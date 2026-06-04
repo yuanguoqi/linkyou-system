@@ -1,0 +1,53 @@
+{
+  "culture": "en",
+  "texts": {
+    "AppName": "Linkyou Management System",
+    "Menu:Home": "Home",
+    "Menu:Dashboard": "Dashboard",
+    "Welcome": "Welcome to Linkyou Management System",
+    "LongWelcomeMessage": "Welcome to Linkyou Management System, an enterprise management platform based on ABP vNext.",
+
+    "Permission:AbpIdentity": "Identity Management",
+    "Permission:Users": "User Management",
+    "Permission:Users.Create": "Create Users",
+    "Permission:Users.Update": "Edit Users",
+    "Permission:Users.Delete": "Delete Users",
+    "Permission:Users.ManagePermissions": "Manage Permissions",
+    "Permission:Roles": "Role Management",
+    "Permission:Roles.Create": "Create Roles",
+    "Permission:Roles.Update": "Edit Roles",
+    "Permission:Roles.Delete": "Delete Roles",
+    "Permission:Roles.ManagePermissions": "Manage Permissions",
+
+    "Permission:TenantManagement": "Tenant Management",
+    "Permission:Tenants": "Tenants",
+    "Permission:Tenants.Create": "Create Tenants",
+    "Permission:Tenants.Update": "Edit Tenants",
+    "Permission:Tenants.Delete": "Delete Tenants",
+    "Permission:Tenants.ManageFeatures": "Manage Features",
+
+    "Permission:AuditLogging": "Audit Logging",
+    "Permission:AuditLogs": "Audit Logs",
+
+    "Permission:SettingManagement": "Setting Management",
+    "Permission:Emailing": "Email Settings",
+
+    "UserNotFound": "User not found.",
+    "RoleNotFound": "Role not found.",
+    "TenantNotFound": "Tenant not found.",
+
+    "DisplayName:UserName": "Username",
+    "DisplayName:Email": "Email",
+    "DisplayName:PhoneNumber": "Phone Number",
+    "DisplayName:Name": "First Name",
+    "DisplayName:Surname": "Last Name",
+
+    "DisplayName:CreationTime": "Creation Time",
+    "DisplayName:CreatorId": "Creator",
+    "DisplayName:LastModificationTime": "Last Modification Time",
+    "DisplayName:LastModifierId": "Last Modifier",
+    "DisplayName:IsDeleted": "Is Deleted",
+    "DisplayName:DeletionTime": "Deletion Time",
+    "DisplayName:DeleterId": "Deleter"
+  }
+}

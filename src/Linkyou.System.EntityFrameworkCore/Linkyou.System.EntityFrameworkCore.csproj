@@ -1,0 +1,40 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <RootNamespace>Linkyou.System</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Linkyou.System.Domain\Linkyou.System.Domain.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- EF Core 核心包 -->
+    <PackageReference Include="Volo.Abp.EntityFrameworkCore" Version="10.4.0" />
+    <!-- PostgreSQL 数据库驱动 -->
+    <PackageReference Include="Volo.Abp.EntityFrameworkCore.PostgreSql" Version="10.4.0" />
+    <!-- 身份管理 EF Core -->
+    <PackageReference Include="Volo.Abp.Identity.EntityFrameworkCore" Version="10.4.0" />
+    <!-- 多租户管理 EF Core -->
+    <PackageReference Include="Volo.Abp.TenantManagement.EntityFrameworkCore" Version="10.4.0" />
+    <!-- 功能管理 EF Core -->
+    <PackageReference Include="Volo.Abp.FeatureManagement.EntityFrameworkCore" Version="10.4.0" />
+    <!-- 设置管理 EF Core -->
+    <PackageReference Include="Volo.Abp.SettingManagement.EntityFrameworkCore" Version="10.4.0" />
+    <!-- 审计日志 EF Core -->
+    <PackageReference Include="Volo.Abp.AuditLogging.EntityFrameworkCore" Version="10.4.0" />
+    <!-- 权限管理 EF Core -->
+    <PackageReference Include="Volo.Abp.PermissionManagement.EntityFrameworkCore" Version="10.4.0" />
+    <!-- EF Core 设计时工具（迁移命令） -->
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.0">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <!-- 动态 LINQ（支持字符串排序） -->
+    <PackageReference Include="System.Linq.Dynamic.Core" Version="1.4.4" />
+  </ItemGroup>
+
+</Project>

@@ -1,0 +1,27 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <RootNamespace>Linkyou.System</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Linkyou.System.Application.Contracts\Linkyou.System.Application.Contracts.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- ABP HTTP API 客户端（动态代理，前端直接调用后端接口） -->
+    <PackageReference Include="Volo.Abp.Http.Client" Version="10.4.0" />
+    <!-- 身份管理 HTTP API 客户端 -->
+    <PackageReference Include="Volo.Abp.Identity.HttpApi.Client" Version="10.4.0" />
+    <!-- 多租户管理 HTTP API 客户端 -->
+    <PackageReference Include="Volo.Abp.TenantManagement.HttpApi.Client" Version="10.4.0" />
+    <!-- 功能管理 HTTP API 客户端 -->
+    <PackageReference Include="Volo.Abp.FeatureManagement.HttpApi.Client" Version="10.4.0" />
+    <!-- 设置管理 HTTP API 客户端 -->
+    <PackageReference Include="Volo.Abp.SettingManagement.HttpApi.Client" Version="10.4.0" />
+  </ItemGroup>
+
+</Project>

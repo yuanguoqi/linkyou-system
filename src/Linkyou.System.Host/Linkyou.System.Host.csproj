@@ -1,0 +1,41 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <RootNamespace>Linkyou.System</RootNamespace>
+    <UserSecretsId>Linkyou-System-Host</UserSecretsId>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- 引用所有业务层 -->
+    <ProjectReference Include="..\Linkyou.System.Application\Linkyou.System.Application.csproj" />
+    <ProjectReference Include="..\Linkyou.System.EntityFrameworkCore\Linkyou.System.EntityFrameworkCore.csproj" />
+    <ProjectReference Include="..\Linkyou.System.HttpApi\Linkyou.System.HttpApi.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- ASP.NET Core 认证与授权 -->
+    <PackageReference Include="Volo.Abp.AspNetCore.Authentication.JwtBearer" Version="10.4.0" />
+    <!-- Swagger/OpenAPI 文档 -->
+    <PackageReference Include="Volo.Abp.Swashbuckle" Version="10.4.0" />
+    <!-- CORS 跨域支持 -->
+    <PackageReference Include="Volo.Abp.AspNetCore.Cors" Version="10.4.0" />
+    <!-- 多租户（从请求头/域名识别租户） -->
+    <PackageReference Include="Volo.Abp.AspNetCore.MultiTenancy" Version="10.4.0" />
+    <!-- Serilog 日志（结构化日志） -->
+    <PackageReference Include="Serilog.AspNetCore" Version="9.0.0" />
+    <PackageReference Include="Serilog.Sinks.Console" Version="6.0.0" />
+    <PackageReference Include="Serilog.Sinks.File" Version="6.0.0" />
+    <!-- JWT Token 生成：签名、加密 -->
+    <PackageReference Include="Microsoft.IdentityModel.Tokens" Version="8.3.2" />
+    <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.3.2" />
+    <!-- EF Core 设计时工具（运行迁移命令时使用） -->
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.0">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
+
+</Project>

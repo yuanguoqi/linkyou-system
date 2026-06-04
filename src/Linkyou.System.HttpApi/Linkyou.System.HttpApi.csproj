@@ -1,0 +1,31 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <RootNamespace>Linkyou.System</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Linkyou.System.Application.Contracts\Linkyou.System.Application.Contracts.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- ABP HTTP API 核心包 -->
+    <PackageReference Include="Volo.Abp.AspNetCore.Mvc" Version="10.4.0" />
+    <!-- 身份管理 HTTP API -->
+    <PackageReference Include="Volo.Abp.Identity.HttpApi" Version="10.4.0" />
+    <!-- 多租户管理 HTTP API -->
+    <PackageReference Include="Volo.Abp.TenantManagement.HttpApi" Version="10.4.0" />
+    <!-- 功能管理 HTTP API -->
+    <PackageReference Include="Volo.Abp.FeatureManagement.HttpApi" Version="10.4.0" />
+    <!-- 设置管理 HTTP API -->
+    <PackageReference Include="Volo.Abp.SettingManagement.HttpApi" Version="10.4.0" />
+    <!-- 审计日志 HTTP API -->
+    <PackageReference Include="Volo.Abp.AuditLogging.HttpApi" Version="10.4.0" />
+    <!-- 权限管理 HTTP API -->
+    <PackageReference Include="Volo.Abp.PermissionManagement.HttpApi" Version="10.4.0" />
+  </ItemGroup>
+
+</Project>

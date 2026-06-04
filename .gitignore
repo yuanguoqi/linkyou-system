@@ -1,0 +1,40 @@
+# 忽略构建输出
+bin/
+obj/
+*.user
+
+# 日志文件
+Logs/
+*.log
+
+# 发布输出
+publish/
+out/
+
+# Visual Studio 临时文件
+.vs/
+*.suo
+*.userosscache
+*.sln.docstates
+
+# NuGet 缓存
+.nuget/
+packages/
+*.nupkg
+
+# 用户机密（本地开发用，不提交）
+**/appsettings.Development.json
+**/secrets.json
+
+# Docker 数据卷
+docker-data/
+
+# OS 生成文件
+.DS_Store
+Thumbs.db
+
+# Rider IDE 文件
+.idea/
+
+# 迁移快照以外的迁移文件（可选，根据团队习惯决定是否提交）
+# src/Linkyou.System.EntityFrameworkCore/Migrations/

@@ -1,0 +1,93 @@
+version: '3.8'
+
+services:
+  # ===================== PostgreSQL 数据库 =====================
+  db:
+    image: postgres:16-alpine
+    container_name: linkyou-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: LinkyouSystem
+      TZ: Asia/Shanghai
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - linkyou-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ===================== 后端 API 服务 =====================
+  api:
+    build:
+      context: ./src
+      dockerfile: Linkyou.System.Host/Dockerfile
+    container_name: linkyou-api
+    restart: unless-stopped
+    ports:
+      - "5000:80"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ConnectionStrings__Default=Host=db;Port=5432;Database=LinkyouSystem;Username=postgres;Password=postgres
+      - AuthServer__Authority=http://api:80
+      - AuthServer__RequireHttpsMetadata=false
+      # 生产环境 CORS 指向前端容器（nginx 80 端口）
+      - App__CorsOrigins=http://localhost,http://web
+      - Jwt__SigningKey=LinkyouSystemJwtSigningKey2024!@#$%^
+      - Jwt__Issuer=LinkyouSystem
+      - Jwt__Audience=LinkyouSystem
+      - TZ=Asia/Shanghai
+    volumes:
+      - ./logs/api:/app/Logs
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - linkyou-network
+
+  # ===================== 前端 Web 服务（nginx） =====================
+  web:
+    build:
+      context: ./web
+      dockerfile: Dockerfile
+    container_name: linkyou-web
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    depends_on:
+      - api
+    networks:
+      - linkyou-network
+
+  # ===================== pgAdmin 数据库管理界面（dev profile） =====================
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: linkyou-pgadmin
+    restart: unless-stopped
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@linkyou.com
+      PGADMIN_DEFAULT_PASSWORD: admin123
+    ports:
+      - "5050:80"
+    depends_on:
+      - db
+    networks:
+      - linkyou-network
+    profiles:
+      - dev
+
+# ===================== 数据卷 =====================
+volumes:
+  postgres_data:
+    driver: local
+
+# ===================== 网络 =====================
+networks:
+  linkyou-network:
+    driver: bridge

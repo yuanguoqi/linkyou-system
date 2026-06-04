@@ -1,0 +1,53 @@
+{
+  "culture": "zh-Hans",
+  "texts": {
+    "AppName": "领佑通用管理系统",
+    "Menu:Home": "首页",
+    "Menu:Dashboard": "仪表盘",
+    "Welcome": "欢迎使用领佑通用管理系统",
+    "LongWelcomeMessage": "欢迎使用领佑通用管理系统，这是一个基于 ABP vNext 的企业级管理平台。",
+
+    "Permission:AbpIdentity": "身份管理",
+    "Permission:Users": "用户管理",
+    "Permission:Users.Create": "创建用户",
+    "Permission:Users.Update": "编辑用户",
+    "Permission:Users.Delete": "删除用户",
+    "Permission:Users.ManagePermissions": "管理权限",
+    "Permission:Roles": "角色管理",
+    "Permission:Roles.Create": "创建角色",
+    "Permission:Roles.Update": "编辑角色",
+    "Permission:Roles.Delete": "删除角色",
+    "Permission:Roles.ManagePermissions": "管理权限",
+
+    "Permission:TenantManagement": "租户管理",
+    "Permission:Tenants": "租户列表",
+    "Permission:Tenants.Create": "创建租户",
+    "Permission:Tenants.Update": "编辑租户",
+    "Permission:Tenants.Delete": "删除租户",
+    "Permission:Tenants.ManageFeatures": "管理功能",
+
+    "Permission:AuditLogging": "审计日志",
+    "Permission:AuditLogs": "审计日志列表",
+
+    "Permission:SettingManagement": "设置管理",
+    "Permission:Emailing": "邮件设置",
+
+    "UserNotFound": "未找到用户。",
+    "RoleNotFound": "未找到角色。",
+    "TenantNotFound": "未找到租户。",
+
+    "DisplayName:UserName": "用户名",
+    "DisplayName:Email": "邮箱",
+    "DisplayName:PhoneNumber": "手机号",
+    "DisplayName:Name": "姓名",
+    "DisplayName:Surname": "姓氏",
+
+    "DisplayName:CreationTime": "创建时间",
+    "DisplayName:CreatorId": "创建人",
+    "DisplayName:LastModificationTime": "最后修改时间",
+    "DisplayName:LastModifierId": "最后修改人",
+    "DisplayName:IsDeleted": "已删除",
+    "DisplayName:DeletionTime": "删除时间",
+    "DisplayName:DeleterId": "删除人"
+  }
+}

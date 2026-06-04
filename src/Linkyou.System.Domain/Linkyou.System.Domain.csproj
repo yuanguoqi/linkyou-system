@@ -1,0 +1,33 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <!-- 目标框架：.NET 10.0 -->
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <RootNamespace>Linkyou.System</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- 引用 Domain.Shared 层 -->
+    <ProjectReference Include="..\Linkyou.System.Domain.Shared\Linkyou.System.Domain.Shared.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- ABP 领域层核心包 -->
+    <PackageReference Include="Volo.Abp.Ddd.Domain" Version="10.4.0" />
+    <!-- 身份管理领域包（用户、角色） -->
+    <PackageReference Include="Volo.Abp.Identity.Domain" Version="10.4.0" />
+    <!-- 多租户管理领域包 -->
+    <PackageReference Include="Volo.Abp.TenantManagement.Domain" Version="10.4.0" />
+    <!-- 功能管理领域包 -->
+    <PackageReference Include="Volo.Abp.FeatureManagement.Domain" Version="10.4.0" />
+    <!-- 设置管理领域包 -->
+    <PackageReference Include="Volo.Abp.SettingManagement.Domain" Version="10.4.0" />
+    <!-- 审计日志领域包 -->
+    <PackageReference Include="Volo.Abp.AuditLogging.Domain" Version="10.4.0" />
+    <!-- 权限管理领域包 -->
+    <PackageReference Include="Volo.Abp.PermissionManagement.Domain" Version="10.4.0" />
+  </ItemGroup>
+
+</Project>
