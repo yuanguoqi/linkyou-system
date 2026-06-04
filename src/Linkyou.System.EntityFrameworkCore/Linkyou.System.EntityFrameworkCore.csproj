@@ -28,13 +28,17 @@
     <PackageReference Include="Volo.Abp.AuditLogging.EntityFrameworkCore" Version="10.4.0" />
     <!-- 权限管理 EF Core -->
     <PackageReference Include="Volo.Abp.PermissionManagement.EntityFrameworkCore" Version="10.4.0" />
+    <!-- 后台作业 EF Core（存储后台任务） -->
+    <PackageReference Include="Volo.Abp.BackgroundJobs.EntityFrameworkCore" Version="10.4.0" />
+    <!-- Autofac DI 容器（MigratorModule 使用） -->
+    <PackageReference Include="Volo.Abp.Autofac" Version="10.4.0" />
     <!-- EF Core 设计时工具（迁移命令） -->
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.0">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <!-- 动态 LINQ（支持字符串排序） -->
-    <PackageReference Include="System.Linq.Dynamic.Core" Version="1.4.4" />
+    <!-- 动态 LINQ（支持字符串排序），需与 ABP Core 传递依赖版本一致 -->
+    <PackageReference Include="System.Linq.Dynamic.Core" Version="1.6.7" />
   </ItemGroup>
 
 </Project>

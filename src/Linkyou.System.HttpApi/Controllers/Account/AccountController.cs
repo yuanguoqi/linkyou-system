@@ -12,7 +12,6 @@ namespace Linkyou.System.Controllers.Account;
 /// </summary>
 [RemoteService]
 [Area("app")]
-[ControllerName("Account")]
 [Route("api/account")]
 public class AccountController : AbpControllerBase
 {

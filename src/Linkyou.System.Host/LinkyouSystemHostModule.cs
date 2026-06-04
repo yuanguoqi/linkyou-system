@@ -5,7 +5,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
-using Microsoft.OpenApi.Models;
+using Microsoft.OpenApi;
 using Volo.Abp;
 using Volo.Abp.AspNetCore.Authentication.JwtBearer;
 using Volo.Abp.AspNetCore.MultiTenancy;
@@ -93,9 +93,9 @@ public class LinkyouSystemHostModule : AbpModule
     {
         Configure<AbpLocalizationOptions>(options =>
         {
-            // 支持的语言列表
-            options.Languages.Add(new LanguageInfo("zh-Hans", "zh-Hans", "简体中文", "cn"));
-            options.Languages.Add(new LanguageInfo("en", "en", "English", "gb"));
+            // 支持的语言列表（ABP 10.x LanguageInfo 构造函数：cultureCode, uiCultureCode, displayName）
+            options.Languages.Add(new LanguageInfo("zh-Hans", "zh-Hans", "简体中文"));
+            options.Languages.Add(new LanguageInfo("en", "en", "English"));
         });
     }
 
@@ -116,7 +116,7 @@ public class LinkyouSystemHostModule : AbpModule
                             .Select(o => o.RemovePostFix("/"))
                             .ToArray()
                     )
-                    .WithAbpExposedHeaders()      // 暴露 ABP 所需的响应头
+                    .WithExposedHeaders("grpc-status", "grpc-message", "Grpc-Status", "Grpc-Message", "Grpc-Encoding", "Grpc-Accept-Encoding")
                     .SetIsOriginAllowedToAllowWildcardSubdomains()
                     .AllowAnyHeader()
                     .AllowAnyMethod()
@@ -126,27 +126,39 @@ public class LinkyouSystemHostModule : AbpModule
     }
 
     /// <summary>
-    /// 配置 Swagger API 文档
+    /// 配置 Swagger API 文档（JWT Bearer 认证）
     /// </summary>
     private void ConfigureSwagger(ServiceConfigurationContext context, IConfiguration configuration)
     {
-        context.Services.AddAbpSwaggerGenWithOAuth(
-            configuration["AuthServer:Authority"]!,
-            new Dictionary<string, string>
+        context.Services.AddAbpSwaggerGen(options =>
+        {
+            options.SwaggerDoc("v1", new OpenApiInfo
             {
-                { "LinkyouSystem", "领佑通用管理系统 API" }
-            },
-            options =>
-            {
-                options.SwaggerDoc("v1", new OpenApiInfo
-                {
-                    Title = "领佑通用管理系统 API",
-                    Version = "v1",
-                    Description = "基于 ABP vNext 10.4 的企业级管理系统接口文档"
-                });
-                options.DocInclusionPredicate((_, __) => true);
-                options.CustomSchemaIds(type => type.FullName);
+                Title = "领佑通用管理系统 API",
+                Version = "v1",
+                Description = "基于 ABP vNext 10.4 的企业级管理系统接口文档"
             });
+            options.DocInclusionPredicate((_, __) => true);
+            options.CustomSchemaIds(type => type.FullName);
+
+            // 添加 JWT Bearer 认证支持
+            options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+            {
+                Name = "Authorization",
+                Type = SecuritySchemeType.Http,
+                Scheme = "bearer",
+                BearerFormat = "JWT",
+                In = ParameterLocation.Header,
+                Description = "请输入 JWT Token，格式：Bearer {token}"
+            });
+            options.AddSecurityRequirement(_ => new OpenApiSecurityRequirement
+            {
+                {
+                    new OpenApiSecuritySchemeReference("Bearer", null),
+                    new List<string>()
+                }
+            });
+        });
     }
 
     /// <summary>
@@ -186,7 +198,7 @@ public class LinkyouSystemHostModule : AbpModule
         app.UseMultiTenancy();
 
         // 本地化（从请求头 Accept-Language 读取）
-        app.UseAbpLocalization();
+        app.UseAbpRequestLocalization();
 
         // 认证 & 授权
         app.UseAuthentication();

@@ -22,8 +22,6 @@
     <PackageReference Include="Volo.Abp.FeatureManagement.HttpApi" Version="10.4.0" />
     <!-- 设置管理 HTTP API -->
     <PackageReference Include="Volo.Abp.SettingManagement.HttpApi" Version="10.4.0" />
-    <!-- 审计日志 HTTP API -->
-    <PackageReference Include="Volo.Abp.AuditLogging.HttpApi" Version="10.4.0" />
     <!-- 权限管理 HTTP API -->
     <PackageReference Include="Volo.Abp.PermissionManagement.HttpApi" Version="10.4.0" />
   </ItemGroup>

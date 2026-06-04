@@ -6,7 +6,6 @@ using Volo.Abp.FeatureManagement;
 using Volo.Abp.SettingManagement;
 using Volo.Abp.AuditLogging;
 using Volo.Abp.PermissionManagement.Identity;
-using Volo.Abp.PermissionManagement.IdentityServer;
 
 namespace Linkyou.System;
 

@@ -24,8 +24,6 @@
     <PackageReference Include="Volo.Abp.FeatureManagement.Application.Contracts" Version="10.4.0" />
     <!-- 设置管理应用契约包 -->
     <PackageReference Include="Volo.Abp.SettingManagement.Application.Contracts" Version="10.4.0" />
-    <!-- 审计日志应用契约包 -->
-    <PackageReference Include="Volo.Abp.AuditLogging.Application.Contracts" Version="10.4.0" />
     <!-- 权限管理应用契约包 -->
     <PackageReference Include="Volo.Abp.PermissionManagement.Application.Contracts" Version="10.4.0" />
   </ItemGroup>

@@ -5,10 +5,10 @@ using System.Linq;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
-using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using Volo.Abp.DependencyInjection;
+using Linkyou.System.Jwt;
 
 namespace Linkyou.System.Host.Jwt;
 
@@ -16,7 +16,7 @@ namespace Linkyou.System.Host.Jwt;
 /// JWT Token 生成服务
 /// 负责签发 AccessToken 和 RefreshToken
 /// </summary>
-public class JwtTokenService : ITransientDependency
+public class JwtTokenService : IJwtTokenService, ITransientDependency
 {
     private readonly IConfiguration _configuration;
 

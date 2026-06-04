@@ -49,8 +49,20 @@ public class LinkyouSystemDbContext :
     /// <summary>用户令牌表</summary>
     public DbSet<IdentityUserToken> UserTokens { get; set; }
 
-    /// <summary>角色声明表</summary>
-    public DbSet<IdentityRoleOrganizationUnit> RoleOrganizationUnits { get; set; }
+    /// <summary>声明类型表</summary>
+    public DbSet<IdentityClaimType> ClaimTypes { get; set; }
+
+    /// <summary>用户委托表</summary>
+    public DbSet<IdentityUserDelegation> UserDelegations { get; set; }
+
+    /// <summary>安全日志表</summary>
+    public DbSet<IdentitySecurityLog> SecurityLogs { get; set; }
+
+    /// <summary>用户会话表</summary>
+    public DbSet<IdentitySession> Sessions { get; set; }
+
+    /// <summary>用户链接表</summary>
+    public DbSet<IdentityLinkUser> LinkUsers { get; set; }
 
     /// <summary>组织单元表</summary>
     public DbSet<OrganizationUnit> OrganizationUnits { get; set; }

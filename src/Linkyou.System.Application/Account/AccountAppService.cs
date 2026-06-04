@@ -2,11 +2,12 @@ using System;
 using System.Collections.Generic;
 using System.Security.Claims;
 using System.Threading.Tasks;
-using Linkyou.System.Host.Jwt;
+using Linkyou.System.Jwt;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.Caching.Distributed;
 using Volo.Abp;
 using Volo.Abp.Application.Services;
+using Volo.Abp.Authorization;
 using Volo.Abp.Caching;
 using Volo.Abp.Identity;
 using Volo.Abp.Security.Claims;
@@ -20,7 +21,7 @@ namespace Linkyou.System.Account;
 public class AccountAppService : ApplicationService, IAccountAppService
 {
     private readonly IdentityUserManager _userManager;
-    private readonly JwtTokenService _jwtTokenService;
+    private readonly IJwtTokenService _jwtTokenService;
     private readonly IDistributedCache<string> _refreshTokenCache;
 
     // RefreshToken 缓存键前缀
@@ -28,7 +29,7 @@ public class AccountAppService : ApplicationService, IAccountAppService
 
     public AccountAppService(
         IdentityUserManager userManager,
-        JwtTokenService jwtTokenService,
+        IJwtTokenService jwtTokenService,
         IDistributedCache<string> refreshTokenCache)
     {
         _userManager = userManager;

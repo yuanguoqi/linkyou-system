@@ -20,17 +20,19 @@
     <PackageReference Include="Volo.Abp.AspNetCore.Authentication.JwtBearer" Version="10.4.0" />
     <!-- Swagger/OpenAPI 文档 -->
     <PackageReference Include="Volo.Abp.Swashbuckle" Version="10.4.0" />
-    <!-- CORS 跨域支持 -->
-    <PackageReference Include="Volo.Abp.AspNetCore.Cors" Version="10.4.0" />
+    <PackageReference Include="Microsoft.OpenApi" Version="2.3.0" />
+    <!-- CORS 跨域支持（包含在 Volo.Abp.AspNetCore.Mvc 中，无需单独引用） -->
     <!-- 多租户（从请求头/域名识别租户） -->
     <PackageReference Include="Volo.Abp.AspNetCore.MultiTenancy" Version="10.4.0" />
     <!-- Serilog 日志（结构化日志） -->
+    <PackageReference Include="Volo.Abp.AspNetCore.Serilog" Version="10.4.0" />
     <PackageReference Include="Serilog.AspNetCore" Version="9.0.0" />
+    <PackageReference Include="Serilog.Sinks.Async" Version="2.1.0" />
     <PackageReference Include="Serilog.Sinks.Console" Version="6.0.0" />
     <PackageReference Include="Serilog.Sinks.File" Version="6.0.0" />
-    <!-- JWT Token 生成：签名、加密 -->
-    <PackageReference Include="Microsoft.IdentityModel.Tokens" Version="8.3.2" />
-    <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.3.2" />
+    <!-- JWT Token 生成：版本需与 ABP JwtBearer 包依赖一致 -->
+    <PackageReference Include="Microsoft.IdentityModel.Tokens" Version="8.16.0" />
+    <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.16.0" />
     <!-- EF Core 设计时工具（运行迁移命令时使用） -->
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.0">
       <PrivateAssets>all</PrivateAssets>

@@ -5,7 +5,6 @@ using Volo.Abp.Modularity;
 using Volo.Abp.TenantManagement;
 using Volo.Abp.FeatureManagement;
 using Volo.Abp.SettingManagement;
-using Volo.Abp.AuditLogging;
 using Volo.Abp.PermissionManagement;
 
 namespace Linkyou.System;
@@ -26,7 +25,6 @@ namespace Linkyou.System;
     typeof(AbpTenantManagementApplicationModule),
     typeof(AbpFeatureManagementApplicationModule),
     typeof(AbpSettingManagementApplicationModule),
-    typeof(AbpAuditLoggingApplicationModule),
     typeof(AbpPermissionManagementApplicationModule)
 )]
 public class LinkyouSystemApplicationModule : AbpModule

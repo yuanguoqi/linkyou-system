@@ -23,12 +23,12 @@
     <PackageReference Include="Volo.Abp.FeatureManagement.Application" Version="10.4.0" />
     <!-- 设置管理应用层 -->
     <PackageReference Include="Volo.Abp.SettingManagement.Application" Version="10.4.0" />
-    <!-- 审计日志应用层 -->
-    <PackageReference Include="Volo.Abp.AuditLogging.Application" Version="10.4.0" />
     <!-- 权限管理应用层 -->
     <PackageReference Include="Volo.Abp.PermissionManagement.Application" Version="10.4.0" />
     <!-- AutoMapper 对象映射 -->
     <PackageReference Include="Volo.Abp.AutoMapper" Version="10.4.0" />
+    <!-- 分布式缓存（RefreshToken 存储） -->
+    <PackageReference Include="Volo.Abp.Caching" Version="10.4.0" />
   </ItemGroup>
 
 </Project>

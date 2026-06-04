@@ -1,15 +1,10 @@
 <script setup lang="ts">
-import { ref, computed, watch } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
-import { useAuthStore } from '@/stores/auth'
+import { computed } from 'vue'
 import { useAppStore } from '@/stores/app'
 import SidebarMenu from './components/SidebarMenu.vue'
 import HeaderBar from './components/HeaderBar.vue'
 import TabsNav from './components/TabsNav.vue'
 
-const route = useRoute()
-const router = useRouter()
-const authStore = useAuthStore()
 const appStore = useAppStore()
 
 const collapsed = computed(() => appStore.sidebarCollapsed)

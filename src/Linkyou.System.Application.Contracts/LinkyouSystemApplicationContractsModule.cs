@@ -5,9 +5,7 @@ using Volo.Abp.ObjectExtending;
 using Volo.Abp.TenantManagement;
 using Volo.Abp.FeatureManagement;
 using Volo.Abp.SettingManagement;
-using Volo.Abp.AuditLogging;
 using Volo.Abp.PermissionManagement;
-
 namespace Linkyou.System;
 
 /// <summary>
@@ -25,7 +23,6 @@ namespace Linkyou.System;
     typeof(AbpTenantManagementApplicationContractsModule),
     typeof(AbpFeatureManagementApplicationContractsModule),
     typeof(AbpSettingManagementApplicationContractsModule),
-    typeof(AbpAuditLoggingApplicationContractsModule),
     typeof(AbpPermissionManagementApplicationContractsModule)
 )]
 public class LinkyouSystemApplicationContractsModule : AbpModule

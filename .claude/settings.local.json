@@ -3,7 +3,24 @@
     "allow": [
       "Bash(ls:*)",
       "Bash(npx skills:*)",
-      "Bash(cd:*)"
+      "Bash(cd:*)",
+      "Bash(cd \"E:/DevelopCode/SelfCode/linkyou-system/src\" && dotnet build Linkyou.System.sln 2>&1)",
+      "Bash(tail:*)",
+      "Bash(dotnet nuget:*)",
+      "Bash(echo curl failed:*)",
+      "Bash(dotnet csharp:*)",
+      "Bash(python3:*)",
+      "Bash(xargs grep -l \"Module\")",
+      "Bash(xargs grep \"AbpValidationModule\\\\|Member.*Module\")",
+      "Bash(dotnet build:*)",
+      "Bash(grep CS0246:*)",
+      "Bash(dotnet-ilspy:*)",
+      "Bash(grep:*)",
+      "Bash(Remove-Item:*)",
+      "Bash(dotnet run:*)",
+      "Bash(dotnet script:*)",
+      "Bash(powershell:*)",
+      "Bash(cd \"E:\\\\DevelopCode\\\\SelfCode\\\\linkyou-system\\\\web\" && npm run build 2>&1)"
     ]
   }
 }

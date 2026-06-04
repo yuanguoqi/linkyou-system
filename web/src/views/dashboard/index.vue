@@ -1,6 +1,6 @@
 <script setup lang="ts">
 // 仪表盘首页
-import { ref, onMounted } from 'vue'
+import { ref } from 'vue'
 import { useAuthStore } from '@/stores/auth'
 
 const authStore = useAuthStore()

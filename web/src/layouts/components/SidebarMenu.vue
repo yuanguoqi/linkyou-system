@@ -1,16 +1,12 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import { useRouter, useRoute } from 'vue-router'
-import { useAuthStore } from '@/stores/auth'
-import { usePermission } from '@/composables/usePermission'
+import { useRoute } from 'vue-router'
 
-const props = defineProps<{
+defineProps<{
   collapsed: boolean
 }>()
 
-const router = useRouter()
 const route = useRoute()
-const { hasPermission } = usePermission()
 
 // 菜单列表（静态配置，可扩展为动态路由）
 const menuItems = [

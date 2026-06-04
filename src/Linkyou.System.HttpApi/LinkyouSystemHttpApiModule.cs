@@ -4,8 +4,8 @@ using Volo.Abp.Modularity;
 using Volo.Abp.TenantManagement;
 using Volo.Abp.FeatureManagement;
 using Volo.Abp.SettingManagement;
-using Volo.Abp.AuditLogging;
 using Volo.Abp.PermissionManagement;
+using Volo.Abp.PermissionManagement.HttpApi;
 
 namespace Linkyou.System;
 
@@ -22,7 +22,6 @@ namespace Linkyou.System;
     typeof(AbpTenantManagementHttpApiModule),
     typeof(AbpFeatureManagementHttpApiModule),
     typeof(AbpSettingManagementHttpApiModule),
-    typeof(AbpAuditLoggingHttpApiModule),
     typeof(AbpPermissionManagementHttpApiModule)
 )]
 public class LinkyouSystemHttpApiModule : AbpModule
@@ -34,7 +33,7 @@ public class LinkyouSystemHttpApiModule : AbpModule
         {
             options
                 .ConventionalControllers
-                .Create(typeof(LinkyouSystemApplicationModule).Assembly);
+                .Create(typeof(LinkyouSystemApplicationContractsModule).Assembly);
         });
     }
 }

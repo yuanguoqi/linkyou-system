@@ -1,6 +1,5 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
-import type { MenuItem } from '@/types/router'
 
 /** 应用全局状态（侧边栏折叠、面包屑、标签页等） */
 export const useAppStore = defineStore('app', () => {
