@@ -7,6 +7,7 @@ import {
   type IdentityRoleDto,
   type GetIdentityRoleListInput,
 } from '@/api/modules/identity'
+import { formatDateTime } from '@/utils/date'
 import RoleDialog from './components/RoleDialog.vue'
 
 // ── State ──────────────────────────────────────────────
@@ -103,17 +104,6 @@ function handleDelete(row: IdentityRoleDto) {
 
 function handleDialogSuccess() {
   fetchRoles()
-}
-
-function formatTime(value: string | null): string {
-  if (!value) return '-'
-  const d = new Date(value)
-  const y = d.getFullYear()
-  const m = String(d.getMonth() + 1).padStart(2, '0')
-  const day = String(d.getDate()).padStart(2, '0')
-  const h = String(d.getHours()).padStart(2, '0')
-  const min = String(d.getMinutes()).padStart(2, '0')
-  return `${y}-${m}-${day} ${h}:${min}`
 }
 
 // ── Lifecycle ──────────────────────────────────────────
@@ -224,7 +214,7 @@ onMounted(() => {
             align="center"
           >
             <template #default="{ row }">
-              {{ formatTime(row.creationTime) }}
+              {{ formatDateTime(row.creationTime) }}
             </template>
           </el-table-column>
           <el-table-column

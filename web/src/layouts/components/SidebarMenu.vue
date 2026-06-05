@@ -1,32 +1,14 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { useRoute } from 'vue-router'
+import { useMenu } from '@/composables/useMenu'
 
 defineProps<{
   collapsed: boolean
 }>()
 
 const route = useRoute()
-
-const menuItems = [
-  {
-    path: '/dashboard',
-    title: '仪表盘',
-    icon: 'Odometer',
-  },
-  {
-    title: '系统管理',
-    icon: 'Setting',
-    children: [
-      { path: '/system/users', title: '用户管理', icon: 'User' },
-      { path: '/system/roles', title: '角色管理', icon: 'UserFilled' },
-      { path: '/system/tenants', title: '租户管理', icon: 'OfficeBuilding' },
-      { path: '/system/audit-logs', title: '审计日志', icon: 'Document' },
-      { path: '/system/menus', title: '菜单管理', icon: 'Menu' },
-      { path: '/system/settings', title: '系统设置', icon: 'Tools' },
-    ],
-  },
-]
+const { menuItems } = useMenu()
 
 const activeMenu = computed(() => route.path)
 </script>
@@ -42,22 +24,22 @@ const activeMenu = computed(() => route.path)
     router
     class="sidebar-menu"
   >
-    <template v-for="(item, idx) in menuItems" :key="item.path || item.title">
+    <template v-for="(item, idx) in menuItems" :key="item.id">
       <!-- Section divider between groups -->
       <div v-if="idx > 0" class="menu-divider" />
-      <el-sub-menu v-if="item.children" :index="item.title">
+      <el-sub-menu v-if="item.children && item.children.length > 0" :index="item.id">
         <template #title>
           <el-icon class="menu-icon"><component :is="item.icon" /></el-icon>
-          <span class="menu-title">{{ item.title }}</span>
+          <span class="menu-title">{{ item.name }}</span>
         </template>
         <el-menu-item
           v-for="child in item.children"
-          :key="child.path"
+          :key="child.id"
           :index="child.path"
         >
           <el-icon class="menu-icon"><component :is="child.icon" /></el-icon>
           <template #title>
-            <span class="menu-title">{{ child.title }}</span>
+            <span class="menu-title">{{ child.name }}</span>
           </template>
         </el-menu-item>
       </el-sub-menu>
@@ -65,7 +47,7 @@ const activeMenu = computed(() => route.path)
       <el-menu-item v-else :index="item.path">
         <el-icon class="menu-icon"><component :is="item.icon" /></el-icon>
         <template #title>
-          <span class="menu-title">{{ item.title }}</span>
+          <span class="menu-title">{{ item.name }}</span>
         </template>
       </el-menu-item>
     </template>

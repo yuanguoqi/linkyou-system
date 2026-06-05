@@ -28,7 +28,7 @@ export interface GetTenantListInput {
 }
 
 // ── API ────────────────────────────────────────────────
-const BASE_URL = '/api/multi-tenancy/tenants'
+const BASE_URL = '/multi-tenancy/tenants'
 
 export const tenantApi = {
   get: (id: string) =>

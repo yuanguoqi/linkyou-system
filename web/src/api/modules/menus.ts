@@ -14,6 +14,21 @@ export interface MenuDto {
   creationTime: string
 }
 
+export interface UserMenuDto {
+  id: string
+  name: string
+  path: string
+  icon: string | null
+  parentId: string | null
+  sort: number
+  children: UserMenuDto[]
+}
+
+export interface MenuRolePermissionDto {
+  menuId: string
+  roleName: string
+}
+
 export interface CreateMenuDto {
   name: string
   path: string
@@ -34,7 +49,7 @@ export interface GetMenuListInput {
 }
 
 // ── API ────────────────────────────────────────────────
-const BASE_URL = '/api/app/menus'
+const BASE_URL = '/app/menus'
 
 export const menuApi = {
   get: (id: string) =>
@@ -43,8 +58,17 @@ export const menuApi = {
   getList: (params: GetMenuListInput) =>
     http.get<PagedResultDto<MenuDto>>(BASE_URL, { params }),
 
-  getTree: () =>
-    http.get<MenuDto[]>(`${BASE_URL}/tree`),
+  /** 获取当前用户的菜单（根据角色权限过滤，树形结构） */
+  getUserMenus: () =>
+    http.get<UserMenuDto[]>(`${BASE_URL}/user-menus`),
+
+  /** 获取指定菜单的角色权限列表 */
+  getMenuRolePermissions: (menuId: string) =>
+    http.get<MenuRolePermissionDto[]>(`${BASE_URL}/${menuId}/role-permissions`),
+
+  /** 设置菜单的角色权限（覆盖写入） */
+  setMenuRolePermissions: (menuId: string, roleNames: string[]) =>
+    http.put(`${BASE_URL}/${menuId}/role-permissions`, roleNames),
 
   create: (data: CreateMenuDto) =>
     http.post<MenuDto>(BASE_URL, data),

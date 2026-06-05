@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Linkyou.System.Controllers;
 using Microsoft.AspNetCore.Mvc;
@@ -33,4 +34,16 @@ public class MenuController : LinkyouSystemController, IMenuAppService
 
     [HttpDelete("{id}")]
     public Task DeleteAsync(Guid id) => _appService.DeleteAsync(id);
+
+    [HttpGet("user-menus")]
+    public Task<List<UserMenuDto>> GetUserMenusAsync()
+        => _appService.GetUserMenusAsync();
+
+    [HttpGet("{menuId}/role-permissions")]
+    public Task<List<MenuRolePermissionDto>> GetMenuRolePermissionsAsync(Guid menuId)
+        => _appService.GetMenuRolePermissionsAsync(menuId);
+
+    [HttpPut("{menuId}/role-permissions")]
+    public Task SetMenuRolePermissionsAsync(Guid menuId, [FromBody] string[] roleNames)
+        => _appService.SetMenuRolePermissionsAsync(menuId, roleNames);
 }

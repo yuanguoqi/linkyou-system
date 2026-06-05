@@ -2,7 +2,6 @@ using System.Threading.Tasks;
 using Linkyou.System.Account;
 using Microsoft.AspNetCore.Mvc;
 using Volo.Abp;
-using Volo.Abp.AspNetCore.Mvc;
 
 namespace Linkyou.System.Controllers.Account;
 
@@ -13,7 +12,7 @@ namespace Linkyou.System.Controllers.Account;
 [RemoteService]
 [Area("app")]
 [Route("api/account")]
-public class AccountController : AbpControllerBase
+public class AccountController : LinkyouSystemController
 {
     private readonly IAccountAppService _accountAppService;
 

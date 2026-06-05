@@ -61,38 +61,6 @@ public class JwtTokenService : IJwtTokenService, ITransientDependency
     }
 
     /// <summary>
-    /// 从已过期的 AccessToken 中读取 Claims（用于刷新令牌时验证身份）
-    /// </summary>
-    public ClaimsPrincipal GetPrincipalFromExpiredToken(string token)
-    {
-        var validationParameters = new TokenValidationParameters
-        {
-            ValidateIssuer = true,
-            ValidIssuer = _configuration["Jwt:Issuer"],
-            ValidateAudience = true,
-            ValidAudience = _configuration["Jwt:Audience"],
-            ValidateIssuerSigningKey = true,
-            IssuerSigningKey = new SymmetricSecurityKey(
-                Encoding.UTF8.GetBytes(_configuration["Jwt:SigningKey"]!)),
-            // 允许已过期的 Token，刷新时必须关闭此校验
-            ValidateLifetime = false,
-        };
-
-        var handler = new JwtSecurityTokenHandler();
-        var principal = handler.ValidateToken(token, validationParameters, out var securityToken);
-
-        if (securityToken is not JwtSecurityToken jwtToken
-            || !jwtToken.Header.Alg.Equals(
-                SecurityAlgorithms.HmacSha256,
-                StringComparison.InvariantCultureIgnoreCase))
-        {
-            throw new SecurityTokenException("无效的令牌");
-        }
-
-        return principal;
-    }
-
-    /// <summary>
     /// 获取访问令牌有效期（秒）
     /// </summary>
     public int GetAccessTokenExpiresInSeconds()

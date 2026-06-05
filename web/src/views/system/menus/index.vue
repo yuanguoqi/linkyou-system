@@ -4,6 +4,7 @@ import { ElMessage, ElMessageBox } from 'element-plus'
 import { Plus, Search, Refresh, Edit, Delete } from '@element-plus/icons-vue'
 import { menuApi } from '@/api/modules/menus'
 import type { MenuDto, GetMenuListInput } from '@/api/modules/menus'
+import { formatDateTime } from '@/utils/date'
 import MenuDialog from './components/MenuDialog.vue'
 
 // ── Extended type for tree ─────────────────────────────
@@ -115,18 +116,6 @@ function handleDialogSaved() {
   fetchMenuList()
 }
 
-// ── Helpers ────────────────────────────────────────────
-function formatTime(time: string): string {
-  if (!time) return '—'
-  const d = new Date(time)
-  return d.toLocaleString('zh-CN', {
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-    hour: '2-digit',
-    minute: '2-digit',
-  })
-}
 </script>
 
 <template>
@@ -211,7 +200,7 @@ function formatTime(time: string): string {
 
         <el-table-column prop="creationTime" label="创建时间" width="160" align="center">
           <template #default="{ row }">
-            <span class="cell-time tabular">{{ formatTime(row.creationTime) }}</span>
+            <span class="cell-time tabular">{{ formatDateTime(row.creationTime) }}</span>
           </template>
         </el-table-column>
 

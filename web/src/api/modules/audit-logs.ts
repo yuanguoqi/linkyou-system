@@ -33,7 +33,7 @@ export interface GetAuditLogListInput {
 }
 
 // ── API ────────────────────────────────────────────────
-const BASE_URL = '/api/audit-logging/audit-logs'
+const BASE_URL = '/audit-logging/audit-logs'
 
 export const auditLogApi = {
   get: (id: string) =>

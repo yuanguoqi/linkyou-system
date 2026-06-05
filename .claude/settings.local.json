@@ -38,7 +38,13 @@
       "Bash(pkill -f \"Linkyou.System.Host\")",
       "Bash(netstat -ano)",
       "Bash(taskkill //F //PID 25268)",
-      "Bash(taskkill //F //PID 26156)"
+      "Bash(taskkill //F //PID 26156)",
+      "Bash(taskkill //F //PID 33844)",
+      "Bash(dotnet ef *)",
+      "Bash(bash scripts/db-migrate.sh list)",
+      "Bash(taskkill //F //PID 39808)",
+      "Bash(taskkill //F //PID 43352)",
+      "Bash(taskkill //F //PID 12568)"
     ]
   }
 }

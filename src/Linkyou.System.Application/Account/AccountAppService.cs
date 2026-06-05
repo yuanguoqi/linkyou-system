@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using Linkyou.System.Jwt;
@@ -8,6 +9,8 @@ using Microsoft.Extensions.Caching.Distributed;
 using Volo.Abp;
 using Volo.Abp.Application.Services;
 using Volo.Abp.Authorization;
+using Volo.Abp.Authorization.Permissions;
+using Volo.Abp.PermissionManagement;
 using Volo.Abp.Caching;
 using Volo.Abp.Identity;
 using Volo.Abp.Security.Claims;
@@ -23,6 +26,7 @@ public class AccountAppService : ApplicationService, IAccountAppService
     private readonly IdentityUserManager _userManager;
     private readonly IJwtTokenService _jwtTokenService;
     private readonly IDistributedCache<string> _refreshTokenCache;
+    private readonly IPermissionManager _permissionManager;
 
     // RefreshToken 缓存键前缀
     private const string RefreshTokenCachePrefix = "RefreshToken:";
@@ -30,11 +34,13 @@ public class AccountAppService : ApplicationService, IAccountAppService
     public AccountAppService(
         IdentityUserManager userManager,
         IJwtTokenService jwtTokenService,
-        IDistributedCache<string> refreshTokenCache)
+        IDistributedCache<string> refreshTokenCache,
+        IPermissionManager permissionManager)
     {
         _userManager = userManager;
         _jwtTokenService = jwtTokenService;
         _refreshTokenCache = refreshTokenCache;
+        _permissionManager = permissionManager;
     }
 
     /// <summary>
@@ -144,6 +150,26 @@ public class AccountAppService : ApplicationService, IAccountAppService
         var user = await _userManager.GetByIdAsync(userId);
         var roles = await _userManager.GetRolesAsync(user);
 
+        // 收集所有已授予的权限（用户直接授权 + 角色授权）
+        var grantedPermissions = new HashSet<string>();
+
+        // 1. 用户直接拥有的权限
+        var userPermissionGrants = await _permissionManager.GetAllAsync("User", userId.ToString());
+        foreach (var grant in userPermissionGrants)
+        {
+            grantedPermissions.Add(grant.Name);
+        }
+
+        // 2. 通过角色拥有的权限
+        foreach (var roleName in roles)
+        {
+            var rolePermissionGrants = await _permissionManager.GetAllAsync("Role", roleName);
+            foreach (var grant in rolePermissionGrants)
+            {
+                grantedPermissions.Add(grant.Name);
+            }
+        }
+
         return new CurrentUserDto
         {
             Id = user.Id.ToString(),
@@ -154,8 +180,7 @@ public class AccountAppService : ApplicationService, IAccountAppService
             PhoneNumber = user.PhoneNumber,
             TenantId = user.TenantId,
             Roles = [.. roles],
-            // 权限列表由前端通过角色推断，或扩展此处查询 PermissionManager
-            Permissions = [],
+            Permissions = [.. grantedPermissions],
         };
     }
 

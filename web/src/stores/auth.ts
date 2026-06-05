@@ -45,6 +45,11 @@ export const useAuthStore = defineStore('auth', () => {
 
     // 获取当前用户信息
     await fetchCurrentUser()
+
+    // 持久化用户ID（供刷新令牌时使用）
+    if (currentUser.value?.id) {
+      localStorage.setItem('user_id', currentUser.value.id)
+    }
   }
 
   /** 刷新令牌 */
@@ -94,6 +99,7 @@ export const useAuthStore = defineStore('auth', () => {
       currentTenantId.value = null
       localStorage.removeItem('access_token')
       localStorage.removeItem('refresh_token')
+      localStorage.removeItem('user_id')
       localStorage.removeItem('tenant_id')
     }
   }

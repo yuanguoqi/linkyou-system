@@ -72,8 +72,8 @@ export interface GetIdentityRoleListInput {
 }
 
 // ── API ────────────────────────────────────────────────
-const USER_BASE = '/api/identity/users'
-const ROLE_BASE = '/api/identity/roles'
+const USER_BASE = '/identity/users'
+const ROLE_BASE = '/identity/roles'
 
 export const identityUserApi = {
   get: (id: string) =>

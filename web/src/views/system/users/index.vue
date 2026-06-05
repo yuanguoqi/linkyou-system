@@ -3,6 +3,7 @@ import { ref, reactive, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { identityUserApi } from '@/api/modules/identity'
 import type { IdentityUserDto } from '@/api/modules/identity'
+import { formatDateTime } from '@/utils/date'
 import UserDialog from './components/UserDialog.vue'
 
 // ── State ────────────────────────────────────────────
@@ -96,17 +97,6 @@ function handleDelete(row: IdentityUserDto) {
 
 function handleDialogSuccess() {
   fetchUsers()
-}
-
-function formatTime(value: string | null): string {
-  if (!value) return '-'
-  const d = new Date(value)
-  const y = d.getFullYear()
-  const m = String(d.getMonth() + 1).padStart(2, '0')
-  const day = String(d.getDate()).padStart(2, '0')
-  const h = String(d.getHours()).padStart(2, '0')
-  const min = String(d.getMinutes()).padStart(2, '0')
-  return `${y}-${m}-${day} ${h}:${min}`
 }
 
 function getDisplayName(row: IdentityUserDto): string {
@@ -206,7 +196,7 @@ onMounted(() => {
             align="center"
           >
             <template #default="{ row }">
-              {{ formatTime(row.creationTime) }}
+              {{ formatDateTime(row.creationTime) }}
             </template>
           </el-table-column>
           <el-table-column

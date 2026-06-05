@@ -20,7 +20,7 @@ export interface GetSettingsInput {
 }
 
 // ── API ────────────────────────────────────────────────
-const BASE_URL = '/api/setting-management/settings'
+const BASE_URL = '/setting-management/settings'
 
 export const settingApi = {
   get: (params: GetSettingsInput) =>

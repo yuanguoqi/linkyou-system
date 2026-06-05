@@ -41,11 +41,11 @@ const staticRoutes: RouteRecordRaw[] = [
         component: () => import('@/views/dashboard/index.vue'),
         meta: { title: '仪表盘', icon: 'Odometer', affix: true },
       },
-      // 动态注册系统管理模块路由
+      // 动态注册系统管理模块路由（展平以匹配 Vue Router 要求）
       ...systemRoutes.flatMap(group =>
         (group.children || []).map(child => ({
           ...child,
-          path: `${group.path}/${child.path}`,
+          path: `${group.path}/${child.path}`.replace(/^\//, ''),
         }))
       ),
     ],

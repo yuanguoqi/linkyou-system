@@ -6,9 +6,10 @@ namespace Linkyou.System;
 public static class LinkyouSystemConsts
 {
     /// <summary>
-    /// 数据库表名前缀，所有业务表统一以 Lys_ 开头
+    /// ABP 内置模块表名前缀（如 AbpAuditLogs、AbpRoles）
+    /// 业务表不使用前缀，直接使用 PascalCase 命名（如 Menus、MenuRolePermissions）
     /// </summary>
-    public const string DbTablePrefix = "Lys_";
+    public const string DbTablePrefix = "";
 
     /// <summary>
     /// 数据库 Schema，PostgreSQL 中默认为 public

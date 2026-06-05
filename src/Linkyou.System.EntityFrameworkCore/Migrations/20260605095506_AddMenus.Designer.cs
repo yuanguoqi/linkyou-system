@@ -3,6 +3,7 @@ using System;
 using Linkyou.System.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using Volo.Abp.EntityFrameworkCore;
@@ -12,9 +13,11 @@ using Volo.Abp.EntityFrameworkCore;
 namespace Linkyou.System.Migrations
 {
     [DbContext(typeof(LinkyouSystemDbContext))]
-    partial class LinkyouSystemDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260605095506_AddMenus")]
+    partial class AddMenus
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -104,13 +107,7 @@ namespace Linkyou.System.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ParentId");
-
-                    b.HasIndex("Sort");
-
                     b.HasIndex("TenantId", "Name");
-
-                    b.HasIndex("TenantId", "ParentId");
 
                     b.ToTable("Menus", (string)null);
                 });
@@ -142,12 +139,7 @@ namespace Linkyou.System.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("MenuId");
-
-                    b.HasIndex("TenantId", "RoleName");
-
-                    b.HasIndex("TenantId", "MenuId", "RoleName")
-                        .IsUnique();
+                    b.HasIndex("TenantId", "MenuId", "RoleName");
 
                     b.ToTable("MenuRolePermissions", (string)null);
                 });
@@ -1727,25 +1719,6 @@ namespace Linkyou.System.Migrations
                     b.HasKey("TenantId", "Name");
 
                     b.ToTable("AbpTenantConnectionStrings", (string)null);
-                });
-
-            modelBuilder.Entity("Linkyou.System.Menus.Menu", b =>
-                {
-                    b.HasOne("Linkyou.System.Menus.Menu", null)
-                        .WithMany()
-                        .HasForeignKey("ParentId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .HasConstraintName("FK_Menus_ParentId");
-                });
-
-            modelBuilder.Entity("Linkyou.System.Menus.MenuRolePermission", b =>
-                {
-                    b.HasOne("Linkyou.System.Menus.Menu", null)
-                        .WithMany()
-                        .HasForeignKey("MenuId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("FK_MenuRolePermissions_MenuId");
                 });
 
             modelBuilder.Entity("Volo.Abp.AuditLogging.AuditLogAction", b =>
