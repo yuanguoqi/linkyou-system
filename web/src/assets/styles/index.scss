@@ -1,5 +1,6 @@
-// 全局样式重置和基础样式
+@use 'variables' as *;
 
+// ===================== 全局重置 =====================
 * {
   margin: 0;
   padding: 0;
@@ -14,43 +15,195 @@ body,
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC',
     'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
   font-size: $font-size-base;
-  color: #303133;
   -webkit-font-smoothing: antialiased;
+  color: var(--text-primary);
+  background: var(--bg-page);
+  transition: background 0.3s, color 0.3s;
 }
 
-// 滚动条美化
-::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
-}
-
-::-webkit-scrollbar-track {
-  background: transparent;
-}
-
+// ===================== 滚动条 =====================
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb {
-  background: #c0c4cc;
+  background: var(--scrollbar-thumb);
   border-radius: 3px;
-
-  &:hover {
-    background: #909399;
-  }
+  &:hover { background: var(--scrollbar-thumb-hover); }
 }
 
-// Element Plus 全局覆盖
-.el-card {
-  border-radius: 8px;
-}
+// ===================== Element Plus 通用覆盖 =====================
+.el-card { border-radius: 8px; }
+.el-table { border-radius: 8px; overflow: hidden; }
 
-.el-table {
-  border-radius: 8px;
-  overflow: hidden;
-}
-
-// CSS 变量（供组件使用）
+// ===================== 深色主题 CSS 变量（默认） =====================
 :root {
-  --sidebar-bg: #{$sidebar-bg};
-  --sidebar-border: #{$sidebar-border};
-  --header-height: #{$header-height};
-  --content-bg: #{$content-bg};
+  // 背景层次
+  --bg-page:      #0f1117;
+  --bg-card:      #13151f;
+  --bg-input:     rgba(255, 255, 255, 0.04);
+  --bg-hover:     rgba(99, 102, 241, 0.08);
+
+  // 主色
+  --primary:      #6366f1;
+  --primary-light: #818cf8;
+  --primary-pale:  #a5b4fc;
+  --primary-glow:  rgba(99, 102, 241, 0.3);
+
+  // 语义色
+  --success: #34d399;
+  --warning: #fbbf24;
+  --danger:  #f87171;
+  --info:    #94a3b8;
+
+  // 文字层次
+  --text-primary:   #e2e8f0;
+  --text-secondary: #94a3b8;
+  --text-muted:     #64748b;
+  --text-disabled:  #334155;
+
+  // 边框
+  --border-default: rgba(255, 255, 255, 0.06);
+  --border-subtle:  rgba(255, 255, 255, 0.08);
+  --border-primary: rgba(99, 102, 241, 0.2);
+  --border-active:  rgba(99, 102, 241, 0.4);
+
+  // 布局
+  --sidebar-bg:       #13151f;
+  --sidebar-gradient: linear-gradient(180deg, #13151f 0%, #0d0f18 100%);
+  --sidebar-border:   rgba(99, 102, 241, 0.12);
+  --header-bg:        rgba(15, 17, 23, 0.95);
+  --header-border:    rgba(99, 102, 241, 0.12);
+  --header-height:    60px;
+  --content-bg:       #0f1117;
+
+  // 组件
+  --tab-bg:           rgba(13, 15, 24, 0.98);
+  --tab-border:       rgba(99, 102, 241, 0.1);
+  --tab-item-bg:      rgba(255, 255, 255, 0.02);
+  --tab-item-border:  rgba(255, 255, 255, 0.06);
+  --tab-active-bg:    rgba(99, 102, 241, 0.12);
+  --tab-active-border: rgba(99, 102, 241, 0.25);
+  --tab-dot:          #475569;
+  --tab-dot-active:   #6366f1;
+
+  // 输入框
+  --input-wrapper-bg:     rgba(255, 255, 255, 0.04);
+  --input-wrapper-border: rgba(255, 255, 255, 0.08);
+  --input-text:           #e2e8f0;
+  --input-placeholder:    #475569;
+
+  // 弹窗
+  --dialog-bg:     #1a1d2e;
+  --dialog-border: rgba(99, 102, 241, 0.2);
+
+  // 滚动条
+  --scrollbar-thumb:       rgba(99, 102, 241, 0.25);
+  --scrollbar-thumb-hover: rgba(99, 102, 241, 0.45);
+
+  // 阴影
+  --shadow-card: 0 8px 30px rgba(0, 0, 0, 0.3);
+  --shadow-dialog: 0 24px 64px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(99, 102, 241, 0.1);
+  --shadow-sidebar: 4px 0 24px rgba(0, 0, 0, 0.4);
+  --shadow-header: 0 1px 0 rgba(255, 255, 255, 0.04);
+
+  // Logo 文字渐变
+  --logo-text-gradient: linear-gradient(135deg, #e2e8f0 0%, #a5b4fc 100%);
+
+  // 用户头像
+  --avatar-gradient: linear-gradient(135deg, #6366f1, #8b5cf6);
+
+  // 面包屑
+  --breadcrumb-color:       #64748b;
+  --breadcrumb-active:      #94a3b8;
+  --breadcrumb-separator:   #334155;
+
+  // 菜单
+  --menu-text:          #64748b;
+  --menu-text-hover:    #c7d2fe;
+  --menu-text-active:   #a5b4fc;
+  --menu-icon-hover:    #a5b4fc;
+  --menu-bg-hover:      rgba(99, 102, 241, 0.08);
+  --menu-bg-active:     linear-gradient(90deg, rgba(99, 102, 241, 0.2), rgba(99, 102, 241, 0.05));
+  --menu-indicator:     linear-gradient(180deg, #6366f1, #8b5cf6);
+  --sub-menu-arrow:     #475569;
+}
+
+// ===================== 浅色主题 CSS 变量 =====================
+// 设计目标：柔和暖灰基调，避免纯白刺眼，降低饱和度和对比度，提升长时间阅读舒适感
+html.light {
+  // 背景层次：暖灰米色系，避免冷蓝和纯白
+  --bg-page:  #f5f4f2;       // 页面背景：暖米灰，不刺眼
+  --bg-card:  #faf9f7;       // 卡片：轻微暖白，与页面有层次但不强对比
+  --bg-input: rgba(0, 0, 0, 0.035); // 输入框内嵌
+  --bg-hover: rgba(99, 102, 241, 0.05); // 悬停：极淡主色
+
+  // 文字层次：暖灰色调，告别深蓝刺眼
+  --text-primary:   #2d2d35;   // 主文字：近黑暖灰，对比适中不刺眼
+  --text-secondary: #636270;   // 次要文字：中性暖灰
+  --text-muted:     #9896a4;   // 辅助文字：浅暖灰
+  --text-disabled:  #c9c8d0;   // 禁用：极浅灰
+
+  // 边框：极淡暖灰，几乎感知不到但有层次
+  --border-default: rgba(0, 0, 0, 0.07);
+  --border-subtle:  rgba(0, 0, 0, 0.1);
+  --border-primary: rgba(99, 102, 241, 0.2);
+  --border-active:  rgba(99, 102, 241, 0.45);
+
+  // 布局：侧栏和顶栏用轻微暖白而非纯白
+  --sidebar-bg:       #faf9f7;
+  --sidebar-gradient: linear-gradient(180deg, #faf9f7 0%, #f5f4f2 100%);
+  --sidebar-border:   rgba(0, 0, 0, 0.07);
+  --header-bg:        rgba(250, 249, 247, 0.96);
+  --header-border:    rgba(0, 0, 0, 0.07);
+  --content-bg:       #f5f4f2;
+
+  // 标签栏
+  --tab-bg:            #eeede9;          // 标签栏背景：比页面略深，形成分割感
+  --tab-border:        rgba(0, 0, 0, 0.07);
+  --tab-item-bg:       rgba(250, 249, 247, 0.85);
+  --tab-item-border:   rgba(0, 0, 0, 0.07);
+  --tab-active-bg:     rgba(99, 102, 241, 0.08);
+  --tab-active-border: rgba(99, 102, 241, 0.25);
+  --tab-dot:           #c5c4cc;
+  --tab-dot-active:    #6366f1;
+
+  // 输入框：轻暖白背景
+  --input-wrapper-bg:     #faf9f7;
+  --input-wrapper-border: rgba(0, 0, 0, 0.12);
+  --input-text:           #2d2d35;
+  --input-placeholder:    #b0aebb;
+
+  // 弹窗：暖白
+  --dialog-bg:     #faf9f7;
+  --dialog-border: rgba(0, 0, 0, 0.1);
+
+  // 滚动条：低调灰
+  --scrollbar-thumb:       rgba(0, 0, 0, 0.15);
+  --scrollbar-thumb-hover: rgba(0, 0, 0, 0.25);
+
+  // 阴影：极轻暖色调阴影
+  --shadow-card:    0 2px 12px rgba(0, 0, 0, 0.06), 0 1px 3px rgba(0, 0, 0, 0.04);
+  --shadow-dialog:  0 12px 40px rgba(0, 0, 0, 0.1), 0 4px 12px rgba(0, 0, 0, 0.06);
+  --shadow-sidebar: 2px 0 12px rgba(0, 0, 0, 0.06);
+  --shadow-header:  0 1px 0 rgba(0, 0, 0, 0.07);
+
+  // Logo 文字渐变：暖深灰到主色
+  --logo-text-gradient: linear-gradient(135deg, #2d2d35 0%, #6366f1 100%);
+
+  // 用户头像（保持品牌色）
+  --avatar-gradient: linear-gradient(135deg, #6366f1, #8b5cf6);
+
+  // 面包屑
+  --breadcrumb-color:     #9896a4;
+  --breadcrumb-active:    #636270;
+  --breadcrumb-separator: #d0cfd8;
+
+  // 菜单：暖灰文字，主色激活
+  --menu-text:         #9896a4;
+  --menu-text-hover:   #4f46e5;
+  --menu-text-active:  #4f46e5;
+  --menu-icon-hover:   #6366f1;
+  --menu-bg-hover:     rgba(99, 102, 241, 0.06);
+  --menu-bg-active:    linear-gradient(90deg, rgba(99, 102, 241, 0.1), rgba(99, 102, 241, 0.02));
+  --menu-indicator:    linear-gradient(180deg, #6366f1, #8b5cf6);
+  --sub-menu-arrow:    #d0cfd8;
 }
