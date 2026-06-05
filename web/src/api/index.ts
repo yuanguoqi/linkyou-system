@@ -43,7 +43,12 @@ http.interceptors.request.use(
 http.interceptors.response.use(
   (response: AxiosResponse) => response,
   async (error) => {
-    const { response } = error
+    const { response, config } = error
+
+    // 标记了 skipErrorHandler 的请求（如登录接口），由调用方自行处理错误
+    if (config?._skipErrorHandler) {
+      return Promise.reject(error)
+    }
 
     if (!response) {
       // 网络错误或超时
@@ -56,17 +61,15 @@ http.interceptors.response.use(
 
     switch (status) {
       case 400:
-        // 业务校验失败，显示后端返回的错误消息
         ElMessage.error(abpError?.message || '请求参数错误')
         break
 
       case 401:
-        // 未认证，尝试刷新令牌
+        // 未认证，尝试刷新令牌（登录页不会触发此分支，因为登录接口用 skipErrorHandler）
         await handleUnauthorized()
         break
 
       case 403:
-        // 无权限
         ElMessage.error('您没有权限执行此操作')
         router.push('/403')
         break

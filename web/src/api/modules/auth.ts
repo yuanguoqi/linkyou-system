@@ -3,9 +3,9 @@ import type { LoginRequest, LoginResponse, CurrentUser, RefreshTokenRequest, Cha
 
 /** 认证相关 API */
 export const authApi = {
-  /** 登录，获取 JWT Token */
+  /** 登录，获取 JWT Token（错误由调用方处理，不走全局拦截器弹消息） */
   login: (data: LoginRequest) =>
-    http.post<LoginResponse>('/account/login', data),
+    http.post<LoginResponse>('/account/login', data, { _skipErrorHandler: true } as object),
 
   /** 刷新 Access Token */
   refreshToken: (data: RefreshTokenRequest) =>

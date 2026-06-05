@@ -3,10 +3,9 @@ import { ref, reactive, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import type { FormInstance, FormRules } from 'element-plus'
-import { User, Lock, Message, RefreshRight, Sunny, Moon } from '@element-plus/icons-vue'
+import { User, Lock, Message, RefreshRight, Sunny, Moon, Warning, Close } from '@element-plus/icons-vue'
 import { useAuthStore } from '@/stores/auth'
 import { useThemeStore } from '@/stores/theme'
-import type { LoginRequest } from '@/types/auth'
 import CaptchaCanvas from './components/CaptchaCanvas.vue'
 
 const router = useRouter()
@@ -27,12 +26,15 @@ const loginCaptchaCode = ref('')
 const registerCaptchaCode = ref('')
 
 // 登录表单
-const loginForm = reactive<LoginRequest & { captcha: string }>({
+const loginForm = reactive({
   userNameOrEmailAddress: '',
   password: '',
-  rememberMe: false,
+  rememberMe: false as boolean,
   captcha: '',
 })
+
+// 登录错误提示（显示在表单上方的横幅）
+const loginError = ref('')
 
 // 注册表单
 const registerForm = reactive({
@@ -152,7 +154,14 @@ function switchPanel(panel: 'login' | 'register') {
 }
 
 async function handleLogin() {
-  await formRef.value?.validate()
+  // 清除上次的错误提示
+  loginError.value = ''
+  try {
+    await formRef.value?.validate()
+  } catch {
+    // 表单校验失败，不发请求
+    return
+  }
   loading.value = true
   try {
     await authStore.login({
@@ -160,7 +169,6 @@ async function handleLogin() {
       password: loginForm.password,
       rememberMe: loginForm.rememberMe,
     })
-    // 记住密码：同时保存用户名和密码（密码明文存储，适合内部系统）
     if (loginForm.rememberMe) {
       localStorage.setItem('remember_me', JSON.stringify({
         userNameOrEmailAddress: loginForm.userNameOrEmailAddress,
@@ -169,10 +177,14 @@ async function handleLogin() {
     } else {
       localStorage.removeItem('remember_me')
     }
-    ElMessage.success('登录成功，欢迎回来！')
     const redirect = (route.query.redirect as string) || '/'
     router.push(redirect)
-  } catch {
+  } catch (err: unknown) {
+    // 从 axios 响应中提取后端返回的错误信息显示在页面内
+    const axiosErr = err as { response?: { data?: { error?: { message?: string } } } }
+    loginError.value =
+      axiosErr?.response?.data?.error?.message ||
+      '登录失败，请检查用户名和密码'
     refreshLoginCaptcha()
   } finally {
     loading.value = false
@@ -251,6 +263,12 @@ async function handleRegister() {
         <Transition name="slide-fade" mode="out-in">
           <div v-if="activePanel === 'login'" key="login" class="form-panel">
             <p class="form-welcome">欢迎回来，请登录您的账户</p>
+            <!-- 登录错误横幅 -->
+            <div v-if="loginError" class="login-error-banner">
+              <el-icon class="error-icon"><Warning /></el-icon>
+              <span>{{ loginError }}</span>
+              <el-icon class="close-icon" @click="loginError = ''"><Close /></el-icon>
+            </div>
             <el-form ref="formRef" :model="loginForm" :rules="loginRules" size="large">
               <el-form-item prop="userNameOrEmailAddress">
                 <el-input
@@ -634,6 +652,29 @@ async function handleRegister() {
   margin: 0 0 20px;
 }
 
+// ===================== 登录错误横幅 =====================
+.login-error-banner {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  margin-bottom: 16px;
+  border-radius: 8px;
+  background: rgba(239, 68, 68, 0.12);
+  border: 1px solid rgba(239, 68, 68, 0.35);
+  color: #fca5a5;
+  font-size: 13px;
+  .error-icon { flex-shrink: 0; color: #f87171; }
+  span { flex: 1; }
+  .close-icon {
+    flex-shrink: 0;
+    cursor: pointer;
+    opacity: 0.6;
+    transition: opacity 0.2s;
+    &:hover { opacity: 1; }
+  }
+}
+
 // ===================== 玻璃输入框 =====================
 .glass-input {
   :deep(.el-input__wrapper) {
@@ -696,11 +737,28 @@ async function handleRegister() {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  margin: 4px 0 16px;
+  position: relative;
+  z-index: 1;
   .remember-check {
-    :deep(.el-checkbox__label) { color: var(--text-secondary); font-size: 13px; }
+    cursor: pointer;
+    :deep(.el-checkbox__label) {
+      color: var(--text-secondary);
+      font-size: 13px;
+      user-select: none;
+    }
     :deep(.el-checkbox__inner) {
       background: var(--input-bg);
       border-color: var(--input-border);
+      transition: background 0.2s, border-color 0.2s;
+    }
+    // 选中态：显示蓝紫色背景，确保对勾可见
+    :deep(.el-checkbox__input.is-checked .el-checkbox__inner) {
+      background: #6366f1 !important;
+      border-color: #6366f1 !important;
+    }
+    :deep(.el-checkbox__input.is-checked .el-checkbox__inner::after) {
+      border-color: #fff !important;
     }
   }
   .forgot-link {
