@@ -32,7 +32,7 @@ async function handleCommand(cmd: string) {
     <!-- 左侧：折叠按钮 + 面包屑 -->
     <div class="header-left">
       <button class="action-btn" @click="appStore.toggleSidebar()">
-        <el-icon :size="18">
+        <el-icon :size="16">
           <Fold v-if="!appStore.sidebarCollapsed" />
           <Expand v-else />
         </el-icon>
@@ -55,7 +55,7 @@ async function handleCommand(cmd: string) {
       <el-tooltip content="切换语言" placement="bottom">
         <el-dropdown @command="appStore.setLocale">
           <button class="action-btn">
-            <el-icon :size="16"><Grid /></el-icon>
+            <el-icon :size="15"><Grid /></el-icon>
           </button>
           <template #dropdown>
             <el-dropdown-menu>
@@ -69,10 +69,10 @@ async function handleCommand(cmd: string) {
       <!-- 主题切换 -->
       <el-tooltip :content="themeStore.isDark ? '切换为浅色' : '切换为深色'" placement="bottom">
         <button class="action-btn theme-btn" @click="themeStore.toggleDark()">
-          <el-icon :size="16">
-            <Sunny v-if="themeStore.isDark" />
-            <Moon v-else />
-          </el-icon>
+          <transition name="theme-icon" mode="out-in">
+            <el-icon v-if="themeStore.isDark" :size="15" key="sun"><Sunny /></el-icon>
+            <el-icon v-else :size="15" key="moon"><Moon /></el-icon>
+          </transition>
         </button>
       </el-tooltip>
 
@@ -88,7 +88,7 @@ async function handleCommand(cmd: string) {
             <span class="user-name">{{ authStore.userDisplayName }}</span>
             <span class="user-role">管理员</span>
           </div>
-          <el-icon class="arrow-icon" :size="12"><ArrowDown /></el-icon>
+          <el-icon class="arrow-icon" :size="10"><ArrowDown /></el-icon>
         </div>
         <template #dropdown>
           <el-dropdown-menu>
@@ -117,19 +117,19 @@ async function handleCommand(cmd: string) {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 20px;
+  padding: 0 16px;
 }
 
 .header-left {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
 
   .breadcrumb {
     :deep(.el-breadcrumb__item .el-breadcrumb__inner) {
       color: var(--breadcrumb-color);
-      font-size: 13px;
-      transition: color 0.3s;
+      font-size: 12.5px;
+      transition: color 0.2s;
     }
     :deep(.el-breadcrumb__item:last-child .el-breadcrumb__inner) {
       color: var(--breadcrumb-active);
@@ -144,55 +144,61 @@ async function handleCommand(cmd: string) {
 .header-right {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 4px;
 
   .divider {
     width: 1px;
-    height: 20px;
+    height: 16px;
     background: var(--border-subtle);
-    margin: 0 4px;
+    margin: 0 6px;
   }
 }
 
-// 通用操作按钮（折叠、语言、主题）
+// Action buttons
 .action-btn {
-  width: 34px;
-  height: 34px;
+  width: 32px;
+  height: 32px;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: var(--bg-input);
-  border: 1px solid var(--border-subtle);
+  background: transparent;
+  border: 1px solid transparent;
   border-radius: 8px;
   cursor: pointer;
-  color: var(--text-secondary);
-  transition: all 0.2s;
+  color: var(--text-muted);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 
   &:hover {
     background: var(--bg-hover);
-    border-color: var(--border-active);
+    border-color: var(--border-primary);
     color: var(--primary-pale);
   }
 }
 
-// 主题按钮 hover 带旋转动效
-.theme-btn:hover {
-  :deep(.el-icon) {
-    transform: rotate(20deg);
-    transition: transform 0.3s;
-  }
+// Theme button icon transition
+.theme-icon-enter-active,
+.theme-icon-leave-active {
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.theme-icon-enter-from {
+  opacity: 0;
+  transform: rotate(-90deg) scale(0.6);
+}
+.theme-icon-leave-to {
+  opacity: 0;
+  transform: rotate(90deg) scale(0.6);
 }
 
-// 用户信息
+// User info
 .user-info {
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 6px 12px 6px 6px;
+  gap: 8px;
+  padding: 4px 10px 4px 4px;
   border-radius: 10px;
   cursor: pointer;
   border: 1px solid transparent;
-  transition: all 0.2s;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 
   &:hover {
     background: var(--bg-hover);
@@ -200,44 +206,57 @@ async function handleCommand(cmd: string) {
   }
 
   .user-avatar {
-    width: 34px;
-    height: 34px;
+    width: 30px;
+    height: 30px;
     border-radius: 8px;
     background: var(--avatar-gradient);
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 14px;
+    font-family: 'Plus Jakarta Sans', 'Inter', sans-serif;
+    font-size: 12.5px;
     font-weight: 700;
     color: #fff;
-    box-shadow: 0 0 12px var(--primary-glow);
+    box-shadow: 0 0 8px var(--primary-glow);
     flex-shrink: 0;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+
+    .user-info:hover & {
+      transform: scale(1.08);
+      box-shadow: 0 0 12px var(--primary-glow),
+                  0 0 24px rgba(99, 102, 241, 0.15);
+    }
   }
 
   .user-meta {
     display: flex;
     flex-direction: column;
-    gap: 1px;
+    gap: 0;
 
     .user-name {
-      font-size: 13px;
+      font-size: 12.5px;
       font-weight: 500;
       color: var(--text-primary);
-      line-height: 1.3;
-      transition: color 0.3s;
+      line-height: 1.4;
+      transition: color 0.2s;
     }
 
     .user-role {
       font-size: 11px;
       color: var(--text-muted);
       line-height: 1.3;
-      transition: color 0.3s;
+      transition: color 0.2s;
     }
   }
 
   .arrow-icon {
     color: var(--text-muted);
     margin-left: 2px;
+    transition: transform 0.2s;
+
+    .user-info:hover & {
+      transform: translateY(1px);
+    }
   }
 }
 </style>

@@ -113,7 +113,7 @@ onMounted(fetchList)
       </div>
       <div class="search-actions">
         <el-button class="btn-ghost" @click="handleReset">重置</el-button>
-        <el-button type="primary" @click="handleSearch">
+        <el-button type="primary" class="btn-primary" @click="handleSearch">
           <el-icon><Search /></el-icon>搜索
         </el-button>
       </div>
@@ -122,9 +122,9 @@ onMounted(fetchList)
     <!-- 列表面板 -->
     <div class="panel">
       <div class="panel-header">
-        <span class="panel-title">XXX 管理</span>
+        <span class="panel-title font-display">XXX 管理</span>
         <div class="panel-actions">
-          <el-button type="primary" @click="handleCreate">
+          <el-button type="primary" class="btn-primary" @click="handleCreate">
             <el-icon><Plus /></el-icon>新增
           </el-button>
         </div>
@@ -172,10 +172,10 @@ onMounted(fetchList)
 
 <style scoped lang="scss">
 .page-container {
-  padding: 20px;
+  padding: 16px;
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 12px;
   min-height: 100%;
 }
 
@@ -185,10 +185,11 @@ onMounted(fetchList)
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  padding: 16px 20px;
-  background: #13151f;
-  border: 1px solid rgba(255, 255, 255, 0.06);
+  padding: 14px 16px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-default);
   border-radius: 12px;
+  transition: background 0.3s, border-color 0.3s;
 
   .search-fields {
     display: flex;
@@ -208,48 +209,53 @@ onMounted(fetchList)
 
 // 面板
 .panel {
-  background: #13151f;
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  border-radius: 14px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-default);
+  border-radius: 12px;
   overflow: hidden;
+  transition: background 0.3s, border-color 0.3s;
 
   .panel-header {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 16px 20px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--border-default);
 
     .panel-title {
-      font-size: 14px;
+      font-family: 'Plus Jakarta Sans', 'Inter', sans-serif;
+      font-size: 13.5px;
       font-weight: 600;
-      color: #cbd5e1;
+      color: var(--text-secondary);
+      letter-spacing: -0.2px;
     }
   }
 
-  .panel-body { padding: 20px; }
+  .panel-body { padding: 16px; }
 }
 
 // 表格覆盖
 .data-table {
   :deep(th.el-table__cell) {
-    background: rgba(255, 255, 255, 0.03);
-    color: #94a3b8;
+    background: rgba(255, 255, 255, 0.02);
+    color: var(--text-secondary);
     font-weight: 500;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    font-size: 12px;
+    border-bottom: 1px solid var(--border-default);
   }
 
   :deep(td.el-table__cell) {
-    color: #cbd5e1;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+    color: var(--text-primary);
+    border-bottom: 1px solid var(--border-default);
+    font-size: 13px;
   }
 
   :deep(tr:hover > td) {
-    background: rgba(99, 102, 241, 0.05) !important;
+    background: var(--bg-hover) !important;
   }
 
   :deep(.el-table__body-wrapper) { background: transparent; }
-  :deep(.el-table__empty-block) { background: transparent; color: #475569; }
+  :deep(.el-table__empty-block) { background: transparent; color: var(--text-disabled); }
 }
 
 // 行操作按钮
@@ -261,85 +267,103 @@ onMounted(fetchList)
 .action-btn {
   padding: 3px 10px;
   font-size: 12px;
-  border-radius: 5px;
-  border: 1px solid rgba(99, 102, 241, 0.25);
-  background: rgba(99, 102, 241, 0.08);
-  color: #a5b4fc;
+  border-radius: 6px;
+  border: 1px solid var(--border-primary);
+  background: var(--primary-dim);
+  color: var(--primary-pale);
   cursor: pointer;
   transition: all 0.15s;
 
   &:hover {
     background: rgba(99, 102, 241, 0.18);
-    border-color: rgba(99, 102, 241, 0.5);
+    border-color: var(--border-active);
   }
 
   &.danger {
-    border-color: rgba(248, 113, 113, 0.25);
-    background: rgba(248, 113, 113, 0.08);
+    border-color: rgba(248, 113, 113, 0.2);
+    background: var(--danger-dim);
     color: #fca5a5;
 
     &:hover {
       background: rgba(248, 113, 113, 0.18);
-      border-color: rgba(248, 113, 113, 0.5);
+      border-color: rgba(248, 113, 113, 0.4);
     }
   }
 }
 
 // 幽灵按钮
 .btn-ghost {
-  background: rgba(255, 255, 255, 0.04) !important;
-  border-color: rgba(255, 255, 255, 0.08) !important;
-  color: #94a3b8 !important;
+  background: transparent !important;
+  border-color: var(--border-subtle) !important;
+  color: var(--text-secondary) !important;
+  font-size: 13px;
 
   &:hover {
-    background: rgba(99, 102, 241, 0.08) !important;
-    border-color: rgba(99, 102, 241, 0.3) !important;
-    color: #a5b4fc !important;
+    background: var(--primary-dim) !important;
+    border-color: var(--border-primary) !important;
+    color: var(--primary-pale) !important;
+  }
+}
+
+// 主要按钮
+.btn-primary {
+  background: linear-gradient(135deg, #4f46e5, #6366f1) !important;
+  border: none !important;
+  border-radius: 8px !important;
+  box-shadow: 0 4px 12px rgba(79, 70, 229, 0.25) !important;
+  font-weight: 500 !important;
+  font-size: 13px;
+
+  &:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 16px rgba(79, 70, 229, 0.35) !important;
   }
 }
 
 // 分页覆盖
 :deep(.el-pagination) {
   justify-content: flex-end;
-  margin-top: 16px;
+  margin-top: 12px;
 
   .el-pager li {
-    background: rgba(255, 255, 255, 0.04);
-    border: 1px solid rgba(255, 255, 255, 0.06);
-    color: #64748b;
+    background: var(--bg-input);
+    border: 1px solid var(--border-default);
+    color: var(--text-muted);
     border-radius: 6px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
 
-    &.is-active { background: #6366f1; border-color: #6366f1; color: #fff; }
-    &:hover:not(.is-active) { background: rgba(99, 102, 241, 0.1); color: #a5b4fc; }
+    &.is-active { background: var(--primary); border-color: var(--primary); color: #fff; }
+    &:hover:not(.is-active) { background: var(--primary-dim); color: var(--primary-pale); }
   }
 
   button {
-    background: rgba(255, 255, 255, 0.04);
-    border: 1px solid rgba(255, 255, 255, 0.06);
-    color: #64748b;
+    background: var(--bg-input);
+    border: 1px solid var(--border-default);
+    color: var(--text-muted);
     border-radius: 6px;
-    &:hover { color: #a5b4fc; }
+    &:hover { color: var(--primary-pale); }
   }
 
   .el-pagination__total,
   .el-pagination__sizes,
-  .el-pagination__jump { color: #64748b; }
+  .el-pagination__jump { color: var(--text-muted); }
 }
 
 // 搜索输入框覆盖
 :deep(.el-input) {
   .el-input__wrapper {
-    background: rgba(255, 255, 255, 0.04);
-    box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.08) inset;
+    background: var(--bg-input);
+    box-shadow: 0 0 0 1px var(--border-subtle) inset;
     border-radius: 8px;
 
-    &:hover { box-shadow: 0 0 0 1px rgba(99, 102, 241, 0.3) inset; }
-    &.is-focus { box-shadow: 0 0 0 1px #6366f1 inset, 0 0 0 3px rgba(99, 102, 241, 0.12); }
+    &:hover { box-shadow: 0 0 0 1px rgba(99, 102, 241, 0.25) inset; }
+    &.is-focus { box-shadow: 0 0 0 1px var(--primary) inset, 0 0 0 3px rgba(99, 102, 241, 0.08); }
   }
 
-  .el-input__inner { color: #e2e8f0; }
-  .el-input__inner::placeholder { color: #475569; }
-  .el-icon { color: #64748b; }
+  .el-input__inner { color: var(--text-primary); }
+  .el-input__inner::placeholder { color: var(--text-muted); }
+  .el-icon { color: var(--text-muted); }
 }
 </style>
 ```

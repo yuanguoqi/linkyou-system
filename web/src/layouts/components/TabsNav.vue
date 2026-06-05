@@ -54,15 +54,15 @@ function handleTabRemove(path: string) {
 .tabs-nav {
   background: var(--tab-bg);
   border-bottom: 1px solid var(--tab-border);
-  padding: 6px 12px 0;
-  height: 38px;
+  padding: 5px 12px 0;
+  height: 36px;
   flex-shrink: 0;
   transition: background 0.3s, border-color 0.3s;
 }
 
 .tabs-inner {
   display: flex;
-  gap: 4px;
+  gap: 3px;
   align-items: flex-end;
   height: 100%;
 }
@@ -70,9 +70,9 @@ function handleTabRemove(path: string) {
 .tab-item {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  padding: 4px 12px;
-  font-size: 12.5px;
+  gap: 5px;
+  padding: 3px 10px;
+  font-size: 12px;
   border-radius: 6px 6px 0 0;
   border: 1px solid var(--tab-item-border);
   border-bottom: none;
@@ -80,21 +80,22 @@ function handleTabRemove(path: string) {
   color: var(--text-muted);
   background: var(--tab-item-bg);
   white-space: nowrap;
-  transition: all 0.2s;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
 
   .tab-dot {
-    width: 6px;
-    height: 6px;
+    width: 5px;
+    height: 5px;
     border-radius: 50%;
     background: var(--tab-dot);
     flex-shrink: 0;
-    transition: background 0.2s;
+    transition: all 0.2s;
   }
 
   .tab-title {
     font-weight: 500;
     transition: color 0.2s;
+    letter-spacing: -0.1px;
   }
 
   &:hover {
@@ -127,14 +128,14 @@ function handleTabRemove(path: string) {
   }
 
   .tab-close {
-    font-size: 11px;
+    font-size: 10px;
     border-radius: 3px;
     color: var(--text-disabled);
     transition: all 0.15s;
-    margin-left: 2px;
+    margin-left: 1px;
 
     &:hover {
-      background: rgba(248, 113, 113, 0.2);
+      background: rgba(248, 113, 113, 0.15);
       color: #f87171;
     }
   }

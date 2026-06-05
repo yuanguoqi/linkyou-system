@@ -19,7 +19,7 @@ const formRef = ref<FormInstance>()
 const registerFormRef = ref<FormInstance>()
 const loading = ref(false)
 
-// 验证码 - 登录和注册各自独立，避免面板切换时状态混乱
+// 验证码
 const loginCaptchaRef = ref<InstanceType<typeof CaptchaCanvas>>()
 const registerCaptchaRef = ref<InstanceType<typeof CaptchaCanvas>>()
 const loginCaptchaCode = ref('')
@@ -33,7 +33,7 @@ const loginForm = reactive({
   captcha: '',
 })
 
-// 登录错误提示（显示在表单上方的横幅）
+// 登录错误提示
 const loginError = ref('')
 
 // 注册表单
@@ -108,7 +108,7 @@ const registerRules: FormRules = {
   ],
 }
 
-// 持久化记住密码 - 恢复用户名和密码
+// 持久化记住密码
 onMounted(() => {
   const saved = localStorage.getItem('remember_me')
   if (saved) {
@@ -143,7 +143,6 @@ function refreshRegisterCaptcha() {
 
 function switchPanel(panel: 'login' | 'register') {
   activePanel.value = panel
-  // 切换面板时刷新对应验证码
   if (panel === 'login') {
     refreshLoginCaptcha()
   } else {
@@ -154,12 +153,10 @@ function switchPanel(panel: 'login' | 'register') {
 }
 
 async function handleLogin() {
-  // 清除上次的错误提示
   loginError.value = ''
   try {
     await formRef.value?.validate()
   } catch {
-    // 表单校验失败，不发请求
     return
   }
   loading.value = true
@@ -180,7 +177,6 @@ async function handleLogin() {
     const redirect = (route.query.redirect as string) || '/'
     router.push(redirect)
   } catch (err: unknown) {
-    // 从 axios 响应中提取后端返回的错误信息显示在页面内
     const axiosErr = err as { response?: { data?: { error?: { message?: string } } } }
     loginError.value =
       axiosErr?.response?.data?.error?.message ||
@@ -195,7 +191,6 @@ async function handleRegister() {
   await registerFormRef.value?.validate()
   loading.value = true
   try {
-    // 注册接口预留，后续接入
     ElMessage.info('注册功能即将开放，请联系管理员')
   } finally {
     loading.value = false
@@ -207,37 +202,48 @@ async function handleRegister() {
 
 <template>
   <div class="login-page" :class="{ dark: themeStore.isDark }">
-    <!-- 动态背景粒子 -->
-    <div class="bg-grid"></div>
-    <div class="bg-orb orb-1"></div>
-    <div class="bg-orb orb-2"></div>
-    <div class="bg-orb orb-3"></div>
+    <!-- 背景效果 -->
+    <div class="bg-grid" />
+    <div class="bg-orb orb-1" />
+    <div class="bg-orb orb-2" />
+    <div class="bg-orb orb-3" />
+    <div class="noise-overlay" />
 
-    <!-- 深色模式切换按钮 -->
+    <!-- 主题切换 -->
     <button class="theme-toggle" @click="themeStore.toggleDark">
-      <el-icon :size="20"><Sunny v-if="themeStore.isDark" /><Moon v-else /></el-icon>
+      <transition name="theme-icon" mode="out-in">
+        <el-icon v-if="themeStore.isDark" :size="18" key="sun"><Sunny /></el-icon>
+        <el-icon v-else :size="18" key="moon"><Moon /></el-icon>
+      </transition>
     </button>
 
     <!-- 登录卡片 -->
     <div class="login-card">
       <!-- 左侧装饰面板 -->
       <div class="card-left">
+        <div class="card-left-mesh" />
         <div class="brand">
           <div class="brand-icon">
             <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M24 4L44 14V34L24 44L4 34V14L24 4Z" stroke="currentColor" stroke-width="2" fill="none"/>
-              <path d="M24 12L36 18V30L24 36L12 30V18L24 12Z" fill="currentColor" opacity="0.3"/>
-              <circle cx="24" cy="24" r="6" fill="currentColor"/>
+              <defs>
+                <linearGradient id="brandGrad" x1="0" y1="0" x2="48" y2="48" gradientUnits="userSpaceOnUse">
+                  <stop stop-color="#6366f1"/>
+                  <stop offset="1" stop-color="#818cf8"/>
+                </linearGradient>
+              </defs>
+              <path d="M24 4L44 14V34L24 44L4 34V14L24 4Z" stroke="url(#brandGrad)" stroke-width="2" fill="none"/>
+              <path d="M24 12L36 18V30L24 36L12 30V18L24 12Z" fill="url(#brandGrad)" opacity="0.2"/>
+              <circle cx="24" cy="24" r="5" fill="url(#brandGrad)"/>
             </svg>
           </div>
-          <h1 class="brand-name">领佑系统</h1>
+          <h1 class="brand-name font-display">领佑系统</h1>
           <p class="brand-desc">Enterprise Management Platform</p>
         </div>
         <div class="feature-list">
-          <div class="feature-item"><span class="dot"></span>多租户企业级架构</div>
-          <div class="feature-item"><span class="dot"></span>细粒度权限管理</div>
-          <div class="feature-item"><span class="dot"></span>实时审计日志</div>
-          <div class="feature-item"><span class="dot"></span>高性能 API 接口</div>
+          <div class="feature-item"><span class="dot" />多租户企业级架构</div>
+          <div class="feature-item"><span class="dot" />细粒度权限管理</div>
+          <div class="feature-item"><span class="dot" />实时审计日志</div>
+          <div class="feature-item"><span class="dot" />高性能 API 接口</div>
         </div>
         <div class="left-footer">Powered by ABP vNext 10.4</div>
       </div>
@@ -256,7 +262,7 @@ async function handleRegister() {
             :class="{ active: activePanel === 'register' }"
             @click="switchPanel('register')"
           >注册</button>
-          <div class="tab-indicator" :class="{ right: activePanel === 'register' }"></div>
+          <div class="tab-indicator" :class="{ right: activePanel === 'register' }" />
         </div>
 
         <!-- 登录表单 -->
@@ -270,7 +276,7 @@ async function handleRegister() {
               <el-icon class="close-icon" @click="loginError = ''"><Close /></el-icon>
             </div>
             <el-form ref="formRef" :model="loginForm" :rules="loginRules" size="large">
-              <el-form-item prop="userNameOrEmailAddress">
+              <el-form-item prop="userNameOrEmailAddress" class="stagger-item" style="--i:0">
                 <el-input
                   v-model="loginForm.userNameOrEmailAddress"
                   placeholder="用户名 / 邮箱"
@@ -280,7 +286,7 @@ async function handleRegister() {
                   class="glass-input"
                 />
               </el-form-item>
-              <el-form-item prop="password">
+              <el-form-item prop="password" class="stagger-item" style="--i:1">
                 <el-input
                   v-model="loginForm.password"
                   type="password"
@@ -292,7 +298,7 @@ async function handleRegister() {
                   @keyup.enter="handleLogin"
                 />
               </el-form-item>
-              <el-form-item prop="captcha">
+              <el-form-item prop="captcha" class="stagger-item" style="--i:2">
                 <div class="captcha-row">
                   <el-input
                     v-model="loginForm.captcha"
@@ -307,13 +313,13 @@ async function handleRegister() {
                   </div>
                 </div>
               </el-form-item>
-              <div class="form-options">
+              <div class="form-options stagger-item" style="--i:3">
                 <el-checkbox v-model="loginForm.rememberMe" class="remember-check">
                   记住密码
                 </el-checkbox>
                 <a href="javascript:;" class="forgot-link">忘记密码？</a>
               </div>
-              <el-form-item>
+              <el-form-item class="stagger-item" style="--i:4">
                 <el-button
                   type="primary"
                   class="submit-btn"
@@ -403,49 +409,49 @@ async function handleRegister() {
 </template>
 
 <style scoped lang="scss">
-// ===================== CSS 变量 =====================
+// ── CSS Variables ──────────────────────────────────────
 .login-page {
-  --bg-from: #0a0e1a;
-  --bg-to: #0d1b2e;
-  --orb-1: rgba(99, 102, 241, 0.35);
-  --orb-2: rgba(14, 165, 233, 0.25);
-  --orb-3: rgba(168, 85, 247, 0.2);
-  --card-bg: rgba(255, 255, 255, 0.04);
-  --card-border: rgba(255, 255, 255, 0.1);
-  --input-bg: rgba(255, 255, 255, 0.07);
-  --input-border: rgba(255, 255, 255, 0.12);
+  --bg-from: #080a0f;
+  --bg-to: #0c1020;
+  --orb-1: rgba(99, 102, 241, 0.25);
+  --orb-2: rgba(79, 70, 229, 0.18);
+  --orb-3: rgba(139, 92, 246, 0.12);
+  --card-bg: rgba(16, 19, 28, 0.8);
+  --card-border: rgba(255, 255, 255, 0.06);
+  --input-bg: rgba(255, 255, 255, 0.04);
+  --input-border: rgba(255, 255, 255, 0.08);
   --input-focus: rgba(99, 102, 241, 0.6);
-  --text-primary: #f0f4ff;
-  --text-secondary: rgba(200, 210, 240, 0.65);
-  --tab-inactive: rgba(200, 210, 240, 0.45);
-  --tab-active: #fff;
-  --btn-from: #6366f1;
-  --btn-to: #818cf8;
-  --left-bg: rgba(99, 102, 241, 0.08);
-  --shadow: 0 32px 80px rgba(0, 0, 0, 0.6);
+  --text-primary: #e8ecf4;
+  --text-secondary: rgba(123, 138, 168, 0.8);
+  --tab-inactive: rgba(123, 138, 168, 0.5);
+  --tab-active: #e8ecf4;
+  --btn-from: #4f46e5;
+  --btn-to: #6366f1;
+  --left-bg: rgba(99, 102, 241, 0.04);
+  --shadow: 0 40px 100px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255, 255, 255, 0.04);
 
-  // 亮色模式覆盖
+  // Light mode
   &:not(.dark) {
-    --bg-from: #e8eeff;
-    --bg-to: #dde8f8;
-    --orb-1: rgba(99, 102, 241, 0.18);
-    --orb-2: rgba(14, 165, 233, 0.15);
-    --orb-3: rgba(168, 85, 247, 0.12);
-    --card-bg: rgba(255, 255, 255, 0.72);
-    --card-border: rgba(180, 190, 240, 0.4);
-    --input-bg: rgba(240, 244, 255, 0.8);
-    --input-border: rgba(140, 155, 220, 0.35);
-    --input-focus: rgba(99, 102, 241, 0.45);
-    --text-primary: #1e2356;
-    --text-secondary: #5a6490;
-    --tab-inactive: #8b93c0;
-    --tab-active: #1e2356;
-    --left-bg: rgba(99, 102, 241, 0.06);
-    --shadow: 0 32px 80px rgba(80, 100, 200, 0.15);
+    --bg-from: #f0f2fa;
+    --bg-to: #e8ecf8;
+    --orb-1: rgba(99, 102, 241, 0.12);
+    --orb-2: rgba(79, 70, 229, 0.08);
+    --orb-3: rgba(139, 92, 246, 0.06);
+    --card-bg: rgba(255, 255, 255, 0.75);
+    --card-border: rgba(0, 0, 0, 0.06);
+    --input-bg: rgba(0, 0, 0, 0.025);
+    --input-border: rgba(0, 0, 0, 0.08);
+    --input-focus: rgba(99, 102, 241, 0.4);
+    --text-primary: #0c0e14;
+    --text-secondary: #5a6478;
+    --tab-inactive: #9ca3b4;
+    --tab-active: #0c0e14;
+    --left-bg: rgba(99, 102, 241, 0.03);
+    --shadow: 0 32px 80px rgba(0, 0, 0, 0.08), 0 0 0 1px rgba(0, 0, 0, 0.04);
   }
 }
 
-// ===================== 页面容器 =====================
+// ── Page Container ─────────────────────────────────────
 .login-page {
   min-height: 100vh;
   background: linear-gradient(135deg, var(--bg-from) 0%, var(--bg-to) 100%);
@@ -457,13 +463,13 @@ async function handleRegister() {
   transition: background 0.4s;
 }
 
-// ===================== 动态背景 =====================
+// ── Background Effects ─────────────────────────────────
 .bg-grid {
   position: absolute;
   inset: 0;
   background-image:
-    linear-gradient(rgba(99, 102, 241, 0.05) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(99, 102, 241, 0.05) 1px, transparent 1px);
+    linear-gradient(rgba(99, 102, 241, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(99, 102, 241, 0.03) 1px, transparent 1px);
   background-size: 48px 48px;
   pointer-events: none;
 }
@@ -471,232 +477,291 @@ async function handleRegister() {
 .bg-orb {
   position: absolute;
   border-radius: 50%;
-  filter: blur(80px);
+  filter: blur(100px);
   pointer-events: none;
-  animation: float 8s ease-in-out infinite;
+  animation: float 10s ease-in-out infinite;
 }
-.orb-1 { width: 600px; height: 600px; top: -200px; left: -150px; background: var(--orb-1); animation-delay: 0s; }
-.orb-2 { width: 500px; height: 500px; bottom: -150px; right: -100px; background: var(--orb-2); animation-delay: -3s; }
-.orb-3 { width: 400px; height: 400px; top: 50%; left: 50%; transform: translate(-50%, -50%); background: var(--orb-3); animation-delay: -6s; }
+.orb-1 { width: 500px; height: 500px; top: -180px; left: -120px; background: var(--orb-1); animation-delay: 0s; }
+.orb-2 { width: 400px; height: 400px; bottom: -120px; right: -80px; background: var(--orb-2); animation-delay: -4s; }
+.orb-3 { width: 350px; height: 350px; top: 50%; left: 50%; transform: translate(-50%, -50%); background: var(--orb-3); animation-delay: -7s; }
 
 @keyframes float {
   0%, 100% { transform: translateY(0) scale(1); }
-  50% { transform: translateY(-30px) scale(1.05); }
+  50% { transform: translateY(-20px) scale(1.03); }
 }
 .orb-3 { animation-name: float-center; }
 @keyframes float-center {
   0%, 100% { transform: translate(-50%, -50%) scale(1); }
-  50% { transform: translate(-50%, calc(-50% - 20px)) scale(1.08); }
+  50% { transform: translate(-50%, calc(-50% - 15px)) scale(1.05); }
 }
 
-// ===================== 主题切换 =====================
+// ── Theme Toggle ───────────────────────────────────────
 .theme-toggle {
   position: fixed;
   top: 20px;
   right: 20px;
-  width: 44px;
-  height: 44px;
-  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
   border: 1px solid var(--card-border);
   background: var(--card-bg);
-  backdrop-filter: blur(12px);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
   color: var(--text-primary);
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.3s;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   z-index: 100;
+
   &:hover {
-    border-color: rgba(99, 102, 241, 0.6);
-    background: rgba(99, 102, 241, 0.15);
-    transform: rotate(20deg);
+    border-color: rgba(99, 102, 241, 0.4);
+    background: rgba(99, 102, 241, 0.1);
   }
 }
 
-// ===================== 登录卡片 =====================
+.theme-icon-enter-active,
+.theme-icon-leave-active {
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.theme-icon-enter-from {
+  opacity: 0;
+  transform: rotate(-90deg) scale(0.6);
+}
+.theme-icon-leave-to {
+  opacity: 0;
+  transform: rotate(90deg) scale(0.6);
+}
+
+// ── Login Card ─────────────────────────────────────────
 .login-card {
   position: relative;
   z-index: 10;
-  width: 880px;
-  min-height: 540px;
+  width: 860px;
+  min-height: 520px;
   display: flex;
-  border-radius: 24px;
+  border-radius: 20px;
   border: 1px solid var(--card-border);
   background: var(--card-bg);
-  backdrop-filter: blur(24px);
+  backdrop-filter: blur(40px) saturate(180%);
+  -webkit-backdrop-filter: blur(40px) saturate(180%);
   box-shadow: var(--shadow);
   overflow: hidden;
   animation: card-in 0.6s cubic-bezier(0.16, 1, 0.3, 1);
 }
 @keyframes card-in {
-  from { opacity: 0; transform: translateY(30px) scale(0.97); }
+  from { opacity: 0; transform: translateY(24px) scale(0.98); }
   to   { opacity: 1; transform: translateY(0) scale(1); }
 }
 
-// ===================== 左侧装饰 =====================
+// ── Left Decorative Panel ──────────────────────────────
 .card-left {
-  width: 300px;
+  width: 280px;
   flex-shrink: 0;
-  padding: 48px 36px;
+  padding: 40px 28px;
   background: var(--left-bg);
   border-right: 1px solid var(--card-border);
   display: flex;
   flex-direction: column;
-  gap: 32px;
+  gap: 28px;
+  position: relative;
+  overflow: hidden;
 
   .brand {
     .brand-icon {
-      width: 56px;
-      height: 56px;
-      color: #6366f1;
-      margin-bottom: 16px;
+      width: 48px;
+      height: 48px;
+      margin-bottom: 14px;
       svg { width: 100%; height: 100%; }
     }
     .brand-name {
-      font-size: 22px;
+      font-size: 20px;
       font-weight: 700;
       color: var(--text-primary);
-      margin: 0 0 6px;
-      letter-spacing: 0.5px;
+      margin: 0 0 4px;
+      letter-spacing: -0.3px;
     }
     .brand-desc {
-      font-size: 12px;
+      font-size: 11px;
       color: var(--text-secondary);
       margin: 0;
-      letter-spacing: 1px;
+      letter-spacing: 1.5px;
       text-transform: uppercase;
+      font-weight: 500;
     }
   }
 
   .feature-list {
     display: flex;
     flex-direction: column;
-    gap: 14px;
+    gap: 12px;
     .feature-item {
       display: flex;
       align-items: center;
       gap: 10px;
-      font-size: 13px;
+      font-size: 12.5px;
       color: var(--text-secondary);
       .dot {
-        width: 6px;
-        height: 6px;
+        width: 5px;
+        height: 5px;
         border-radius: 50%;
-        background: linear-gradient(135deg, #6366f1, #818cf8);
+        background: #6366f1;
         flex-shrink: 0;
-        box-shadow: 0 0 8px rgba(99, 102, 241, 0.6);
+        box-shadow: 0 0 6px rgba(99, 102, 241, 0.5);
       }
     }
   }
 
   .left-footer {
     margin-top: auto;
-    font-size: 11px;
+    font-size: 10.5px;
     color: var(--text-secondary);
-    opacity: 0.5;
+    opacity: 0.4;
   }
 }
 
-// ===================== 右侧表单 =====================
+// Geometric mesh pattern in left panel
+.card-left-mesh {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.4;
+  background:
+    radial-gradient(circle at 20% 80%, rgba(99, 102, 241, 0.08) 0%, transparent 50%),
+    radial-gradient(circle at 80% 20%, rgba(139, 92, 246, 0.06) 0%, transparent 50%);
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(99, 102, 241, 0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(99, 102, 241, 0.04) 1px, transparent 1px);
+    background-size: 24px 24px;
+    mask-image: linear-gradient(180deg, transparent 0%, black 30%, black 70%, transparent 100%);
+    -webkit-mask-image: linear-gradient(180deg, transparent 0%, black 30%, black 70%, transparent 100%);
+  }
+}
+
+// ── Right Form Panel ───────────────────────────────────
 .card-right {
   flex: 1;
-  padding: 48px 48px 40px;
+  padding: 40px 40px 36px;
   display: flex;
   flex-direction: column;
 }
 
-// ===================== Tab 切换 =====================
+// ── Tab Switch ─────────────────────────────────────────
 .panel-tabs {
   display: flex;
-  margin-bottom: 28px;
+  margin-bottom: 24px;
   position: relative;
   width: fit-content;
   background: var(--input-bg);
   border-radius: 10px;
-  padding: 4px;
+  padding: 3px;
   border: 1px solid var(--input-border);
 
   .tab-btn {
     position: relative;
     z-index: 2;
-    padding: 8px 28px;
+    padding: 7px 24px;
     border: none;
     background: transparent;
     border-radius: 7px;
-    font-size: 14px;
+    font-size: 13px;
     font-weight: 500;
     color: var(--tab-inactive);
     cursor: pointer;
-    transition: color 0.3s;
+    transition: color 0.25s;
     &.active { color: var(--tab-active); }
   }
 
   .tab-indicator {
     position: absolute;
-    top: 4px;
-    left: 4px;
-    width: calc(50% - 4px);
-    height: calc(100% - 8px);
-    background: linear-gradient(135deg, #6366f1, #818cf8);
+    top: 3px;
+    left: 3px;
+    width: calc(50% - 3px);
+    height: calc(100% - 6px);
+    background: linear-gradient(135deg, #4f46e5, #6366f1);
     border-radius: 7px;
     transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
+    box-shadow: 0 4px 16px rgba(99, 102, 241, 0.3);
     &.right { transform: translateX(100%); }
   }
 }
 
 .form-welcome {
-  font-size: 13px;
+  font-size: 12.5px;
   color: var(--text-secondary);
-  margin: 0 0 20px;
+  margin: 0 0 18px;
 }
 
-// ===================== 登录错误横幅 =====================
+// ── Login Error Banner ─────────────────────────────────
 .login-error-banner {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 10px 14px;
-  margin-bottom: 16px;
-  border-radius: 8px;
-  background: rgba(239, 68, 68, 0.12);
-  border: 1px solid rgba(239, 68, 68, 0.35);
+  padding: 10px 12px;
+  margin-bottom: 14px;
+  border-radius: 10px;
+  background: rgba(248, 113, 113, 0.08);
+  border: 1px solid rgba(248, 113, 113, 0.2);
   color: #fca5a5;
-  font-size: 13px;
+  font-size: 12.5px;
   .error-icon { flex-shrink: 0; color: #f87171; }
   span { flex: 1; }
   .close-icon {
     flex-shrink: 0;
     cursor: pointer;
-    opacity: 0.6;
+    opacity: 0.5;
     transition: opacity 0.2s;
     &:hover { opacity: 1; }
   }
 }
 
-// ===================== 玻璃输入框 =====================
+// ── Stagger Entrance Animations ────────────────────────
+.stagger-item {
+  animation: stagger-in 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation-delay: calc(0.08s * var(--i, 0) + 0.3s);
+}
+
+@keyframes stagger-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+// ── Glass Input ────────────────────────────────────────
 .glass-input {
   :deep(.el-input__wrapper) {
     background: var(--input-bg) !important;
     border: 1px solid var(--input-border) !important;
     border-radius: 10px !important;
     box-shadow: none !important;
-    transition: border-color 0.25s, box-shadow 0.25s;
-    &:hover { border-color: rgba(99, 102, 241, 0.4) !important; }
+    transition: border-color 0.25s cubic-bezier(0.4, 0, 0.2, 1),
+                box-shadow 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    &:hover { border-color: rgba(99, 102, 241, 0.3) !important; }
     &.is-focus {
       border-color: var(--input-focus) !important;
-      box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.12) !important;
+      box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1),
+                  0 0 16px rgba(99, 102, 241, 0.06) !important;
     }
     .el-input__inner {
       color: var(--text-primary) !important;
+      font-size: 13px;
       &::placeholder { color: var(--text-secondary) !important; }
     }
     .el-input__prefix-inner .el-icon { color: var(--text-secondary) !important; }
   }
 }
 
-// ===================== 验证码行 =====================
+// ── Captcha Row ────────────────────────────────────────
 .captcha-row {
   display: flex;
   gap: 10px;
@@ -711,9 +776,9 @@ async function handleRegister() {
     cursor: pointer;
     flex-shrink: 0;
     border: 1px solid var(--input-border);
-    transition: border-color 0.25s;
+    transition: border-color 0.2s;
     &:hover {
-      border-color: rgba(99, 102, 241, 0.5);
+      border-color: rgba(99, 102, 241, 0.4);
       .refresh-icon { opacity: 1; }
     }
     canvas { width: 100%; height: 100%; display: block; }
@@ -723,7 +788,7 @@ async function handleRegister() {
       display: flex;
       align-items: center;
       justify-content: center;
-      background: rgba(0, 0, 0, 0.4);
+      background: rgba(0, 0, 0, 0.45);
       color: #fff;
       opacity: 0;
       transition: opacity 0.2s;
@@ -731,20 +796,20 @@ async function handleRegister() {
   }
 }
 
-// ===================== 表单选项 =====================
+// ── Form Options ───────────────────────────────────────
 .form-options {
   width: 100%;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin: 4px 0 16px;
+  margin: 2px 0 14px;
   position: relative;
   z-index: 1;
   .remember-check {
     cursor: pointer;
     :deep(.el-checkbox__label) {
       color: var(--text-secondary);
-      font-size: 13px;
+      font-size: 12.5px;
       user-select: none;
     }
     :deep(.el-checkbox__inner) {
@@ -752,7 +817,6 @@ async function handleRegister() {
       border-color: var(--input-border);
       transition: background 0.2s, border-color 0.2s;
     }
-    // 选中态：显示蓝紫色背景，确保对勾可见
     :deep(.el-checkbox__input.is-checked .el-checkbox__inner) {
       background: #6366f1 !important;
       border-color: #6366f1 !important;
@@ -762,7 +826,7 @@ async function handleRegister() {
     }
   }
   .forgot-link {
-    font-size: 13px;
+    font-size: 12.5px;
     color: #6366f1;
     text-decoration: none;
     transition: color 0.2s;
@@ -770,39 +834,39 @@ async function handleRegister() {
   }
 }
 
-// ===================== 提交按钮 =====================
+// ── Submit Button ──────────────────────────────────────
 .submit-btn {
   width: 100%;
-  height: 46px;
-  font-size: 15px;
+  height: 42px;
+  font-size: 13.5px;
   font-weight: 600;
   border-radius: 10px;
   border: none;
   background: linear-gradient(135deg, var(--btn-from), var(--btn-to)) !important;
-  box-shadow: 0 8px 24px rgba(99, 102, 241, 0.35);
-  letter-spacing: 1px;
+  box-shadow: 0 6px 20px rgba(79, 70, 229, 0.3);
+  letter-spacing: 0.5px;
   transition: transform 0.2s, box-shadow 0.2s;
   &:hover:not(:disabled) {
-    transform: translateY(-2px);
-    box-shadow: 0 12px 32px rgba(99, 102, 241, 0.5);
+    transform: translateY(-1px);
+    box-shadow: 0 8px 28px rgba(79, 70, 229, 0.4);
   }
   &:active { transform: translateY(0); }
 }
 
-// ===================== 面板切换动画 =====================
+// ── Panel Transition ───────────────────────────────────
 .slide-fade-enter-active,
-.slide-fade-leave-active { transition: all 0.25s ease; }
-.slide-fade-enter-from { opacity: 0; transform: translateX(20px); }
-.slide-fade-leave-to   { opacity: 0; transform: translateX(-20px); }
+.slide-fade-leave-active { transition: all 0.2s ease; }
+.slide-fade-enter-from { opacity: 0; transform: translateX(16px); }
+.slide-fade-leave-to   { opacity: 0; transform: translateX(-16px); }
 
-:deep(.el-form-item) { margin-bottom: 18px; }
-:deep(.el-form-item__error) { color: #f87171; font-size: 12px; }
+:deep(.el-form-item) { margin-bottom: 16px; }
+:deep(.el-form-item__error) { color: #f87171; font-size: 11.5px; }
 
-// ===================== 响应式 =====================
+// ── Responsive ─────────────────────────────────────────
 @media (max-width: 768px) {
   .login-card { width: calc(100vw - 32px); flex-direction: column; }
-  .card-left { width: 100%; padding: 28px 24px; flex-direction: row; align-items: center; gap: 20px; }
+  .card-left { width: 100%; padding: 24px 20px; flex-direction: row; align-items: center; gap: 16px; }
   .feature-list, .left-footer { display: none; }
-  .card-right { padding: 24px; }
+  .card-right { padding: 24px 20px; }
 }
 </style>

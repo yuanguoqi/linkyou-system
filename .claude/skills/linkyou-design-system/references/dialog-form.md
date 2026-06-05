@@ -126,68 +126,73 @@ function handleClose() {
 <style scoped lang="scss">
 // 弹窗深色覆盖
 :deep(.el-dialog) {
-  background: #1a1d2e;
-  border: 1px solid rgba(99, 102, 241, 0.2);
+  background: var(--dialog-bg);
+  border: 1px solid var(--dialog-border);
   border-radius: 16px;
-  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(99, 102, 241, 0.1);
+  box-shadow: var(--shadow-dialog);
+  backdrop-filter: blur(40px);
+  -webkit-backdrop-filter: blur(40px);
 
   .el-dialog__header {
     padding: 20px 24px 16px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    border-bottom: 1px solid var(--border-default);
     margin: 0;
 
     .el-dialog__title {
+      font-family: 'Plus Jakarta Sans', 'Inter', sans-serif;
       font-size: 15px;
       font-weight: 600;
-      color: #e2e8f0;
+      color: var(--text-primary);
+      letter-spacing: -0.3px;
     }
 
     .el-dialog__headerbtn .el-icon {
-      color: #64748b;
-      &:hover { color: #94a3b8; }
+      color: var(--text-muted);
+      &:hover { color: var(--text-secondary); }
     }
   }
 
   .el-dialog__body {
-    padding: 24px;
+    padding: 20px 24px;
   }
 
   .el-dialog__footer {
-    padding: 16px 24px 20px;
-    border-top: 1px solid rgba(255, 255, 255, 0.06);
+    padding: 16px 24px;
+    border-top: 1px solid var(--border-default);
   }
 }
 
 // 表单覆盖
 .dialog-form {
   :deep(.el-form-item__label) {
-    color: #94a3b8;
+    color: var(--text-secondary);
     font-size: 13px;
   }
 
   :deep(.el-input .el-input__wrapper) {
-    background: rgba(255, 255, 255, 0.04);
-    box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.08) inset;
+    background: var(--bg-input);
+    box-shadow: 0 0 0 1px var(--border-subtle) inset;
     border-radius: 8px;
+    transition: box-shadow 0.2s;
 
-    &:hover { box-shadow: 0 0 0 1px rgba(99, 102, 241, 0.3) inset; }
+    &:hover { box-shadow: 0 0 0 1px rgba(99, 102, 241, 0.25) inset; }
     &.is-focus {
-      box-shadow: 0 0 0 1px #6366f1 inset, 0 0 0 3px rgba(99, 102, 241, 0.12);
+      box-shadow: 0 0 0 1px var(--primary) inset, 0 0 0 3px rgba(99, 102, 241, 0.08);
     }
   }
 
   :deep(.el-input__inner) {
-    color: #e2e8f0;
-    &::placeholder { color: #475569; }
+    color: var(--text-primary);
+    &::placeholder { color: var(--text-muted); }
   }
 
-  :deep(.el-input__count) { color: #64748b; }
+  :deep(.el-input__count) { color: var(--text-muted); }
 
   :deep(.el-form-item.is-error .el-input__wrapper) {
     box-shadow: 0 0 0 1px #f87171 inset;
   }
 
-  :deep(.el-form-item__error) { color: #f87171; }
+  :deep(.el-form-item__error) { color: #f87171; font-size: 11.5px; }
 }
 
 // 底部按钮
@@ -198,31 +203,34 @@ function handleClose() {
 }
 
 .btn-cancel {
-  padding: 8px 20px;
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 7px 18px;
+  background: transparent;
+  border: 1px solid var(--border-subtle);
   border-radius: 8px;
-  color: #94a3b8;
-  font-size: 14px;
+  color: var(--text-secondary);
+  font-size: 13px;
   cursor: pointer;
   transition: all 0.2s;
 
   &:hover {
-    background: rgba(255, 255, 255, 0.08);
-    color: #e2e8f0;
+    background: var(--primary-dim);
+    border-color: var(--border-primary);
+    color: var(--primary-pale);
   }
 }
 
 .btn-confirm {
-  background: linear-gradient(135deg, #6366f1, #818cf8) !important;
+  background: linear-gradient(135deg, #4f46e5, #6366f1) !important;
   border: none !important;
   border-radius: 8px !important;
-  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3) !important;
+  box-shadow: 0 4px 12px rgba(79, 70, 229, 0.25) !important;
   font-weight: 500 !important;
+  font-size: 13px;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 
   &:hover {
     transform: translateY(-1px);
-    box-shadow: 0 6px 18px rgba(99, 102, 241, 0.4) !important;
+    box-shadow: 0 6px 16px rgba(79, 70, 229, 0.35) !important;
   }
 }
 </style>

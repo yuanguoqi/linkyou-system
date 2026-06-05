@@ -41,7 +41,9 @@ const activeMenu = computed(() => route.path)
     router
     class="sidebar-menu"
   >
-    <template v-for="item in menuItems" :key="item.path || item.title">
+    <template v-for="(item, idx) in menuItems" :key="item.path || item.title">
+      <!-- Section divider between groups -->
+      <div v-if="idx > 0" class="menu-divider" />
       <el-sub-menu v-if="item.children" :index="item.title">
         <template #title>
           <el-icon class="menu-icon"><component :is="item.icon" /></el-icon>
@@ -75,34 +77,42 @@ const activeMenu = computed(() => route.path)
   flex: 1;
   overflow-y: auto;
   overflow-x: hidden;
-  padding: 8px 0;
+  padding: 6px 0;
 
-  &::-webkit-scrollbar { width: 4px; }
+  // Section divider
+  .menu-divider {
+    height: 1px;
+    margin: 4px 14px;
+    background: linear-gradient(90deg, transparent 0%, var(--border-subtle) 50%, transparent 100%);
+  }
+
+  &::-webkit-scrollbar { width: 3px; }
   &::-webkit-scrollbar-track { background: transparent; }
   &::-webkit-scrollbar-thumb {
     background: var(--scrollbar-thumb);
-    border-radius: 2px;
+    border-radius: 6px;
   }
 
   :deep(.el-menu-item),
   :deep(.el-sub-menu__title) {
-    height: 44px;
-    line-height: 44px;
-    margin: 2px 8px;
+    height: 40px;
+    line-height: 40px;
+    margin: 1px 6px;
     border-radius: 8px;
-    padding-left: 12px !important;
-    transition: background 0.2s, color 0.2s;
+    padding-left: 10px !important;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
     color: var(--menu-text);
 
     .menu-icon {
-      font-size: 17px;
+      font-size: 16px;
       margin-right: 10px;
       transition: color 0.2s;
     }
 
     .menu-title {
-      font-size: 13.5px;
+      font-size: 13px;
       font-weight: 500;
+      letter-spacing: -0.1px;
     }
 
     &:hover {
@@ -124,10 +134,15 @@ const activeMenu = computed(() => route.path)
       top: 50%;
       transform: translateY(-50%);
       width: 3px;
-      height: 20px;
+      height: 16px;
       background: var(--menu-indicator);
-      border-radius: 0 2px 2px 0;
+      border-radius: 0 3px 3px 0;
+      box-shadow: 0 0 8px var(--primary-glow),
+                  0 0 16px rgba(99, 102, 241, 0.15);
     }
+
+    // Subtle glow around active item
+    box-shadow: inset 0 0 20px rgba(99, 102, 241, 0.03);
 
     .menu-icon { color: var(--menu-text-active) !important; }
   }
@@ -138,12 +153,13 @@ const activeMenu = computed(() => route.path)
 
   :deep(.el-sub-menu__title .el-sub-menu__icon-arrow) {
     color: var(--sub-menu-arrow);
+    font-size: 11px;
   }
 
   :deep(.el-sub-menu .el-menu-item) {
-    padding-left: 36px !important;
-    height: 40px;
-    line-height: 40px;
+    padding-left: 34px !important;
+    height: 38px;
+    line-height: 38px;
 
     &::before { display: none; }
     &.is-active {
