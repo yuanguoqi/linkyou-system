@@ -2,6 +2,10 @@ using Linkyou.System;
 using Serilog;
 using Serilog.Events;
 
+// Npgsql 8.x 默认要求 timestamp with time zone 必须是 UTC，
+// 启用 legacy 模式以兼容 ABP 框架内部使用的 Local DateTime
+AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
+
 // 配置 Serilog 启动日志（在 DI 容器初始化之前使用）
 Log.Logger = new LoggerConfiguration()
     .MinimumLevel.Debug()
