@@ -30,6 +30,8 @@ export interface LoginResponse {
 /** 刷新令牌请求 */
 export interface RefreshTokenRequest {
   refreshToken: string
+  /** AccessToken 过期后 CurrentUser 为 null，需前端明确传入 userId */
+  userId: string
 }
 
 /** 修改密码请求 */

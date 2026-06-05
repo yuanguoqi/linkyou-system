@@ -52,6 +52,12 @@ public class RefreshTokenInput
 {
     [Required]
     public required string RefreshToken { get; set; }
+
+    /// <summary>
+    /// 用户 ID（AccessToken 过期后无法从 CurrentUser 获取，由前端传入）
+    /// </summary>
+    [Required]
+    public required Guid UserId { get; set; }
 }
 
 /// <summary>

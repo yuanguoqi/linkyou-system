@@ -20,9 +20,11 @@ const formRef = ref<FormInstance>()
 const registerFormRef = ref<FormInstance>()
 const loading = ref(false)
 
-// 验证码
-const captchaRef = ref<InstanceType<typeof CaptchaCanvas>>()
-const captchaCode = ref('')
+// 验证码 - 登录和注册各自独立，避免面板切换时状态混乱
+const loginCaptchaRef = ref<InstanceType<typeof CaptchaCanvas>>()
+const registerCaptchaRef = ref<InstanceType<typeof CaptchaCanvas>>()
+const loginCaptchaCode = ref('')
+const registerCaptchaCode = ref('')
 
 // 登录表单
 const loginForm = reactive<LoginRequest & { captcha: string }>({
@@ -54,7 +56,7 @@ const loginRules: FormRules = {
     { required: true, message: '请输入验证码', trigger: 'blur' },
     {
       validator: (_: unknown, value: string, cb: (e?: Error) => void) => {
-        if (value.toLowerCase() !== captchaCode.value.toLowerCase()) {
+        if (value.toLowerCase() !== loginCaptchaCode.value.toLowerCase()) {
           cb(new Error('验证码错误'))
         } else {
           cb()
@@ -93,7 +95,7 @@ const registerRules: FormRules = {
     { required: true, message: '请输入验证码', trigger: 'blur' },
     {
       validator: (_: unknown, value: string, cb: (e?: Error) => void) => {
-        if (value.toLowerCase() !== captchaCode.value.toLowerCase()) {
+        if (value.toLowerCase() !== registerCaptchaCode.value.toLowerCase()) {
           cb(new Error('验证码错误'))
         } else {
           cb()
@@ -104,29 +106,47 @@ const registerRules: FormRules = {
   ],
 }
 
-// 持久化记住密码
+// 持久化记住密码 - 恢复用户名和密码
 onMounted(() => {
   const saved = localStorage.getItem('remember_me')
   if (saved) {
-    const parsed = JSON.parse(saved)
-    loginForm.userNameOrEmailAddress = parsed.userNameOrEmailAddress || ''
-    loginForm.rememberMe = true
+    try {
+      const parsed = JSON.parse(saved)
+      loginForm.userNameOrEmailAddress = parsed.userNameOrEmailAddress || ''
+      loginForm.password = parsed.password || ''
+      loginForm.rememberMe = true
+    } catch {
+      localStorage.removeItem('remember_me')
+    }
   }
 })
 
-function handleCaptchaCode(code: string) {
-  captchaCode.value = code
+function handleLoginCaptchaCode(code: string) {
+  loginCaptchaCode.value = code
 }
 
-function refreshCaptcha() {
-  captchaRef.value?.generate()
+function handleRegisterCaptchaCode(code: string) {
+  registerCaptchaCode.value = code
+}
+
+function refreshLoginCaptcha() {
+  loginCaptchaRef.value?.generate()
   loginForm.captcha = ''
+}
+
+function refreshRegisterCaptcha() {
+  registerCaptchaRef.value?.generate()
   registerForm.captcha = ''
 }
 
 function switchPanel(panel: 'login' | 'register') {
   activePanel.value = panel
-  refreshCaptcha()
+  // 切换面板时刷新对应验证码
+  if (panel === 'login') {
+    refreshLoginCaptcha()
+  } else {
+    refreshRegisterCaptcha()
+  }
   formRef.value?.clearValidate()
   registerFormRef.value?.clearValidate()
 }
@@ -140,9 +160,11 @@ async function handleLogin() {
       password: loginForm.password,
       rememberMe: loginForm.rememberMe,
     })
+    // 记住密码：同时保存用户名和密码（密码明文存储，适合内部系统）
     if (loginForm.rememberMe) {
       localStorage.setItem('remember_me', JSON.stringify({
         userNameOrEmailAddress: loginForm.userNameOrEmailAddress,
+        password: loginForm.password,
       }))
     } else {
       localStorage.removeItem('remember_me')
@@ -151,7 +173,7 @@ async function handleLogin() {
     const redirect = (route.query.redirect as string) || '/'
     router.push(redirect)
   } catch {
-    refreshCaptcha()
+    refreshLoginCaptcha()
   } finally {
     loading.value = false
   }
@@ -165,9 +187,10 @@ async function handleRegister() {
     ElMessage.info('注册功能即将开放，请联系管理员')
   } finally {
     loading.value = false
-    refreshCaptcha()
+    refreshRegisterCaptcha()
   }
 }
+
 </script>
 
 <template>
@@ -260,8 +283,8 @@ async function handleRegister() {
                     maxlength="4"
                     @keyup.enter="handleLogin"
                   />
-                  <div class="captcha-img" @click="refreshCaptcha" title="点击刷新">
-                    <CaptchaCanvas ref="captchaRef" @code="handleCaptchaCode" />
+                  <div class="captcha-img" @click="refreshLoginCaptcha" title="点击刷新">
+                    <CaptchaCanvas ref="loginCaptchaRef" @code="handleLoginCaptchaCode" />
                     <el-icon class="refresh-icon"><RefreshRight /></el-icon>
                   </div>
                 </div>
@@ -338,8 +361,8 @@ async function handleRegister() {
                     class="glass-input captcha-input"
                     maxlength="4"
                   />
-                  <div class="captcha-img" @click="refreshCaptcha" title="点击刷新">
-                    <CaptchaCanvas ref="captchaRef" @code="handleCaptchaCode" />
+                  <div class="captcha-img" @click="refreshRegisterCaptcha" title="点击刷新">
+                    <CaptchaCanvas ref="registerCaptchaRef" @code="handleRegisterCaptchaCode" />
                     <el-icon class="refresh-icon"><RefreshRight /></el-icon>
                   </div>
                 </div>

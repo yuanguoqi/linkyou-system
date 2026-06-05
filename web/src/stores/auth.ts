@@ -50,8 +50,13 @@ export const useAuthStore = defineStore('auth', () => {
   /** 刷新令牌 */
   async function refreshToken() {
     if (!refreshTokenValue.value) throw new Error('无刷新令牌')
+    const userId = currentUser.value?.id ?? localStorage.getItem('user_id')
+    if (!userId) throw new Error('无用户信息，请重新登录')
 
-    const res = await authApi.refreshToken({ refreshToken: refreshTokenValue.value })
+    const res = await authApi.refreshToken({
+      refreshToken: refreshTokenValue.value,
+      userId,
+    })
     const { accessToken: token, refreshToken: newRefreshToken } = res.data
 
     accessToken.value = token

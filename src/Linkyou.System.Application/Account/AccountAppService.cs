@@ -100,16 +100,14 @@ public class AccountAppService : ApplicationService, IAccountAppService
     /// </summary>
     public async Task<LoginOutput> RefreshTokenAsync(RefreshTokenInput input)
     {
-        // 从过期的 AccessToken 中读取用户 ID（前端不传 AccessToken 时，也可从缓存查找）
-        // 此处采用简化方案：从缓存中按 RefreshToken 值反查用户
-        // 生产建议：存储 userId→refreshToken 映射，直接按 userId 查
-        Guid? userId = await FindUserIdByRefreshTokenAsync(input.RefreshToken);
-        if (userId == null)
+        // 使用前端传入的 UserId 直接验证 RefreshToken，无需依赖过期的 AccessToken
+        var isValid = await ValidateRefreshTokenAsync(input.UserId, input.RefreshToken);
+        if (!isValid)
         {
             throw new UserFriendlyException("刷新令牌无效或已过期，请重新登录");
         }
 
-        var user = await _userManager.GetByIdAsync(userId.Value);
+        var user = await _userManager.GetByIdAsync(input.UserId);
         var roles = await _userManager.GetRolesAsync(user);
         var claims = BuildClaims(user, roles);
 
@@ -231,24 +229,13 @@ public class AccountAppService : ApplicationService, IAccountAppService
     }
 
     /// <summary>
-    /// 根据 RefreshToken 值查找对应用户 ID
-    /// 当前实现：遍历缓存（简化版）
-    /// 生产建议：改为数据库表存储 userId↔refreshToken 映射，效率更高
+    /// 根据 UserId 和 RefreshToken 验证令牌有效性
+    /// UserId 由前端在刷新请求中明确传入，避免依赖过期 AccessToken 中的 CurrentUser
     /// </summary>
-    private async Task<Guid?> FindUserIdByRefreshTokenAsync(string refreshToken)
+    private async Task<bool> ValidateRefreshTokenAsync(Guid userId, string refreshToken)
     {
-        // 简化实现：直接从 HTTP 请求头中读取用户 ID（如前端同时传了旧 AccessToken）
-        // 这里采用另一种方式：要求前端在刷新时传入 userId（或从 Cookie 读取）
-        // 更健壮的做法见注释，此处先实现基础版本
-        if (CurrentUser.Id.HasValue)
-        {
-            var cached = await _refreshTokenCache.GetAsync(
-                RefreshTokenCachePrefix + CurrentUser.Id.Value);
-            if (cached == refreshToken)
-            {
-                return CurrentUser.Id.Value;
-            }
-        }
-        return null;
+        var cached = await _refreshTokenCache.GetAsync(
+            RefreshTokenCachePrefix + userId);
+        return cached == refreshToken;
     }
 }
