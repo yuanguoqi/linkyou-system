@@ -289,14 +289,12 @@ async function handleRegister() {
                   </div>
                 </div>
               </el-form-item>
-              <el-form-item>
-                <div class="form-options">
-                  <el-checkbox v-model="loginForm.rememberMe" class="remember-check">
-                    记住密码
-                  </el-checkbox>
-                  <a href="javascript:;" class="forgot-link">忘记密码？</a>
-                </div>
-              </el-form-item>
+              <div class="form-options">
+                <el-checkbox v-model="loginForm.rememberMe" class="remember-check">
+                  记住密码
+                </el-checkbox>
+                <a href="javascript:;" class="forgot-link">忘记密码？</a>
+              </div>
               <el-form-item>
                 <el-button
                   type="primary"
