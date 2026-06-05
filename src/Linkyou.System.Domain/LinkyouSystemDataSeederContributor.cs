@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Identity;
 using Volo.Abp;
 using Volo.Abp.Authorization.Permissions;
 using Volo.Abp.Data;
@@ -23,6 +24,7 @@ public class LinkyouSystemDataSeederContributor
     private readonly IIdentityDataSeeder _identityDataSeeder;
     private readonly ICurrentTenant _currentTenant;
     private readonly IdentityRoleManager _roleManager;
+    private readonly IdentityUserManager _userManager;
     private readonly IPermissionDataSeeder _permissionDataSeeder;
     private readonly IPermissionDefinitionManager _permissionDefinitionManager;
 
@@ -30,12 +32,14 @@ public class LinkyouSystemDataSeederContributor
         IIdentityDataSeeder identityDataSeeder,
         ICurrentTenant currentTenant,
         IdentityRoleManager roleManager,
+        IdentityUserManager userManager,
         IPermissionDataSeeder permissionDataSeeder,
         IPermissionDefinitionManager permissionDefinitionManager)
     {
         _identityDataSeeder = identityDataSeeder;
         _currentTenant = currentTenant;
         _roleManager = roleManager;
+        _userManager = userManager;
         _permissionDataSeeder = permissionDataSeeder;
         _permissionDefinitionManager = permissionDefinitionManager;
     }
@@ -53,18 +57,44 @@ public class LinkyouSystemDataSeederContributor
     }
 
     /// <summary>
-    /// 创建默认 admin 账号（ABP 内置 IIdentityDataSeeder 负责幂等处理）
-    /// 默认：admin@linkyou.com / Admin@123456
+    /// 创建默认 admin 账号，并强制同步密码。
+    /// ABP 的 IIdentityDataSeeder 是幂等的：若 admin 用户已存在则跳过创建，
+    /// 不会更新密码。因此在调用 SeedAsync 后额外执行一次密码强制重置，
+    /// 确保 admin 账号始终可以用 Admin@123456 登录。
     /// </summary>
     private async Task SeedAdminUserAsync(DataSeedContext context)
     {
+        var adminPassword = context.Properties.GetOrDefault("AdminPassword") as string
+            ?? "Admin@123456";
+
         await _identityDataSeeder.SeedAsync(
             adminEmail: context.Properties.GetOrDefault("AdminEmail") as string
                 ?? "admin@linkyou.com",
-            adminPassword: context.Properties.GetOrDefault("AdminPassword") as string
-                ?? "Admin@123456",
+            adminPassword: adminPassword,
             tenantId: context.TenantId
         );
+
+        // 强制重置密码：无论 admin 是新建还是已存在，均同步为目标密码。
+        // 使用 RemovePassword + AddPassword 避免依赖 TwoFactorTokenProvider。
+        var adminUser = await _userManager.FindByNameAsync("admin");
+        if (adminUser != null && !await _userManager.CheckPasswordAsync(adminUser, adminPassword))
+        {
+            var removeResult = await _userManager.RemovePasswordAsync(adminUser);
+            if (!removeResult.Succeeded)
+            {
+                throw new AbpException(
+                    "移除 admin 旧密码失败: " +
+                    string.Join(", ", removeResult.Errors.Select(e => e.Description)));
+            }
+
+            var addResult = await _userManager.AddPasswordAsync(adminUser, adminPassword);
+            if (!addResult.Succeeded)
+            {
+                throw new AbpException(
+                    "设置 admin 新密码失败: " +
+                    string.Join(", ", addResult.Errors.Select(e => e.Description)));
+            }
+        }
     }
 
     /// <summary>
