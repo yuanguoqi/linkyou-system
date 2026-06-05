@@ -1,6 +1,7 @@
 using Linkyou.System;
 using Serilog;
 using Serilog.Events;
+using Volo.Abp.Data;
 
 // Npgsql 8.x 默认要求 timestamp with time zone 必须是 UTC，
 // 启用 legacy 模式以兼容 ABP 框架内部使用的 Local DateTime
@@ -38,6 +39,14 @@ try
 
     // 初始化并启动 ABP 应用
     await app.InitializeApplicationAsync();
+
+    // 自动执行种子数据（幂等，重复运行不会重复插入）
+    using (var scope = app.Services.CreateScope())
+    {
+        await scope.ServiceProvider
+            .GetRequiredService<IDataSeeder>()
+            .SeedAsync();
+    }
 
     await app.RunAsync();
 
