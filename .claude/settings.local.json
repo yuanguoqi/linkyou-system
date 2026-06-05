@@ -26,7 +26,12 @@
       "Bash(cd \"E:\\\\DevelopCode\\\\SelfCode\\\\linkyou-system\\\\src\\\\Linkyou.System.EntityFrameworkCore\" && dotnet ef migrations add InitialCreate --startup-project ../Linkyou.System.Host 2>&1)",
       "Bash(cd \"E:\\\\DevelopCode\\\\SelfCode\\\\linkyou-system\\\\src\\\\Linkyou.System.EntityFrameworkCore\" && dotnet ef database update --startup-project ../Linkyou.System.Host 2>&1)",
       "Bash(cd E:\\\\DevelopCode\\\\SelfCode\\\\linkyou-system:*)",
-      "Bash(git config:*)"
+      "Bash(git config:*)",
+      "Bash(dir:*)",
+      "WebSearch",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "Bash(curl:*)"
     ]
   }
 }
