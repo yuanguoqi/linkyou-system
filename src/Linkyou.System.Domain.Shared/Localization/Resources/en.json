@@ -32,6 +32,15 @@
     "Permission:SettingManagement": "Setting Management",
     "Permission:Emailing": "Email Settings",
 
+    "Permission:Menus": "Menu Management",
+    "Permission:MenuItems": "Menu Items",
+    "Permission:MenuItems.Create": "Create Menu",
+    "Permission:MenuItems.Update": "Edit Menu",
+    "Permission:MenuItems.Delete": "Delete Menu",
+
+    "Menus:Menu:010001": "Menu name '{0}' already exists, please use a different name.",
+    "Menus:Menu:010002": "Menu does not exist."
+
     "UserNotFound": "User not found.",
     "RoleNotFound": "Role not found.",
     "TenantNotFound": "Tenant not found.",

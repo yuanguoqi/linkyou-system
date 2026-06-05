@@ -1,5 +1,7 @@
+using Linkyou.System.Menus;
 using Microsoft.EntityFrameworkCore;
 using Volo.Abp;
+using Volo.Abp.EntityFrameworkCore;
 using Volo.Abp.Identity.EntityFrameworkCore;
 using Volo.Abp.TenantManagement.EntityFrameworkCore;
 using Volo.Abp.AuditLogging.EntityFrameworkCore;
@@ -29,20 +31,14 @@ public static class LinkyouSystemDbContextModelCreatingExtensions
         builder.ConfigureSettingManagement();
         builder.ConfigureBackgroundJobs();
 
-        /* 在此追加业务实体的 Fluent API 配置
-         *
-         * 示例：
-         * builder.Entity<Product>(b =>
-         * {
-         *     b.ToTable(LinkyouSystemConsts.DbTablePrefix + "Products",
-         *         LinkyouSystemConsts.DbSchema);
-         *     b.ConfigureByConvention();  // 自动配置软删除、审计字段等
-         *     b.Property(x => x.Name)
-         *         .IsRequired()
-         *         .HasMaxLength(ProductConsts.MaxNameLength)
-         *         .HasColumnName(nameof(Product.Name));
-         *     b.HasIndex(x => x.Name);
-         * });
-         */
+        builder.Entity<Menu>(b =>
+        {
+            b.ToTable(LinkyouSystemConsts.DbTablePrefix + "Menus", LinkyouSystemConsts.DbSchema);
+            b.Property(x => x.Name).IsRequired().HasMaxLength(MenuConsts.MaxNameLength);
+            b.Property(x => x.Path).IsRequired().HasMaxLength(MenuConsts.MaxPathLength);
+            b.Property(x => x.Icon).HasMaxLength(MenuConsts.MaxIconLength);
+            b.Property(x => x.Permission).HasMaxLength(MenuConsts.MaxPermissionLength);
+            b.HasIndex(x => new { x.TenantId, x.Name });
+        });
     }
 }

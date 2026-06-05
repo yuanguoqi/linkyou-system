@@ -1,3 +1,4 @@
+using Linkyou.System.Menus;
 using Microsoft.EntityFrameworkCore;
 using Volo.Abp.Data;
 using Volo.Abp.EntityFrameworkCore;
@@ -65,7 +66,7 @@ public class LinkyouSystemDbContext :
     public DbSet<TenantConnectionString> TenantConnectionStrings { get; set; }
 
     // ==================== 业务实体表（在此追加） ====================
-    // 示例：public DbSet<Product> Products { get; set; }
+    public DbSet<Menu> Menus { get; set; }
 
     public LinkyouSystemDbContext(DbContextOptions<LinkyouSystemDbContext> options)
         : base(options)

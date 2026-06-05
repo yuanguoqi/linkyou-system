@@ -32,6 +32,15 @@
     "Permission:SettingManagement": "设置管理",
     "Permission:Emailing": "邮件设置",
 
+    "Permission:Menus": "菜单管理",
+    "Permission:MenuItems": "菜单项",
+    "Permission:MenuItems.Create": "创建菜单",
+    "Permission:MenuItems.Update": "编辑菜单",
+    "Permission:MenuItems.Delete": "删除菜单",
+
+    "Menus:Menu:010001": "菜单名称 '{0}' 已存在，请使用不同的名称。",
+    "Menus:Menu:010002": "菜单不存在。"
+
     "UserNotFound": "未找到用户。",
     "RoleNotFound": "未找到角色。",
     "TenantNotFound": "未找到租户。",

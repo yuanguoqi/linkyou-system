@@ -4,6 +4,7 @@ import NProgress from 'nprogress'
 import 'nprogress/nprogress.css'
 import { useAuthStore } from '@/stores/auth'
 import { useAppStore } from '@/stores/app'
+import systemRoutes from './modules/system'
 
 // 不需要认证的白名单路由
 const WHITE_LIST = ['/login', '/403', '/404']
@@ -40,6 +41,13 @@ const staticRoutes: RouteRecordRaw[] = [
         component: () => import('@/views/dashboard/index.vue'),
         meta: { title: '仪表盘', icon: 'Odometer', affix: true },
       },
+      // 动态注册系统管理模块路由
+      ...systemRoutes.flatMap(group =>
+        (group.children || []).map(child => ({
+          ...child,
+          path: `${group.path}/${child.path}`,
+        }))
+      ),
     ],
   },
   // 未匹配的路由重定向到 404

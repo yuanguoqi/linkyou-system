@@ -1,3 +1,4 @@
+using Microsoft.Extensions.DependencyInjection;
 using Volo.Abp.AspNetCore.Mvc;
 using Volo.Abp.Identity;
 using Volo.Abp.Modularity;
@@ -35,5 +36,9 @@ public class LinkyouSystemHttpApiModule : AbpModule
                 .ConventionalControllers
                 .Create(typeof(LinkyouSystemApplicationContractsModule).Assembly);
         });
+
+        // 确保当前程序集被 ASP.NET Core MVC 扫描
+        context.Services.AddMvc()
+            .AddApplicationPart(typeof(LinkyouSystemHttpApiModule).Assembly);
     }
 }

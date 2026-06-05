@@ -22,6 +22,7 @@ const menuItems = [
       { path: '/system/roles', title: '角色管理', icon: 'UserFilled' },
       { path: '/system/tenants', title: '租户管理', icon: 'OfficeBuilding' },
       { path: '/system/audit-logs', title: '审计日志', icon: 'Document' },
+      { path: '/system/menus', title: '菜单管理', icon: 'Menu' },
       { path: '/system/settings', title: '系统设置', icon: 'Tools' },
     ],
   },

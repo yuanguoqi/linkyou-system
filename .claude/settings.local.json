@@ -34,7 +34,11 @@
       "Bash(curl:*)",
       "Bash(grep :5000:*)",
       "Bash(npx vue-tsc *)",
-      "Bash(npx vite *)"
+      "Bash(npx vite *)",
+      "Bash(pkill -f \"Linkyou.System.Host\")",
+      "Bash(netstat -ano)",
+      "Bash(taskkill //F //PID 25268)",
+      "Bash(taskkill //F //PID 26156)"
     ]
   }
 }

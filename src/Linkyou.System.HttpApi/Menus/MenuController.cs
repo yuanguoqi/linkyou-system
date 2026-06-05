@@ -1,0 +1,36 @@
+using System;
+using System.Threading.Tasks;
+using Linkyou.System.Controllers;
+using Microsoft.AspNetCore.Mvc;
+using Volo.Abp;
+using Volo.Abp.Application.Dtos;
+
+namespace Linkyou.System.Menus;
+
+[RemoteService]
+[Area("app")]
+[Route("api/app/menus")]
+public class MenuController : LinkyouSystemController, IMenuAppService
+{
+    private readonly IMenuAppService _appService;
+
+    public MenuController(IMenuAppService appService)
+        => _appService = appService;
+
+    [HttpGet("{id}")]
+    public Task<MenuDto> GetAsync(Guid id) => _appService.GetAsync(id);
+
+    [HttpGet]
+    public Task<PagedResultDto<MenuDto>> GetListAsync([FromQuery] GetMenuListInput input)
+        => _appService.GetListAsync(input);
+
+    [HttpPost]
+    public Task<MenuDto> CreateAsync(CreateMenuDto input) => _appService.CreateAsync(input);
+
+    [HttpPut("{id}")]
+    public Task<MenuDto> UpdateAsync(Guid id, UpdateMenuDto input)
+        => _appService.UpdateAsync(id, input);
+
+    [HttpDelete("{id}")]
+    public Task DeleteAsync(Guid id) => _appService.DeleteAsync(id);
+}

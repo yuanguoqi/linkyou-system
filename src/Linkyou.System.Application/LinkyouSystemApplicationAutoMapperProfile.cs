@@ -1,5 +1,5 @@
 using AutoMapper;
-using Linkyou.System.Localization;
+using Linkyou.System.Menus;
 
 namespace Linkyou.System;
 
@@ -11,10 +11,6 @@ public class LinkyouSystemApplicationAutoMapperProfile : Profile
 {
     public LinkyouSystemApplicationAutoMapperProfile()
     {
-        /* 在此添加实体到 DTO 的映射
-         * 示例:
-         * CreateMap<Product, ProductDto>();
-         * CreateMap<Product, ProductLookupDto>();
-         */
+        CreateMap<Menu, MenuDto>();
     }
 }
