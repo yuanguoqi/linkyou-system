@@ -210,6 +210,7 @@ public class LinkyouSystemHostModule : AbpModule
         // Swagger 文档（开发环境显示）
         if (env.IsDevelopment())
         {
+            app.UseSwagger();
             app.UseAbpSwaggerUI(options =>
             {
                 options.SwaggerEndpoint("/swagger/v1/swagger.json", "领佑通用管理系统 API v1");
