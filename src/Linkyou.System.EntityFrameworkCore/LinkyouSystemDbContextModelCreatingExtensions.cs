@@ -39,7 +39,7 @@ public static class LinkyouSystemDbContextModelCreatingExtensions
             b.Property(x => x.Icon).HasMaxLength(MenuConsts.MaxIconLength);
             b.Property(x => x.Permission).HasMaxLength(MenuConsts.MaxPermissionLength);
 
-            // 索引：租户内菜单名唯一
+            // 索引：租户内菜单名
             b.HasIndex(x => new { x.TenantId, x.Name });
             // 索引：按父级查询子菜单
             b.HasIndex(x => new { x.TenantId, x.ParentId });
@@ -50,7 +50,7 @@ public static class LinkyouSystemDbContextModelCreatingExtensions
             b.HasOne<Menu>()
                 .WithMany()
                 .HasForeignKey(x => x.ParentId)
-                .OnDelete(DeleteBehavior.Restrict)  // 禁止级联删除，防止误删子菜单
+                .OnDelete(DeleteBehavior.Restrict)
                 .HasConstraintName("FK_Menus_ParentId");
         });
 
@@ -59,7 +59,7 @@ public static class LinkyouSystemDbContextModelCreatingExtensions
             b.ToTable("MenuRolePermissions", LinkyouSystemConsts.DbSchema);
             b.Property(x => x.RoleName).IsRequired().HasMaxLength(256);
 
-            // 索引：租户+角色查询（最常用）
+            // 索引：租户+角色查询
             b.HasIndex(x => new { x.TenantId, x.RoleName });
             // 索引：租户+菜单+角色（唯一约束）
             b.HasIndex(x => new { x.TenantId, x.MenuId, x.RoleName }).IsUnique();

@@ -41,7 +41,7 @@ public class LinkyouSystemDbMigrationService : ITransientDependency
         _logger.LogInformation("数据库迁移完成，开始初始化种子数据...");
 
         await _dataSeeder.SeedAsync(new DataSeedContext()
-            .WithProperty("AdminEmail", "admin@linkyou.com")
+            .WithProperty("AdminEmail", "1343261694@qq.com")
             .WithProperty("AdminPassword", "Admin@123456"));
 
         _logger.LogInformation("种子数据初始化完成。");

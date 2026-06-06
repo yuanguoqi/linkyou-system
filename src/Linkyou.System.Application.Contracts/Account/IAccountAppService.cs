@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Volo.Abp.Application.Services;
 
@@ -22,4 +23,7 @@ public interface IAccountAppService : IApplicationService
 
     /// <summary>退出登录（服务端吊销刷新令牌）</summary>
     Task LogoutAsync();
+
+    /// <summary>获取租户列表（公开接口，供登录页使用）</summary>
+    Task<List<TenantLookupDto>> GetTenantListAsync();
 }

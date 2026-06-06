@@ -10,9 +10,11 @@ using Volo.Abp;
 using Volo.Abp.Application.Services;
 using Volo.Abp.Authorization;
 using Volo.Abp.Authorization.Permissions;
+using Volo.Abp.Domain.Repositories;
 using Volo.Abp.PermissionManagement;
 using Volo.Abp.Caching;
 using Volo.Abp.Identity;
+using Volo.Abp.TenantManagement;
 using Volo.Abp.Security.Claims;
 
 namespace Linkyou.System.Account;
@@ -27,6 +29,7 @@ public class AccountAppService : ApplicationService, IAccountAppService
     private readonly IJwtTokenService _jwtTokenService;
     private readonly IDistributedCache<string> _refreshTokenCache;
     private readonly IPermissionManager _permissionManager;
+    private readonly IRepository<Tenant, Guid> _tenantRepository;
 
     // RefreshToken 缓存键前缀
     private const string RefreshTokenCachePrefix = "RefreshToken:";
@@ -35,12 +38,14 @@ public class AccountAppService : ApplicationService, IAccountAppService
         IdentityUserManager userManager,
         IJwtTokenService jwtTokenService,
         IDistributedCache<string> refreshTokenCache,
-        IPermissionManager permissionManager)
+        IPermissionManager permissionManager,
+        IRepository<Tenant, Guid> tenantRepository)
     {
         _userManager = userManager;
         _jwtTokenService = jwtTokenService;
         _refreshTokenCache = refreshTokenCache;
         _permissionManager = permissionManager;
+        _tenantRepository = tenantRepository;
     }
 
     /// <summary>
@@ -215,6 +220,20 @@ public class AccountAppService : ApplicationService, IAccountAppService
             await _refreshTokenCache.RemoveAsync(
                 RefreshTokenCachePrefix + CurrentUser.Id.Value);
         }
+    }
+
+    /// <summary>
+    /// 获取租户列表（公开接口，供登录页使用）
+    /// </summary>
+    [AllowAnonymous]
+    public async Task<List<TenantLookupDto>> GetTenantListAsync()
+    {
+        var tenants = await _tenantRepository.GetListAsync();
+        return tenants.Take(100).Select(t => new TenantLookupDto
+        {
+            Id = t.Id,
+            Name = t.Name,
+        }).ToList();
     }
 
     // ==================== 私有方法 ====================

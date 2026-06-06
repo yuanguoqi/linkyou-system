@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Linkyou.System.Account;
 using Microsoft.AspNetCore.Mvc;
@@ -60,4 +61,12 @@ public class AccountController : LinkyouSystemController
     [HttpPost("logout")]
     public Task LogoutAsync()
         => _accountAppService.LogoutAsync();
+
+    /// <summary>
+    /// 获取租户列表（公开接口，供登录页使用）
+    /// GET /api/account/tenants
+    /// </summary>
+    [HttpGet("tenants")]
+    public Task<List<TenantLookupDto>> GetTenantListAsync()
+        => _accountAppService.GetTenantListAsync();
 }

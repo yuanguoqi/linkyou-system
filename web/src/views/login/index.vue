@@ -3,15 +3,22 @@ import { ref, reactive, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import type { FormInstance, FormRules } from 'element-plus'
-import { User, Lock, Message, RefreshRight, Sunny, Moon, Warning, Close } from '@element-plus/icons-vue'
+import { User, Lock, Message, RefreshRight, Sunny, Moon, Warning, Close, OfficeBuilding } from '@element-plus/icons-vue'
 import { useAuthStore } from '@/stores/auth'
 import { useThemeStore } from '@/stores/theme'
+import { authApi } from '@/api/modules/auth'
+import type { TenantLookupDto } from '@/api/modules/auth'
 import CaptchaCanvas from './components/CaptchaCanvas.vue'
 
 const router = useRouter()
 const route = useRoute()
 const authStore = useAuthStore()
 const themeStore = useThemeStore()
+
+// 租户列表
+const tenantList = ref<TenantLookupDto[]>([])
+const selectedTenantId = ref<string | null>(null)
+const tenantLoading = ref(false)
 
 // 切换面板：login | register
 const activePanel = ref<'login' | 'register'>('login')
@@ -121,7 +128,44 @@ onMounted(() => {
       localStorage.removeItem('remember_me')
     }
   }
+  // 加载租户列表
+  loadTenants()
 })
+
+// 加载租户列表
+async function loadTenants() {
+  tenantLoading.value = true
+  try {
+    // 先清除旧的租户 ID，防止请求头携带无效租户
+    const savedTenantId = localStorage.getItem('tenant_id')
+    authStore.setTenant(null)
+
+    const { data } = await authApi.getTenants()
+    tenantList.value = data
+
+    // 恢复上次选择的租户（需验证该租户仍在列表中）
+    if (savedTenantId && tenantList.value.some(t => t.id === savedTenantId)) {
+      selectedTenantId.value = savedTenantId
+      authStore.setTenant(savedTenantId)
+    } else if (tenantList.value.length > 0) {
+      // 默认选中第一个租户
+      selectedTenantId.value = tenantList.value[0].id
+      authStore.setTenant(tenantList.value[0].id)
+    }
+  } catch {
+    // 租户列表获取失败，清除无效的租户 ID
+    authStore.setTenant(null)
+    localStorage.removeItem('tenant_id')
+  } finally {
+    tenantLoading.value = false
+  }
+}
+
+// 切换租户
+function handleTenantChange(tenantId: string | null) {
+  selectedTenantId.value = tenantId
+  authStore.setTenant(tenantId)
+}
 
 function handleLoginCaptchaCode(code: string) {
   loginCaptchaCode.value = code
@@ -276,7 +320,34 @@ async function handleRegister() {
               <el-icon class="close-icon" @click="loginError = ''"><Close /></el-icon>
             </div>
             <el-form ref="formRef" :model="loginForm" :rules="loginRules" size="large">
-              <el-form-item prop="userNameOrEmailAddress" class="stagger-item" style="--i:0">
+              <!-- 租户选择 -->
+              <el-form-item class="stagger-item" style="--i:0">
+                <el-select
+                  v-model="selectedTenantId"
+                  placeholder="选择租户（默认宿主）"
+                  clearable
+                  filterable
+                  :loading="tenantLoading"
+                  class="glass-input tenant-select"
+                  @change="handleTenantChange"
+                >
+                  <el-option
+                    v-for="tenant in tenantList"
+                    :key="tenant.id"
+                    :label="tenant.name"
+                    :value="tenant.id"
+                  >
+                    <div class="tenant-option">
+                      <el-icon :size="14"><OfficeBuilding /></el-icon>
+                      <span>{{ tenant.name }}</span>
+                    </div>
+                  </el-option>
+                  <template #prefix>
+                    <el-icon><OfficeBuilding /></el-icon>
+                  </template>
+                </el-select>
+              </el-form-item>
+              <el-form-item prop="userNameOrEmailAddress" class="stagger-item" style="--i:1">
                 <el-input
                   v-model="loginForm.userNameOrEmailAddress"
                   placeholder="用户名 / 邮箱"
@@ -286,7 +357,7 @@ async function handleRegister() {
                   class="glass-input"
                 />
               </el-form-item>
-              <el-form-item prop="password" class="stagger-item" style="--i:1">
+              <el-form-item prop="password" class="stagger-item" style="--i:2">
                 <el-input
                   v-model="loginForm.password"
                   type="password"
@@ -298,7 +369,7 @@ async function handleRegister() {
                   @keyup.enter="handleLogin"
                 />
               </el-form-item>
-              <el-form-item prop="captcha" class="stagger-item" style="--i:2">
+              <el-form-item prop="captcha" class="stagger-item" style="--i:3">
                 <div class="captcha-row">
                   <el-input
                     v-model="loginForm.captcha"
@@ -313,13 +384,13 @@ async function handleRegister() {
                   </div>
                 </div>
               </el-form-item>
-              <div class="form-options stagger-item" style="--i:3">
+              <div class="form-options stagger-item" style="--i:4">
                 <el-checkbox v-model="loginForm.rememberMe" class="remember-check">
                   记住密码
                 </el-checkbox>
                 <a href="javascript:;" class="forgot-link">忘记密码？</a>
               </div>
-              <el-form-item class="stagger-item" style="--i:4">
+              <el-form-item class="stagger-item" style="--i:5">
                 <el-button
                   type="primary"
                   class="submit-btn"
@@ -759,6 +830,49 @@ async function handleRegister() {
     }
     .el-input__prefix-inner .el-icon { color: var(--text-secondary) !important; }
   }
+}
+
+// ── Tenant Select ──────────────────────────────────────
+.tenant-select {
+  width: 100%;
+
+  :deep(.el-select__wrapper) {
+    background: var(--input-bg) !important;
+    border: 1px solid var(--input-border) !important;
+    border-radius: 10px !important;
+    box-shadow: none !important;
+    min-height: 42px;
+    transition: border-color 0.25s cubic-bezier(0.4, 0, 0.2, 1),
+                box-shadow 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+
+    &:hover { border-color: rgba(99, 102, 241, 0.3) !important; }
+    &.is-focus {
+      border-color: var(--input-focus) !important;
+      box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1),
+                  0 0 16px rgba(99, 102, 241, 0.06) !important;
+    }
+
+    .el-select__selected-label {
+      color: var(--text-primary) !important;
+      font-size: 13px;
+    }
+
+    .el-select__placeholder {
+      color: var(--text-secondary) !important;
+      font-size: 13px;
+    }
+
+    .el-select__prefix .el-icon {
+      color: var(--text-secondary) !important;
+    }
+  }
+}
+
+.tenant-option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
 }
 
 // ── Captcha Row ────────────────────────────────────────

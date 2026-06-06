@@ -90,3 +90,12 @@ public class CurrentUserDto
     public List<string> Roles { get; set; } = [];
     public List<string> Permissions { get; set; } = [];
 }
+
+/// <summary>
+/// 租户查询 DTO（公开，供登录页使用）
+/// </summary>
+public class TenantLookupDto
+{
+    public Guid Id { get; set; }
+    public string Name { get; set; } = null!;
+}
