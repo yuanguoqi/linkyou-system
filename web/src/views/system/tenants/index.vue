@@ -9,7 +9,7 @@ const {
   loading, tableData, totalCount, searchFilter,
   currentPage, pageSize,
   dialogVisible, dialogMode, editingRow,
-  fetchData, handleSearch, handleReset,
+  handleSearch, handleReset,
   handleCreate, handleEdit, handleDelete, handleDialogSuccess,
   handlePageChange, handleSizeChange,
 } = useCrud<TenantDto, { name: string; adminEmailAddress: string; adminPassword: string }>({

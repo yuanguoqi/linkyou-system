@@ -99,8 +99,9 @@ export const identityRoleApi = {
   getList: (params: GetIdentityRoleListInput) =>
     http.get<PagedResultDto<IdentityRoleDto>>(ROLE_BASE, { params }),
 
+  /** 获取所有角色（用于下拉选择） */
   getAllList: () =>
-    http.get<IdentityRoleDto[]>(`${ROLE_BASE}/all`),
+    http.get<PagedResultDto<IdentityRoleDto>>(ROLE_BASE, { params: { maxResultCount: 1000 } }),
 
   create: (data: CreateIdentityRoleDto) =>
     http.post<IdentityRoleDto>(ROLE_BASE, data),

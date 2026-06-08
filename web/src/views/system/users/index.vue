@@ -173,6 +173,26 @@ onMounted(() => {
             show-overflow-tooltip
           />
           <el-table-column
+            label="角色"
+            min-width="160"
+          >
+            <template #default="{ row }">
+              <div class="role-tags">
+                <el-tag
+                  v-for="role in (row as IdentityUserDto).roles"
+                  :key="role.roleId"
+                  size="small"
+                  effect="plain"
+                  round
+                  class="role-tag"
+                >
+                  {{ role.roleName }}
+                </el-tag>
+                <span v-if="!(row as IdentityUserDto).roles?.length" class="no-role">-</span>
+              </div>
+            </template>
+          </el-table-column>
+          <el-table-column
             prop="isActive"
             label="状态"
             width="100"
@@ -583,6 +603,30 @@ onMounted(() => {
   width: 1px;
   height: 12px;
   background: var(--border-default);
+}
+
+// ── Role Tags ──────────────────────────────────────────
+.role-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.role-tag {
+  font-size: 11px;
+  font-weight: 500;
+  background: var(--primary-dim) !important;
+  color: var(--primary-pale) !important;
+  border: 1px solid rgba(99, 102, 241, 0.15) !important;
+  border-radius: 12px !important;
+  padding: 0 8px !important;
+  height: 22px !important;
+  line-height: 22px !important;
+}
+
+.no-role {
+  color: var(--text-muted);
+  font-size: 12px;
 }
 
 // ── Tag Override ───────────────────────────────────────

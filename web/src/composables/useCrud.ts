@@ -1,4 +1,4 @@
-import { ref, reactive, watch, onMounted } from 'vue'
+import { ref, watch, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 
 /**
@@ -53,8 +53,6 @@ export function useCrud<T extends { id: string }, CreateDto, UpdateDto = CreateD
 ) {
   const {
     fetchList,
-    create,
-    update,
     delete: deleteFn,
     deleteMessage = '确定要删除「{name}」吗？此操作不可恢复。',
     getRowName = () => '',
@@ -65,7 +63,7 @@ export function useCrud<T extends { id: string }, CreateDto, UpdateDto = CreateD
 
   // ── 状态 ──────────────────────────────────────────────
   const loading = ref(false)
-  const tableData = ref<T[]>([]) as { value: T[] }
+  const tableData = ref<T[]>([])
   const totalCount = ref(0)
   const searchFilter = ref('')
 

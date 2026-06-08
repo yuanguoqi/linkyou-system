@@ -81,7 +81,8 @@ function resetForm() {
 
 async function fetchRoles() {
   try {
-    roles.value = (await identityRoleApi.getAllList()).data
+    const { data } = await identityRoleApi.getAllList()
+    roles.value = data.items
   } catch {
     roles.value = []
   }
