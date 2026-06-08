@@ -43,16 +43,16 @@ $font-body: 'Inter', -apple-system, BlinkMacSystemFont, 'PingFang SC', sans-seri
 $font-mono: 'JetBrains Mono', 'Inter', monospace;
 ```
 
-### 字号规范
+### 字号规范（大气、科技感）
 ```scss
-$text-xs:   11px;     // 辅助标签、角标
-$text-sm:   12px;     // 次要说明
-$text-base: 13px;     // 正文（核心字号）
-$text-lg:   14px;     // 小标题、面板标题
-$text-xl:   15px;     // 弹窗标题
-$text-2xl:  20px;     // 页面标题
-$text-3xl:  24px;     // 大标题、欢迎语
-$text-hero: 96px;     // 错误页码
+$text-xs:   12px;     // 辅助标签、角标
+$text-sm:   12.5px;   // 次要说明
+$text-base: 14px;     // 正文（核心字号）
+$text-lg:   15px;     // 小标题、面板标题
+$text-xl:   16px;     // 弹窗标题
+$text-2xl:  22px;     // 页面标题
+$text-3xl:  26px;     // 大标题、欢迎语
+$text-hero: 100px;    // 错误页码
 ```
 
 ### 字重
@@ -137,15 +137,17 @@ $border-active:   rgba(99, 102, 241, 0.5);     // 激活边框
 
 ---
 
-## 间距规范
+## 间距规范（大气、呼吸感）
 
 遵循 4px 基础单位，常用值：
-- **xs**: 3-4px — 图标与文字间距、小标签内边距
-- **sm**: 6-8px — 列表项间距、小组件内边距
-- **md**: 10-12px — 标准间距
-- **lg**: 14-16px — 卡片内边距、组件间距
-- **xl**: 20-24px — 区块间距、页面内边距
-- **2xl**: 28-32px — 大区块分割
+- **xs**: 4px — 图标与文字间距、小标签内边距
+- **sm**: 8px — 列表项间距、小组件内边距
+- **md**: 12px — 标准间距
+- **lg**: 16px — 卡片内边距、组件间距
+- **xl**: 20px — 区块间距、页面内边距
+- **2xl**: 24-32px — 大区块分割、页面标题区
+
+页面内边距统一使用 `20px`，面板内边距使用 `16px 20px`。
 
 ---
 
@@ -155,9 +157,9 @@ $border-active:   rgba(99, 102, 241, 0.5);     // 激活边框
 $radius-sm:   6px;    // 小元素（tab、badge）
 $radius-md:   8px;    // 普通按钮、输入框、图标容器
 $radius-lg:   10px;   // 弹窗输入框、操作按钮
-$radius-xl:   12px;   // 卡片、面板
-$radius-2xl:  14px;   // 主卡片、仪表盘面板
-$radius-3xl:  16-20px; // 弹窗、登录面板
+$radius-xl:   14px;   // 卡片、面板
+$radius-2xl:  16px;   // 主卡片、仪表盘面板
+$radius-3xl:  20px;   // 弹窗、登录面板
 $radius-full: 9999px; // 胶囊形标签
 ```
 

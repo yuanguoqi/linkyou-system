@@ -1,10 +1,13 @@
 <script setup lang="ts">
 import { ref, reactive, onMounted } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { identityUserApi } from '@/api/modules/identity'
 import type { IdentityUserDto } from '@/api/modules/identity'
 import { formatDateTime } from '@/utils/date'
 import UserDialog from './components/UserDialog.vue'
+
+const { t } = useI18n()
 
 // ── State ────────────────────────────────────────────
 const loading = ref(false)
@@ -37,7 +40,7 @@ async function fetchUsers() {
     tableData.value = res.data.items
     totalCount.value = res.data.totalCount
   } catch {
-    ElMessage.error('获取用户列表失败')
+    ElMessage.error(t('user.fetchFailed'))
   } finally {
     loading.value = false
   }
@@ -75,20 +78,20 @@ function handleEdit(row: IdentityUserDto) {
 
 function handleDelete(row: IdentityUserDto) {
   ElMessageBox.confirm(
-    `确定要删除用户「${row.userName}」吗？此操作不可撤销。`,
-    '删除确认',
+    t('user.deleteConfirmMessage', { userName: row.userName }),
+    t('user.deleteConfirmTitle'),
     {
-      confirmButtonText: '确定删除',
-      cancelButtonText: '取消',
+      confirmButtonText: t('common.confirmDelete'),
+      cancelButtonText: t('common.cancel'),
       type: 'warning',
     },
   ).then(async () => {
     try {
       await identityUserApi.delete(row.id)
-      ElMessage.success('删除成功')
+      ElMessage.success(t('user.deleteSuccess'))
       fetchUsers()
     } catch {
-      ElMessage.error('删除失败')
+      ElMessage.error(t('user.deleteFailed'))
     }
   }).catch(() => {
     // user cancelled
@@ -115,28 +118,28 @@ onMounted(() => {
     <!-- Search Panel -->
     <div class="panel">
       <div class="panel-header">
-        <span class="panel-title font-display">用户管理</span>
+        <span class="panel-title font-display">{{ t('user.title') }}</span>
         <button class="btn-primary" @click="handleCreate">
           <el-icon :size="14"><Plus /></el-icon>
-          新增用户
+          {{ t('user.createUser') }}
         </button>
       </div>
       <div class="panel-body">
         <div class="search-bar">
           <el-input
             v-model="searchParams.keyword"
-            placeholder="搜索用户名、姓名、邮箱..."
+            :placeholder="t('user.searchPlaceholder')"
             clearable
             class="search-input"
             @keyup.enter="handleSearch"
           />
           <button class="btn-primary btn-sm" @click="handleSearch">
             <el-icon :size="13"><Search /></el-icon>
-            搜索
+            {{ t('common.search') }}
           </button>
           <button class="btn-ghost btn-sm" @click="handleReset">
             <el-icon :size="13"><RefreshRight /></el-icon>
-            重置
+            {{ t('common.reset') }}
           </button>
         </div>
       </div>
@@ -153,12 +156,12 @@ onMounted(() => {
         >
           <el-table-column
             prop="userName"
-            label="用户名"
+            :label="t('user.username')"
             min-width="140"
             show-overflow-tooltip
           />
           <el-table-column
-            label="姓名"
+            :label="t('user.fullName')"
             min-width="140"
             show-overflow-tooltip
           >
@@ -168,12 +171,12 @@ onMounted(() => {
           </el-table-column>
           <el-table-column
             prop="email"
-            label="邮箱"
+            :label="t('user.email')"
             min-width="200"
             show-overflow-tooltip
           />
           <el-table-column
-            label="角色"
+            :label="t('user.role')"
             min-width="160"
           >
             <template #default="{ row }">
@@ -194,7 +197,7 @@ onMounted(() => {
           </el-table-column>
           <el-table-column
             prop="isActive"
-            label="状态"
+            :label="t('common.status')"
             width="100"
             align="center"
           >
@@ -205,13 +208,13 @@ onMounted(() => {
                 effect="dark"
                 round
               >
-                {{ row.isActive ? '启用' : '禁用' }}
+                {{ row.isActive ? t('common.enabled') : t('common.disabled') }}
               </el-tag>
             </template>
           </el-table-column>
           <el-table-column
             prop="creationTime"
-            label="创建时间"
+            :label="t('common.createTime')"
             width="170"
             align="center"
           >
@@ -220,7 +223,7 @@ onMounted(() => {
             </template>
           </el-table-column>
           <el-table-column
-            label="操作"
+            :label="t('common.operation')"
             width="140"
             align="center"
             fixed="right"
@@ -229,12 +232,12 @@ onMounted(() => {
               <div class="action-links">
                 <button class="action-link" @click="handleEdit(row as IdentityUserDto)">
                   <el-icon :size="13"><Edit /></el-icon>
-                  编辑
+                  {{ t('common.edit') }}
                 </button>
                 <span class="action-divider" />
                 <button class="action-link action-link--danger" @click="handleDelete(row as IdentityUserDto)">
                   <el-icon :size="13"><Delete /></el-icon>
-                  删除
+                  {{ t('common.delete') }}
                 </button>
               </div>
             </template>
@@ -265,10 +268,10 @@ onMounted(() => {
 <style scoped lang="scss">
 // ── Page Container ─────────────────────────────────────
 .page-container {
-  padding: 16px;
+  padding: 20px;
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 16px;
   min-height: 100%;
 }
 
@@ -276,7 +279,7 @@ onMounted(() => {
 .panel {
   background: var(--bg-card);
   border: 1px solid var(--border-default);
-  border-radius: 12px;
+  border-radius: 14px;
   overflow: hidden;
   transition: background 0.3s, border-color 0.3s;
 
@@ -284,7 +287,7 @@ onMounted(() => {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 14px 16px;
+    padding: 16px 20px;
     border-bottom: 1px solid var(--border-default);
     transition: border-color 0.3s;
   }
@@ -307,7 +310,8 @@ onMounted(() => {
 .search-bar {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
+  padding: 16px 20px;
 
   .search-input {
     width: 320px;
@@ -429,6 +433,7 @@ onMounted(() => {
 .pagination-wrap {
   display: flex;
   justify-content: flex-end;
+  padding: 16px 20px;
   padding: 12px 16px;
   border-top: 1px solid var(--border-default);
 

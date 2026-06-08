@@ -2,6 +2,7 @@
 import { ref, reactive, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Plus, Search, Edit, Delete, RefreshRight } from '@element-plus/icons-vue'
+import { useI18n } from 'vue-i18n'
 import {
   identityRoleApi,
   type IdentityRoleDto,
@@ -9,6 +10,8 @@ import {
 } from '@/api/modules/identity'
 import { formatDateTime } from '@/utils/date'
 import RoleDialog from './components/RoleDialog.vue'
+
+const { t } = useI18n()
 
 // ── State ──────────────────────────────────────────────
 const loading = ref(false)
@@ -43,7 +46,7 @@ async function fetchRoles() {
     tableData.value = res.data.items
     totalCount.value = res.data.totalCount
   } catch {
-    ElMessage.error('获取角色列表失败')
+    ElMessage.error(t('role.fetchListFailed'))
   } finally {
     loading.value = false
   }
@@ -82,20 +85,20 @@ function handleEdit(row: IdentityRoleDto) {
 function handleDelete(row: IdentityRoleDto) {
   if (row.isStatic) return
   ElMessageBox.confirm(
-    `确定要删除角色「${row.name}」吗？此操作不可撤销。`,
-    '删除确认',
+    t('role.deleteConfirm', { name: row.name }),
+    t('common.deleteConfirmTitle'),
     {
-      confirmButtonText: '确定删除',
-      cancelButtonText: '取消',
+      confirmButtonText: t('common.confirmDelete'),
+      cancelButtonText: t('common.cancel'),
       type: 'warning',
     },
   ).then(async () => {
     try {
       await identityRoleApi.delete(row.id)
-      ElMessage.success('删除成功')
+      ElMessage.success(t('common.deleteSuccess'))
       fetchRoles()
     } catch {
-      ElMessage.error('删除失败')
+      ElMessage.error(t('common.deleteFailed'))
     }
   }).catch(() => {
     // user cancelled
@@ -117,28 +120,28 @@ onMounted(() => {
     <!-- Search Panel -->
     <div class="panel">
       <div class="panel-header">
-        <span class="panel-title font-display">角色管理</span>
+        <span class="panel-title font-display">{{ t('role.title') }}</span>
         <button class="btn-primary" @click="handleCreate">
           <el-icon :size="14"><Plus /></el-icon>
-          新增角色
+          {{ t('role.createRole') }}
         </button>
       </div>
       <div class="panel-body">
         <div class="search-bar">
           <el-input
             v-model="searchParams.keyword"
-            placeholder="搜索角色名称..."
+            :placeholder="t('role.searchPlaceholder')"
             clearable
             class="search-input"
             @keyup.enter="handleSearch"
           />
           <button class="btn-primary btn-sm" @click="handleSearch">
             <el-icon :size="13"><Search /></el-icon>
-            搜索
+            {{ t('common.search') }}
           </button>
           <button class="btn-ghost btn-sm" @click="handleReset">
             <el-icon :size="13"><RefreshRight /></el-icon>
-            重置
+            {{ t('common.reset') }}
           </button>
         </div>
       </div>
@@ -155,12 +158,12 @@ onMounted(() => {
         >
           <el-table-column
             prop="name"
-            label="角色名称"
+            :label="t('role.roleName')"
             min-width="160"
             show-overflow-tooltip
           />
           <el-table-column
-            label="默认"
+            :label="t('role.default')"
             width="90"
             align="center"
           >
@@ -171,12 +174,12 @@ onMounted(() => {
                 effect="dark"
                 round
               >
-                {{ row.isDefault ? '是' : '否' }}
+                {{ row.isDefault ? t('common.yes') : t('common.no') }}
               </el-tag>
             </template>
           </el-table-column>
           <el-table-column
-            label="静态"
+            :label="t('role.static')"
             width="90"
             align="center"
           >
@@ -187,12 +190,12 @@ onMounted(() => {
                 effect="dark"
                 round
               >
-                {{ row.isStatic ? '是' : '否' }}
+                {{ row.isStatic ? t('common.yes') : t('common.no') }}
               </el-tag>
             </template>
           </el-table-column>
           <el-table-column
-            label="公共"
+            :label="t('role.public')"
             width="90"
             align="center"
           >
@@ -203,13 +206,13 @@ onMounted(() => {
                 effect="dark"
                 round
               >
-                {{ row.isPublic ? '是' : '否' }}
+                {{ row.isPublic ? t('common.yes') : t('common.no') }}
               </el-tag>
             </template>
           </el-table-column>
           <el-table-column
             prop="creationTime"
-            label="创建时间"
+            :label="t('common.createTime')"
             width="170"
             align="center"
           >
@@ -218,7 +221,7 @@ onMounted(() => {
             </template>
           </el-table-column>
           <el-table-column
-            label="操作"
+            :label="t('common.operation')"
             width="140"
             align="center"
             fixed="right"
@@ -227,7 +230,7 @@ onMounted(() => {
               <div class="action-links">
                 <button class="action-link" @click="handleEdit(row as IdentityRoleDto)">
                   <el-icon :size="13"><Edit /></el-icon>
-                  编辑
+                  {{ t('common.edit') }}
                 </button>
                 <span class="action-divider" />
                 <button
@@ -237,7 +240,7 @@ onMounted(() => {
                   @click="handleDelete(row as IdentityRoleDto)"
                 >
                   <el-icon :size="13"><Delete /></el-icon>
-                  删除
+                  {{ t('common.delete') }}
                 </button>
               </div>
             </template>

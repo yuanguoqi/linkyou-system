@@ -1,7 +1,10 @@
 <script setup lang="ts">
 import { computed } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { useRoute } from 'vue-router'
 import { useMenu } from '@/composables/useMenu'
+
+const { t } = useI18n()
 
 defineProps<{
   collapsed: boolean
@@ -11,6 +14,24 @@ const route = useRoute()
 const { menuItems } = useMenu()
 
 const activeMenu = computed(() => route.path)
+
+// 菜单名称 → i18n key 映射
+const menuNameMap: Record<string, string> = {
+  '仪表盘': 'route.dashboard',
+  '系统管理': 'route.system',
+  '用户管理': 'route.user',
+  '角色管理': 'route.role',
+  '租户管理': 'route.tenant',
+  '审计日志': 'route.auditLog',
+  '菜单管理': 'route.menu',
+  '系统设置': 'route.settings',
+}
+
+/** 解析菜单名称（支持 i18n） */
+function resolveMenuName(name: string): string {
+  const key = menuNameMap[name]
+  return key ? t(key) : name
+}
 </script>
 
 <template>
@@ -30,7 +51,7 @@ const activeMenu = computed(() => route.path)
       <el-sub-menu v-if="item.children && item.children.length > 0" :index="item.id">
         <template #title>
           <el-icon class="menu-icon"><component :is="item.icon" /></el-icon>
-          <span class="menu-title">{{ item.name }}</span>
+          <span class="menu-title">{{ resolveMenuName(item.name) }}</span>
         </template>
         <el-menu-item
           v-for="child in item.children"
@@ -39,7 +60,7 @@ const activeMenu = computed(() => route.path)
         >
           <el-icon class="menu-icon"><component :is="child.icon" /></el-icon>
           <template #title>
-            <span class="menu-title">{{ child.name }}</span>
+            <span class="menu-title">{{ resolveMenuName(child.name) }}</span>
           </template>
         </el-menu-item>
       </el-sub-menu>
@@ -47,7 +68,7 @@ const activeMenu = computed(() => route.path)
       <el-menu-item v-else :index="item.path">
         <el-icon class="menu-icon"><component :is="item.icon" /></el-icon>
         <template #title>
-          <span class="menu-title">{{ item.name }}</span>
+          <span class="menu-title">{{ resolveMenuName(item.name) }}</span>
         </template>
       </el-menu-item>
     </template>
@@ -78,22 +99,22 @@ const activeMenu = computed(() => route.path)
 
   :deep(.el-menu-item),
   :deep(.el-sub-menu__title) {
-    height: 40px;
-    line-height: 40px;
-    margin: 1px 6px;
+    height: 42px;
+    line-height: 42px;
+    margin: 2px 8px;
     border-radius: 8px;
-    padding-left: 10px !important;
+    padding-left: 12px !important;
     transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
     color: var(--menu-text);
 
     .menu-icon {
-      font-size: 16px;
+      font-size: 17px;
       margin-right: 10px;
       transition: color 0.2s;
     }
 
     .menu-title {
-      font-size: 13px;
+      font-size: 13.5px;
       font-weight: 500;
       letter-spacing: -0.1px;
     }

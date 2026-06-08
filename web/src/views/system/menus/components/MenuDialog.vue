@@ -2,8 +2,11 @@
 import { ref, reactive, computed, watch, nextTick } from 'vue'
 import { ElMessage } from 'element-plus'
 import type { FormInstance, FormRules } from 'element-plus'
+import { useI18n } from 'vue-i18n'
 import { menuApi } from '@/api/modules/menus'
 import type { MenuDto, CreateMenuDto } from '@/api/modules/menus'
+
+const { t } = useI18n()
 
 // ── Tree node type (MenuDto + optional children) ──────
 interface MenuTreeNode extends MenuDto {
@@ -44,18 +47,18 @@ const defaultForm = (): CreateMenuDto => ({
 const form = reactive<CreateMenuDto>(defaultForm())
 
 // ── Rules ──────────────────────────────────────────────
-const rules: FormRules = {
+const rules = computed<FormRules>(() => ({
   name: [
-    { required: true, message: '请输入菜单名称', trigger: 'blur' },
+    { required: true, message: t('validation.menuNameRequired'), trigger: 'blur' },
   ],
   path: [
-    { required: true, message: '请输入路由路径', trigger: 'blur' },
+    { required: true, message: t('validation.routePathRequired'), trigger: 'blur' },
   ],
-}
+}))
 
 // ── Computed ───────────────────────────────────────────
 const isEdit = computed(() => !!props.editData)
-const dialogTitle = computed(() => isEdit.value ? '编辑菜单' : '新增菜单')
+const dialogTitle = computed(() => isEdit.value ? t('menu.editMenu') : t('menu.createMenu'))
 
 // ── Watchers ───────────────────────────────────────────
 watch(() => props.visible, (val) => {
@@ -103,17 +106,17 @@ async function handleSubmit() {
 
     if (isEdit.value && props.editData) {
       await menuApi.update(props.editData.id, payload)
-      ElMessage.success('菜单更新成功')
+      ElMessage.success(t('menu.updateSuccess'))
     } else {
       await menuApi.create(payload)
-      ElMessage.success('菜单创建成功')
+      ElMessage.success(t('menu.createSuccess'))
     }
 
     emit('saved')
     handleClose()
   } catch (err: unknown) {
     const axiosErr = err as { response?: { data?: { error?: { message?: string } } } }
-    ElMessage.error(axiosErr?.response?.data?.error?.message || '操作失败')
+    ElMessage.error(axiosErr?.response?.data?.error?.message || t('common.operationFailed'))
   } finally {
     loading.value = false
   }
@@ -152,44 +155,44 @@ const parentOptions = computed(() => {
       label-position="left"
       class="menu-form"
     >
-      <el-form-item label="菜单名称" prop="name">
+      <el-form-item :label="t('menu.menuName')" prop="name">
         <el-input
           v-model="form.name"
-          placeholder="请输入菜单名称"
+          :placeholder="t('menu.menuNamePlaceholder')"
           clearable
         />
       </el-form-item>
 
-      <el-form-item label="路由路径" prop="path">
+      <el-form-item :label="t('menu.routePath')" prop="path">
         <el-input
           v-model="form.path"
-          placeholder="请输入路由路径，如 /system/users"
+          :placeholder="t('menu.routePathPlaceholder')"
           clearable
         />
       </el-form-item>
 
-      <el-form-item label="图标" prop="icon">
+      <el-form-item :label="t('menu.icon')" prop="icon">
         <el-input
           v-model="form.icon"
-          placeholder="请输入图标名称（可选）"
+          :placeholder="t('menu.iconPlaceholder')"
           clearable
         />
       </el-form-item>
 
-      <el-form-item label="上级菜单" prop="parentId">
+      <el-form-item :label="t('menu.parentMenu')" prop="parentId">
         <el-tree-select
           v-model="form.parentId"
           :data="parentOptions"
           :props="{ label: 'name', children: 'children' }"
           node-key="id"
-          placeholder="请选择上级菜单（可选）"
+          :placeholder="t('menu.parentMenuPlaceholder')"
           clearable
           check-strictly
           style="width: 100%"
         />
       </el-form-item>
 
-      <el-form-item label="排序" prop="sort">
+      <el-form-item :label="t('menu.sort')" prop="sort">
         <el-input-number
           v-model="form.sort"
           :min="0"
@@ -199,18 +202,18 @@ const parentOptions = computed(() => {
         />
       </el-form-item>
 
-      <el-form-item label="是否可见" prop="isVisible">
+      <el-form-item :label="t('menu.visible')" prop="isVisible">
         <el-switch
           v-model="form.isVisible"
-          active-text="可见"
-          inactive-text="隐藏"
+          :active-text="t('menu.visible')"
+          :inactive-text="t('menu.hidden')"
         />
       </el-form-item>
 
-      <el-form-item label="权限标识" prop="permission">
+      <el-form-item :label="t('menu.permission')" prop="permission">
         <el-input
           v-model="form.permission"
-          placeholder="请输入权限标识（可选）"
+          :placeholder="t('menu.permissionPlaceholder')"
           clearable
         />
       </el-form-item>
@@ -218,9 +221,9 @@ const parentOptions = computed(() => {
 
     <template #footer>
       <div class="dialog-footer">
-        <el-button class="btn-ghost" @click="handleClose">取消</el-button>
+        <el-button class="btn-ghost" @click="handleClose">{{ t('common.cancel') }}</el-button>
         <el-button class="btn-primary" :loading="loading" @click="handleSubmit">
-          {{ isEdit ? '更新' : '创建' }}
+          {{ isEdit ? t('common.update') : t('common.create') }}
         </el-button>
       </div>
     </template>

@@ -1,14 +1,21 @@
 <script setup lang="ts">
 import { computed } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import { useAppStore } from '@/stores/app'
 
+const { t } = useI18n()
 const route = useRoute()
 const router = useRouter()
 const appStore = useAppStore()
 
 const tabs = computed(() => appStore.visitedTabs)
 const activeTab = computed(() => route.fullPath)
+
+/** 解析 tab 标题（支持 i18n key） */
+function resolveTabTitle(title: string): string {
+  return title.includes('.') ? t(title) : title
+}
 
 function handleTabClick(path: string) {
   router.push(path)
@@ -36,7 +43,7 @@ function handleTabRemove(path: string) {
           @click="handleTabClick(tab.path)"
         >
           <span class="tab-dot" />
-          <span class="tab-title">{{ tab.title }}</span>
+          <span class="tab-title">{{ resolveTabTitle(tab.title) }}</span>
           <el-icon
             v-if="!tab.affix"
             class="tab-close"

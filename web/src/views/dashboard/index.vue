@@ -1,18 +1,20 @@
 <script setup lang="ts">
 import { ref } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { useAuthStore } from '@/stores/auth'
 
 const authStore = useAuthStore()
+const { t } = useI18n()
 
 const stats = ref([
-  { title: '用户总数', value: '—', icon: 'User', color: '#6366f1', glow: 'rgba(99,102,241,0.25)' },
-  { title: '角色总数', value: '—', icon: 'UserFilled', color: '#06b6d4', glow: 'rgba(6,182,212,0.25)' },
-  { title: '租户总数', value: '—', icon: 'OfficeBuilding', color: '#8b5cf6', glow: 'rgba(139,92,246,0.25)' },
-  { title: '今日登录', value: '—', icon: 'DataLine', color: '#34d399', glow: 'rgba(52,211,153,0.25)' },
+  { titleKey: 'dashboard.totalUsers', value: '—', icon: 'User', color: '#6366f1', glow: 'rgba(99,102,241,0.25)' },
+  { titleKey: 'dashboard.totalRoles', value: '—', icon: 'UserFilled', color: '#06b6d4', glow: 'rgba(6,182,212,0.25)' },
+  { titleKey: 'dashboard.totalTenants', value: '—', icon: 'OfficeBuilding', color: '#8b5cf6', glow: 'rgba(139,92,246,0.25)' },
+  { titleKey: 'dashboard.todayLogins', value: '—', icon: 'DataLine', color: '#34d399', glow: 'rgba(52,211,153,0.25)' },
 ])
 
 const now = new Date()
-const greeting = now.getHours() < 12 ? '早上好' : now.getHours() < 18 ? '下午好' : '晚上好'
+const greeting = now.getHours() < 12 ? t('dashboard.goodMorning') : now.getHours() < 18 ? t('dashboard.goodAfternoon') : t('dashboard.goodEvening')
 </script>
 
 <template>
@@ -27,10 +29,10 @@ const greeting = now.getHours() < 12 ? '早上好' : now.getHours() < 18 ? '下�
         <div class="welcome-text">
           <div class="greeting-tag">
             <span class="greeting-dot" />
-            {{ greeting }}，欢迎回来
+            {{ greeting }}，{{ t('dashboard.welcomeBack') }}
           </div>
           <h2 class="user-name">{{ authStore.userDisplayName }}</h2>
-          <p class="sub-text">系统运行正常，今天也是高效工作的一天</p>
+          <p class="sub-text">{{ t('dashboard.systemNormal') }}</p>
         </div>
         <div class="welcome-illustration">
           <div class="orbit-ring ring-1" />
@@ -45,7 +47,7 @@ const greeting = now.getHours() < 12 ? '早上好' : now.getHours() < 18 ? '下�
     <el-row :gutter="12" class="stat-row">
       <el-col
         v-for="stat in stats"
-        :key="stat.title"
+        :key="stat.titleKey"
         :xs="24" :sm="12" :lg="6"
       >
         <div class="stat-card">
@@ -62,13 +64,13 @@ const greeting = now.getHours() < 12 ? '早上好' : now.getHours() < 18 ? '下�
             </div>
             <div class="stat-info">
               <div class="stat-value tabular">{{ stat.value }}</div>
-              <div class="stat-title">{{ stat.title }}</div>
+              <div class="stat-title">{{ t(stat.titleKey) }}</div>
             </div>
           </div>
           <div class="stat-footer">
             <span class="stat-trend">
               <el-icon :size="11"><ArrowUp /></el-icon>
-              暂无数据
+              {{ t('common.noData') }}
             </span>
           </div>
         </div>
@@ -80,23 +82,23 @@ const greeting = now.getHours() < 12 ? '早上好' : now.getHours() < 18 ? '下�
       <el-col :xs="24" :lg="16">
         <div class="panel">
           <div class="panel-header">
-            <span class="panel-title font-display">系统概览</span>
-            <span class="panel-badge">实时</span>
+            <span class="panel-title font-display">{{ t('dashboard.systemOverview') }}</span>
+            <span class="panel-badge">{{ t('dashboard.realtime') }}</span>
           </div>
           <div class="panel-empty">
             <el-icon :size="36" class="empty-icon"><DataLine /></el-icon>
-            <p>暂无图表数据</p>
+            <p>{{ t('dashboard.noChartData') }}</p>
           </div>
         </div>
       </el-col>
       <el-col :xs="24" :lg="8">
         <div class="panel">
           <div class="panel-header">
-            <span class="panel-title font-display">最近活动</span>
+            <span class="panel-title font-display">{{ t('dashboard.recentActivity') }}</span>
           </div>
           <div class="panel-empty">
             <el-icon :size="36" class="empty-icon"><Bell /></el-icon>
-            <p>暂无活动记录</p>
+            <p>{{ t('dashboard.noActivity') }}</p>
           </div>
         </div>
       </el-col>
@@ -106,10 +108,10 @@ const greeting = now.getHours() < 12 ? '早上好' : now.getHours() < 18 ? '下�
 
 <style scoped lang="scss">
 .dashboard {
-  padding: 16px;
+  padding: 20px;
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 16px;
   min-height: 100%;
 }
 
@@ -138,8 +140,8 @@ const greeting = now.getHours() < 12 ? '早上好' : now.getHours() < 18 ? '下�
   }
 
   position: relative;
-  border-radius: 14px;
-  padding: 28px 32px;
+  border-radius: 16px;
+  padding: 32px 36px;
   background: linear-gradient(135deg, var(--wc-bg-from) 0%, var(--wc-bg-mid) 50%, var(--wc-bg-to) 100%);
   border: 1px solid var(--wc-border);
   overflow: hidden;
@@ -221,10 +223,10 @@ const greeting = now.getHours() < 12 ? '早上好' : now.getHours() < 18 ? '下�
 
     .user-name {
       font-family: 'Plus Jakarta Sans', 'Inter', sans-serif;
-      font-size: 24px;
+      font-size: 26px;
       font-weight: 700;
       color: var(--text-primary);
-      margin: 0 0 6px;
+      margin: 0 0 8px;
       letter-spacing: -0.5px;
     }
 
@@ -341,7 +343,7 @@ const greeting = now.getHours() < 12 ? '早上好' : now.getHours() < 18 ? '下�
 
   .stat-value {
     font-family: 'JetBrains Mono', 'Plus Jakarta Sans', monospace;
-    font-size: 24px;
+    font-size: 26px;
     font-weight: 600;
     color: var(--text-primary);
     line-height: 1;
@@ -377,7 +379,7 @@ const greeting = now.getHours() < 12 ? '早上好' : now.getHours() < 18 ? '下�
 .panel {
   background: var(--bg-card);
   border: 1px solid var(--border-default);
-  border-radius: 12px;
+  border-radius: 14px;
   overflow: hidden;
   transition: background 0.3s, border-color 0.3s;
 
@@ -385,13 +387,13 @@ const greeting = now.getHours() < 12 ? '早上好' : now.getHours() < 18 ? '下�
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 14px 16px;
+    padding: 16px 20px;
     border-bottom: 1px solid var(--border-default);
     transition: border-color 0.3s;
 
     .panel-title {
       font-family: 'Plus Jakarta Sans', 'Inter', sans-serif;
-      font-size: 13.5px;
+      font-size: 14px;
       font-weight: 600;
       color: var(--text-secondary);
       letter-spacing: -0.2px;

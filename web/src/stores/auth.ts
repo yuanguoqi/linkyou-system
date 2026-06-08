@@ -2,6 +2,9 @@ import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import { authApi } from '@/api/modules/auth'
 import type { CurrentUser, LoginRequest } from '@/types/auth'
+import i18n from '@/locales'
+
+const { t } = i18n.global
 
 /** 认证状态管理 */
 export const useAuthStore = defineStore('auth', () => {
@@ -43,7 +46,7 @@ export const useAuthStore = defineStore('auth', () => {
     localStorage.setItem('access_token', token)
     localStorage.setItem('refresh_token', refreshToken)
 
-    // 获取当前用户信息
+    // 获取当前用户信息（包含权限和角色）
     await fetchCurrentUser()
 
     // 持久化用户ID（供刷新令牌时使用）
@@ -54,9 +57,9 @@ export const useAuthStore = defineStore('auth', () => {
 
   /** 刷新令牌 */
   async function refreshToken() {
-    if (!refreshTokenValue.value) throw new Error('无刷新令牌')
+    if (!refreshTokenValue.value) throw new Error(t('auth.noRefreshToken'))
     const userId = currentUser.value?.id ?? localStorage.getItem('user_id')
-    if (!userId) throw new Error('无用户信息，请重新登录')
+    if (!userId) throw new Error(t('auth.noUserInfo'))
 
     const res = await authApi.refreshToken({
       refreshToken: refreshTokenValue.value,

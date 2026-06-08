@@ -2,8 +2,11 @@
 import { ref, reactive, computed, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
 import { Refresh } from '@element-plus/icons-vue'
+import { useI18n } from 'vue-i18n'
 import { settingApi } from '@/api/modules/settings'
 import type { SettingDto, UpdateSettingDto } from '@/api/modules/settings'
+
+const { t } = useI18n()
 
 // ── State ──────────────────────────────────────────────
 const loading = ref(false)
@@ -55,7 +58,7 @@ async function fetchSettings() {
     })
   } catch (err: unknown) {
     const axiosErr = err as { response?: { data?: { error?: { message?: string } } } }
-    ElMessage.error(axiosErr?.response?.data?.error?.message || '获取系统设置失败')
+    ElMessage.error(axiosErr?.response?.data?.error?.message || t('settings.fetchFailed'))
   } finally {
     loading.value = false
   }
@@ -70,10 +73,10 @@ async function handleSave() {
     }))
 
     await settingApi.update(payload)
-    ElMessage.success('系统设置保存成功')
+    ElMessage.success(t('settings.saveSuccess'))
   } catch (err: unknown) {
     const axiosErr = err as { response?: { data?: { error?: { message?: string } } } }
-    ElMessage.error(axiosErr?.response?.data?.error?.message || '保存系统设置失败')
+    ElMessage.error(axiosErr?.response?.data?.error?.message || t('settings.saveFailed'))
   } finally {
     saving.value = false
   }
@@ -92,14 +95,14 @@ function formatCategoryName(category: string): string {
 
 function getCategoryDescription(category: string): string {
   const descriptions: Record<string, string> = {
-    'Abp.Mailing': '邮件发送相关配置',
-    'Abp.Security': '安全策略配置',
-    'Abp.Account': '账户相关配置',
-    'Abp.Identity': '身份认证配置',
-    'Abp.SettingManagement': '设置管理配置',
-    'Abp.TenantManagement': '租户管理配置',
+    'Abp.Mailing': t('settings.descMailing'),
+    'Abp.Security': t('settings.descSecurity'),
+    'Abp.Account': t('settings.descAccount'),
+    'Abp.Identity': t('settings.descIdentity'),
+    'Abp.SettingManagement': t('settings.descSettingManagement'),
+    'Abp.TenantManagement': t('settings.descTenantManagement'),
   }
-  return descriptions[category] || `${formatCategoryName(category)} 相关配置`
+  return descriptions[category] || `${formatCategoryName(category)} ${t('settings.descGeneric')}`
 }
 
 function isPasswordSetting(name: string): boolean {
@@ -132,15 +135,15 @@ function setBooleanValue(name: string, val: boolean) {
     <div class="panel header-panel">
       <div class="panel-header">
         <div class="header-left">
-          <span class="panel-title font-display">系统设置</span>
-          <span class="panel-subtitle">管理系统全局配置参数</span>
+          <span class="panel-title font-display">{{ t('settings.title') }}</span>
+          <span class="panel-subtitle">{{ t('settings.subtitle') }}</span>
         </div>
         <div class="header-actions">
           <el-button class="btn-ghost" :icon="Refresh" :loading="loading" @click="handleRefresh">
-            刷新
+            {{ t('common.refresh') }}
           </el-button>
           <el-button class="btn-primary" :loading="saving" @click="handleSave">
-            保存设置
+            {{ t('settings.save') }}
           </el-button>
         </div>
       </div>
@@ -150,7 +153,7 @@ function setBooleanValue(name: string, val: boolean) {
     <div v-if="loading && settingsList.length === 0" class="panel loading-panel">
       <div class="loading-content">
         <el-icon class="loading-icon" :size="32"><Refresh /></el-icon>
-        <span>加载设置中...</span>
+        <span>{{ t('settings.loading') }}</span>
       </div>
     </div>
 
@@ -158,7 +161,7 @@ function setBooleanValue(name: string, val: boolean) {
     <div v-else-if="!loading && settingsList.length === 0" class="panel empty-panel">
       <div class="empty-content">
         <el-icon :size="36" class="empty-icon"><Refresh /></el-icon>
-        <p>暂无系统设置</p>
+        <p>{{ t('settings.noData') }}</p>
       </div>
     </div>
 
@@ -174,7 +177,7 @@ function setBooleanValue(name: string, val: boolean) {
             <span class="group-name font-display">{{ formatCategoryName(group.category) }}</span>
             <span class="group-desc">{{ getCategoryDescription(group.category) }}</span>
           </div>
-          <span class="group-badge">{{ group.items.length }} 项</span>
+          <span class="group-badge">{{ group.items.length }} {{ t('settings.items') }}</span>
         </div>
 
         <div class="group-body">
@@ -195,8 +198,8 @@ function setBooleanValue(name: string, val: boolean) {
                 v-if="isBooleanSetting(setting.name) && (settingValues[setting.name] === 'True' || settingValues[setting.name] === 'False' || settingValues[setting.name] === 'true' || settingValues[setting.name] === 'false')"
                 :model-value="getBooleanValue(setting.name)"
                 @update:model-value="(val: string | number | boolean) => setBooleanValue(setting.name, !!val)"
-                active-text="启用"
-                inactive-text="禁用"
+                :active-text="t('common.enabled')"
+                :inactive-text="t('common.disabled')"
               />
 
               <!-- Number input -->
@@ -204,7 +207,7 @@ function setBooleanValue(name: string, val: boolean) {
                 v-else-if="isNumberSetting(setting.name)"
                 v-model="settingValues[setting.name]"
                 type="number"
-                placeholder="请输入数值"
+                :placeholder="t('settings.numberPlaceholder')"
                 class="setting-input"
               />
 
@@ -214,7 +217,7 @@ function setBooleanValue(name: string, val: boolean) {
                 v-model="settingValues[setting.name]"
                 type="password"
                 show-password
-                placeholder="请输入"
+                :placeholder="t('settings.textPlaceholder')"
                 class="setting-input"
               />
 
@@ -222,7 +225,7 @@ function setBooleanValue(name: string, val: boolean) {
               <el-input
                 v-else
                 v-model="settingValues[setting.name]"
-                placeholder="请输入设置值"
+                :placeholder="t('settings.valuePlaceholder')"
                 class="setting-input"
               />
             </div>

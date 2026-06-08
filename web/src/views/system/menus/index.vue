@@ -2,10 +2,13 @@
 import { ref, reactive, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Plus, Search, Refresh, Edit, Delete } from '@element-plus/icons-vue'
+import { useI18n } from 'vue-i18n'
 import { menuApi } from '@/api/modules/menus'
 import type { MenuDto, GetMenuListInput } from '@/api/modules/menus'
 import { formatDateTime } from '@/utils/date'
 import MenuDialog from './components/MenuDialog.vue'
+
+const { t } = useI18n()
 
 // ── Extended type for tree ─────────────────────────────
 interface MenuTreeNode extends MenuDto {
@@ -44,7 +47,7 @@ async function fetchMenuList() {
     allMenus.value = res.data.items
   } catch (err: unknown) {
     const axiosErr = err as { response?: { data?: { error?: { message?: string } } } }
-    ElMessage.error(axiosErr?.response?.data?.error?.message || '获取菜单列表失败')
+    ElMessage.error(axiosErr?.response?.data?.error?.message || t('menu.fetchListFailed'))
   } finally {
     loading.value = false
   }
@@ -92,22 +95,22 @@ function handleEdit(row: MenuDto) {
 async function handleDelete(row: MenuDto) {
   try {
     await ElMessageBox.confirm(
-      `确定要删除菜单「${row.name}」吗？此操作不可恢复。`,
-      '删除确认',
+      t('menu.deleteConfirm', { name: row.name }),
+      t('common.deleteConfirmTitle'),
       {
-        confirmButtonText: '确定删除',
-        cancelButtonText: '取消',
+        confirmButtonText: t('common.confirmDelete'),
+        cancelButtonText: t('common.cancel'),
         type: 'warning',
       },
     )
 
     await menuApi.delete(row.id)
-    ElMessage.success('菜单删除成功')
+    ElMessage.success(t('menu.deleteSuccess'))
     fetchMenuList()
   } catch (err) {
     if (err !== 'cancel') {
       const axiosErr = err as { response?: { data?: { error?: { message?: string } } } }
-      ElMessage.error(axiosErr?.response?.data?.error?.message || '删除失败')
+      ElMessage.error(axiosErr?.response?.data?.error?.message || t('common.deleteFailed'))
     }
   }
 }
@@ -125,15 +128,15 @@ function handleDialogSaved() {
       <div class="search-row">
         <el-input
           v-model="searchForm.filter"
-          placeholder="搜索菜单名称..."
+          :placeholder="t('menu.searchPlaceholder')"
           :prefix-icon="Search"
           clearable
           class="search-input"
           @keyup.enter="handleSearch"
         />
         <div class="search-actions">
-          <el-button class="btn-ghost" :icon="Refresh" @click="handleReset">重置</el-button>
-          <el-button class="btn-primary" :icon="Search" @click="handleSearch">搜索</el-button>
+          <el-button class="btn-ghost" :icon="Refresh" @click="handleReset">{{ t('common.reset') }}</el-button>
+          <el-button class="btn-primary" :icon="Search" @click="handleSearch">{{ t('common.search') }}</el-button>
         </div>
       </div>
     </div>
@@ -141,9 +144,9 @@ function handleDialogSaved() {
     <!-- Data Table Panel -->
     <div class="panel table-panel">
       <div class="panel-header">
-        <span class="panel-title font-display">菜单列表</span>
+        <span class="panel-title font-display">{{ t('menu.list') }}</span>
         <el-button class="btn-primary btn-sm" :icon="Plus" @click="handleCreate">
-          新增菜单
+          {{ t('menu.createMenu') }}
         </el-button>
       </div>
 
@@ -155,31 +158,31 @@ function handleDialogSaved() {
         :tree-props="{ children: 'children' }"
         class="menu-table"
       >
-        <el-table-column prop="name" label="菜单名称" min-width="160" show-overflow-tooltip>
+        <el-table-column prop="name" :label="t('menu.menuName')" min-width="160" show-overflow-tooltip>
           <template #default="{ row }">
             <span class="cell-name">{{ row.name }}</span>
           </template>
         </el-table-column>
 
-        <el-table-column prop="path" label="路由路径" min-width="180" show-overflow-tooltip>
+        <el-table-column prop="path" :label="t('menu.routePath')" min-width="180" show-overflow-tooltip>
           <template #default="{ row }">
             <span class="cell-path">{{ row.path || '—' }}</span>
           </template>
         </el-table-column>
 
-        <el-table-column prop="icon" label="图标" width="100" align="center">
+        <el-table-column prop="icon" :label="t('menu.icon')" width="100" align="center">
           <template #default="{ row }">
             <span class="cell-icon">{{ row.icon || '—' }}</span>
           </template>
         </el-table-column>
 
-        <el-table-column prop="sort" label="排序" width="80" align="center">
+        <el-table-column prop="sort" :label="t('menu.sort')" width="80" align="center">
           <template #default="{ row }">
             <span class="cell-sort tabular">{{ row.sort }}</span>
           </template>
         </el-table-column>
 
-        <el-table-column prop="isVisible" label="是否可见" width="100" align="center">
+        <el-table-column prop="isVisible" :label="t('menu.visible')" width="100" align="center">
           <template #default="{ row }">
             <el-tag
               :type="row.isVisible ? 'success' : 'info'"
@@ -187,27 +190,27 @@ function handleDialogSaved() {
               effect="dark"
               class="visibility-tag"
             >
-              {{ row.isVisible ? '可见' : '隐藏' }}
+              {{ row.isVisible ? t('menu.visible') : t('menu.hidden') }}
             </el-tag>
           </template>
         </el-table-column>
 
-        <el-table-column prop="permission" label="权限标识" min-width="160" show-overflow-tooltip>
+        <el-table-column prop="permission" :label="t('menu.permission')" min-width="160" show-overflow-tooltip>
           <template #default="{ row }">
             <span class="cell-permission">{{ row.permission || '—' }}</span>
           </template>
         </el-table-column>
 
-        <el-table-column prop="creationTime" label="创建时间" width="160" align="center">
+        <el-table-column prop="creationTime" :label="t('common.createTime')" width="160" align="center">
           <template #default="{ row }">
             <span class="cell-time tabular">{{ formatDateTime(row.creationTime) }}</span>
           </template>
         </el-table-column>
 
-        <el-table-column label="操作" width="140" align="center" fixed="right">
+        <el-table-column :label="t('common.operation')" width="140" align="center" fixed="right">
           <template #default="{ row }">
             <div class="action-buttons">
-              <el-tooltip content="编辑" placement="top">
+              <el-tooltip :content="t('common.edit')" placement="top">
                 <el-button
                   class="action-btn action-edit"
                   :icon="Edit"
@@ -215,7 +218,7 @@ function handleDialogSaved() {
                   @click="handleEdit(row as MenuDto)"
                 />
               </el-tooltip>
-              <el-tooltip content="删除" placement="top">
+              <el-tooltip :content="t('common.delete')" placement="top">
                 <el-button
                   class="action-btn action-delete"
                   :icon="Delete"

@@ -3,7 +3,9 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
+using Volo.Abp.Authorization;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi;
 using Volo.Abp;
@@ -49,6 +51,11 @@ public class LinkyouSystemHostModule : AbpModule
         ConfigureCors(context, configuration);
         ConfigureSwagger(context, configuration);
         ConfigureAntiForgery();
+
+        // 开发环境：替换方法调用授权服务，允许所有已认证用户访问
+        // 注意：必须在所有模块初始化之后执行，确保覆盖 ABP 默认实现
+        context.Services.Replace(
+            ServiceDescriptor.Singleton<IMethodInvocationAuthorizationService, Linkyou.System.Authentication.DevMethodInvocationAuthorizationService>());
     }
 
     /// <summary>

@@ -39,7 +39,13 @@
     "Permission:MenuItems.Delete": "Delete Menu",
 
     "Menus:Menu:010001": "Menu name '{0}' already exists, please use a different name.",
-    "Menus:Menu:010002": "Menu does not exist."
+    "Menus:Menu:010002": "Menu does not exist.",
+
+    "InvalidUserNameOrPassword": "Invalid username or password",
+    "AccountLocked": "Account is locked, please try again later",
+    "InvalidRefreshToken": "Invalid or expired refresh token, please login again",
+    "NotLoggedIn": "Not logged in",
+    "ChangePasswordFailed": "Failed to change password: {0}",
 
     "UserNotFound": "User not found.",
     "RoleNotFound": "Role not found.",

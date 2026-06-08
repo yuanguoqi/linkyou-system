@@ -83,6 +83,48 @@ web/src/
 - **后端返回**: 树形结构 `UserMenuDto[]`，已根据角色权限过滤
 - **侧边栏**: `layouts/components/SidebarMenu.vue` — 渲染动态菜单
 
+## 多租户前端实现
+
+### 租户选择
+
+登录页加载租户列表，用户选择后存储到 auth store：
+
+```typescript
+// 登录页
+const { data } = await authApi.getTenants()
+tenantList.value = data
+selectedTenantId.value = tenantList.value[0]?.id
+authStore.setTenant(selectedTenantId.value)
+```
+
+### 请求携带租户
+
+axios 拦截器自动附加 `__tenant` 头：
+
+```typescript
+// api/index.ts
+if (authStore.currentTenantId) {
+  config.headers['__tenant'] = authStore.currentTenantId
+}
+```
+
+### 租户切换
+
+```typescript
+// auth store
+function setTenant(tenantId: string | null) {
+  currentTenantId.value = tenantId
+  localStorage.setItem('tenant_id', tenantId ?? '')
+}
+```
+
+### 租户 API
+
+```typescript
+// api/modules/auth.ts
+getTenants: () => http.get<TenantLookupDto[]>('/account/tenants')
+```
+
 ## 代码生成规范
 
 ### 1. API 接口定义

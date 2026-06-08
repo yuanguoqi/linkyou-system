@@ -1,9 +1,12 @@
 <script setup lang="ts">
 import { ref, reactive, onMounted, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { auditLogApi } from '@/api/modules/audit-logs'
 import type { AuditLogDto, GetAuditLogListInput } from '@/api/modules/audit-logs'
 import { usePagination } from '@/composables/usePagination'
 import { formatDateTime } from '@/utils/date'
+
+const { t } = useI18n()
 
 
 // ── State ──────────────────────────────────────────────
@@ -109,12 +112,12 @@ onMounted(fetchData)
     <!-- Search Panel -->
     <div class="panel">
       <div class="panel-header">
-        <span class="panel-title">审计日志</span>
+        <span class="panel-title">{{ t('auditLog.title') }}</span>
       </div>
       <div class="search-bar">
         <el-input
           v-model="searchForm.keyword"
-          placeholder="关键词搜索..."
+          :placeholder="t('auditLog.searchPlaceholder')"
           clearable
           class="search-input"
           @keyup.enter="handleSearch"
@@ -127,7 +130,7 @@ onMounted(fetchData)
 
         <el-select
           v-model="searchForm.httpMethod"
-          placeholder="HTTP 方法"
+          :placeholder="t('auditLog.httpMethod')"
           clearable
           class="search-select"
         >
@@ -142,9 +145,9 @@ onMounted(fetchData)
         <el-date-picker
           v-model="searchForm.dateRange"
           type="daterange"
-          range-separator="至"
-          start-placeholder="开始时间"
-          end-placeholder="结束时间"
+          :range-separator="t('auditLog.rangeSeparator')"
+          :start-placeholder="t('auditLog.startTime')"
+          :end-placeholder="t('auditLog.endTime')"
           class="search-datepicker"
           value-format="YYYY-MM-DDTHH:mm:ss"
         />
@@ -152,11 +155,11 @@ onMounted(fetchData)
         <div class="search-actions">
           <button class="btn btn-primary" @click="handleSearch">
             <el-icon :size="14"><Search /></el-icon>
-            搜索
+            {{ t('common.search') }}
           </button>
           <button class="btn btn-ghost" @click="handleReset">
             <el-icon :size="14"><RefreshRight /></el-icon>
-            重置
+            {{ t('common.reset') }}
           </button>
         </div>
       </div>
@@ -165,7 +168,7 @@ onMounted(fetchData)
     <!-- Data Panel -->
     <div class="panel">
       <div class="panel-header">
-        <span class="panel-title">日志列表</span>
+        <span class="panel-title">{{ t('auditLog.list') }}</span>
       </div>
 
       <el-table
@@ -177,7 +180,7 @@ onMounted(fetchData)
       >
         <el-table-column
           prop="httpMethod"
-          label="方法"
+          :label="t('auditLog.method')"
           width="100"
         >
           <template #default="{ row }">
@@ -192,7 +195,7 @@ onMounted(fetchData)
 
         <el-table-column
           prop="url"
-          label="请求地址"
+          :label="t('auditLog.url')"
           min-width="280"
           show-overflow-tooltip
         >
@@ -203,7 +206,7 @@ onMounted(fetchData)
 
         <el-table-column
           prop="userName"
-          label="用户"
+          :label="t('auditLog.user')"
           width="130"
           show-overflow-tooltip
         >
@@ -214,7 +217,7 @@ onMounted(fetchData)
 
         <el-table-column
           prop="clientIpAddress"
-          label="IP 地址"
+          :label="t('auditLog.ipAddress')"
           width="140"
         >
           <template #default="{ row }">
@@ -224,7 +227,7 @@ onMounted(fetchData)
 
         <el-table-column
           prop="executionDuration"
-          label="耗时"
+          :label="t('auditLog.duration')"
           width="100"
         >
           <template #default="{ row }">
@@ -234,7 +237,7 @@ onMounted(fetchData)
 
         <el-table-column
           prop="httpStatusCode"
-          label="状态码"
+          :label="t('auditLog.statusCode')"
           width="100"
         >
           <template #default="{ row }">
@@ -249,7 +252,7 @@ onMounted(fetchData)
 
         <el-table-column
           prop="executionTime"
-          label="执行时间"
+          :label="t('auditLog.executionTime')"
           width="180"
         >
           <template #default="{ row }">

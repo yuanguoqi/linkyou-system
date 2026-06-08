@@ -46,7 +46,9 @@
       "Bash(taskkill //F //PID 43352)",
       "Bash(taskkill //F //PID 12568)",
       "Bash(taskkill //F //PID 44896)",
-      "Bash(PGPASSWORD=Ygq123456789. psql *)"
+      "Bash(PGPASSWORD=Ygq123456789. psql *)",
+      "Bash(taskkill //F //PID 48580)",
+      "Bash(taskkill //F //PID 26776)"
     ]
   }
 }

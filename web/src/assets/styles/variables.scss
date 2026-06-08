@@ -1,6 +1,7 @@
 // =====================================================
 // Linkyou.System — Design Tokens
 // Inspired by Linear / Vercel / Stripe aesthetics
+// Direction: Spacious, Premium, Tech-forward
 // =====================================================
 
 // 主色调 — 宇宙靛蓝
@@ -11,18 +12,18 @@ $danger-color:   #f87171;
 $info-color:     #94a3b8;
 
 // 侧边栏
-$sidebar-width:           212px;
-$sidebar-collapsed-width:  56px;
+$sidebar-width:           220px;
+$sidebar-collapsed-width:  60px;
 $sidebar-bg:              #0c0e14;
 $sidebar-border:          rgba(99, 102, 241, 0.1);
 
 // 顶栏
-$header-height: 52px;
+$header-height: 56px;
 
 // 内容区域
 $content-bg: #080a0f;
 
-// 字体
-$font-size-base:  13px;
+// 字体 — 更大气的字号
+$font-size-base:  14px;
 $font-size-small: 12px;
-$font-size-large: 15px;
+$font-size-large: 16px;

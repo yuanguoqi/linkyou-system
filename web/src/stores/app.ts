@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
+import i18n from '@/locales'
 
 /** 应用全局状态（侧边栏折叠、面包屑、标签页等） */
 export const useAppStore = defineStore('app', () => {
@@ -22,6 +23,8 @@ export const useAppStore = defineStore('app', () => {
   function setLocale(lang: string) {
     locale.value = lang
     localStorage.setItem('locale', lang)
+    // 同步更新 i18n locale
+    i18n.global.locale.value = lang
   }
 
   function setBreadcrumbs(items: { title: string; path?: string }[]) {

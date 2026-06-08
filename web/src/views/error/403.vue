@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 
+const { t } = useI18n()
 const router = useRouter()
 </script>
 
@@ -9,10 +11,10 @@ const router = useRouter()
     <div class="error-bg" />
     <div class="error-content">
       <div class="error-code font-display">403</div>
-      <div class="error-title font-display">访问受限</div>
-      <div class="error-desc">抱歉，您没有权限访问此页面</div>
+      <div class="error-title font-display">{{ t('error.403Title') }}</div>
+      <div class="error-desc">{{ t('error.403Desc') }}</div>
       <el-button type="primary" class="back-btn" @click="router.push('/')">
-        返回首页
+        {{ t('error.backHome') }}
       </el-button>
     </div>
   </div>
@@ -51,9 +53,8 @@ const router = useRouter()
 
 .error-code {
   font-family: 'JetBrains Mono', 'Plus Jakarta Sans', monospace;
-  font-size: 96px;
+  font-size: 100px;
   font-weight: 800;
-  color: var(--text-disabled);
   line-height: 1;
   margin-bottom: 12px;
   letter-spacing: -4px;

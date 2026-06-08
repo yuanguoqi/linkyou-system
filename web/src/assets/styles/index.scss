@@ -249,14 +249,14 @@ html.light .noise-overlay {
   --border-primary: rgba(99, 102, 241, 0.25);
   --border-active:  rgba(99, 102, 241, 0.5);
 
-  // Layout
-  --sidebar-width:    212px;
+  // Layout — Spacious proportions
+  --sidebar-width:    220px;
   --sidebar-bg:       #0c0e14;
   --sidebar-gradient: linear-gradient(180deg, #0e1118 0%, #0a0c12 100%);
   --sidebar-border:   rgba(255, 255, 255, 0.04);
   --header-bg:        rgba(8, 10, 15, 0.85);
   --header-border:    rgba(255, 255, 255, 0.04);
-  --header-height:    52px;
+  --header-height:    56px;
   --content-bg:       #080a0f;
 
   // Tab bar

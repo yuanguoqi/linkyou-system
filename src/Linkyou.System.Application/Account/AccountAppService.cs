@@ -4,6 +4,7 @@ using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using Linkyou.System.Jwt;
+using Linkyou.System.Localization;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.Caching.Distributed;
 using Volo.Abp;
@@ -59,13 +60,13 @@ public class AccountAppService : ApplicationService, IAccountAppService
 
         if (user == null)
         {
-            throw new UserFriendlyException("用户名或密码错误");
+            throw new UserFriendlyException(L["InvalidUserNameOrPassword"]);
         }
 
         // 检查账户是否被锁定
         if (await _userManager.IsLockedOutAsync(user))
         {
-            throw new UserFriendlyException("账户已被锁定，请稍后再试");
+            throw new UserFriendlyException(L["AccountLocked"]);
         }
 
         // 验证密码
@@ -74,7 +75,7 @@ public class AccountAppService : ApplicationService, IAccountAppService
         {
             // 记录失败次数（ABP 内置锁定策略）
             await _userManager.AccessFailedAsync(user);
-            throw new UserFriendlyException("用户名或密码错误");
+            throw new UserFriendlyException(L["InvalidUserNameOrPassword"]);
         }
 
         // 登录成功，重置失败计数
@@ -115,7 +116,7 @@ public class AccountAppService : ApplicationService, IAccountAppService
         var isValid = await ValidateRefreshTokenAsync(input.UserId, input.RefreshToken);
         if (!isValid)
         {
-            throw new UserFriendlyException("刷新令牌无效或已过期，请重新登录");
+            throw new UserFriendlyException(L["InvalidRefreshToken"]);
         }
 
         var user = await _userManager.GetByIdAsync(input.UserId);
@@ -150,7 +151,7 @@ public class AccountAppService : ApplicationService, IAccountAppService
     public async Task<CurrentUserDto> GetCurrentUserAsync()
     {
         var userId = CurrentUser.Id
-            ?? throw new AbpAuthorizationException("未登录");
+            ?? throw new AbpAuthorizationException(L["NotLoggedIn"]);
 
         var user = await _userManager.GetByIdAsync(userId);
         var roles = await _userManager.GetRolesAsync(user);
@@ -196,7 +197,7 @@ public class AccountAppService : ApplicationService, IAccountAppService
     public async Task ChangePasswordAsync(ChangePasswordInput input)
     {
         var userId = CurrentUser.Id
-            ?? throw new AbpAuthorizationException("未登录");
+            ?? throw new AbpAuthorizationException(L["NotLoggedIn"]);
 
         var user = await _userManager.GetByIdAsync(userId);
         var result = await _userManager.ChangePasswordAsync(
@@ -205,7 +206,7 @@ public class AccountAppService : ApplicationService, IAccountAppService
         if (!result.Succeeded)
         {
             var errors = string.Join("; ", result.Errors.Select(e => e.Description));
-            throw new UserFriendlyException($"修改密码失败：{errors}");
+            throw new UserFriendlyException(L["ChangePasswordFailed", errors]);
         }
     }
 

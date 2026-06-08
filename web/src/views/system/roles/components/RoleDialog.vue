@@ -2,12 +2,15 @@
 import { ref, reactive, computed } from 'vue'
 import { ElMessage } from 'element-plus'
 import type { FormInstance, FormRules } from 'element-plus'
+import { useI18n } from 'vue-i18n'
 import {
   identityRoleApi,
   type IdentityRoleDto,
   type CreateIdentityRoleDto,
   type UpdateIdentityRoleDto,
 } from '@/api/modules/identity'
+
+const { t } = useI18n()
 
 // ── Emits & Expose ─────────────────────────────────────
 const emit = defineEmits<{
@@ -32,12 +35,12 @@ const form = reactive<CreateIdentityRoleDto>({
 })
 
 // ── Validation Rules ───────────────────────────────────
-const rules: FormRules = {
+const rules = computed<FormRules>(() => ({
   name: [
-    { required: true, message: '请输入角色名称', trigger: 'blur' },
-    { min: 2, max: 64, message: '角色名称长度 2-64 个字符', trigger: 'blur' },
+    { required: true, message: t('validation.roleNameRequired'), trigger: 'blur' },
+    { min: 2, max: 64, message: t('validation.roleNameLength'), trigger: 'blur' },
   ],
-}
+}))
 
 // ── Methods ────────────────────────────────────────────
 function resetForm() {
@@ -82,15 +85,15 @@ async function handleSubmit() {
         concurrencyStamp: concurrencyStamp.value,
       }
       await identityRoleApi.update(editId.value!, payload)
-      ElMessage.success('角色更新成功')
+      ElMessage.success(t('role.updateSuccess'))
     } else {
       await identityRoleApi.create(form)
-      ElMessage.success('角色创建成功')
+      ElMessage.success(t('role.createSuccess'))
     }
     visible.value = false
     emit('success')
   } catch {
-    ElMessage.error(isEdit.value ? '更新失败' : '创建失败')
+    ElMessage.error(isEdit.value ? t('common.updateFailed') : t('common.createFailed'))
   } finally {
     submitLoading.value = false
   }
@@ -100,7 +103,7 @@ async function handleSubmit() {
 <template>
   <el-dialog
     v-model="visible"
-    :title="isEdit ? '编辑角色' : '新增角色'"
+    :title="isEdit ? t('role.editRole') : t('role.createRole')"
     width="480px"
     :close-on-click-modal="false"
     destroy-on-close
@@ -114,29 +117,29 @@ async function handleSubmit() {
       label-position="left"
       class="role-form"
     >
-      <el-form-item label="角色名称" prop="name">
+      <el-form-item :label="t('role.roleName')" prop="name">
         <el-input
           v-model="form.name"
-          placeholder="请输入角色名称"
+          :placeholder="t('role.roleNamePlaceholder')"
           clearable
           maxlength="64"
         />
       </el-form-item>
 
-      <el-form-item label="默认角色" prop="isDefault">
+      <el-form-item :label="t('role.defaultRole')" prop="isDefault">
         <el-switch
           v-model="form.isDefault"
-          active-text="是"
-          inactive-text="否"
+          :active-text="t('common.yes')"
+          :inactive-text="t('common.no')"
           inline-prompt
         />
       </el-form-item>
 
-      <el-form-item label="公共角色" prop="isPublic">
+      <el-form-item :label="t('role.publicRole')" prop="isPublic">
         <el-switch
           v-model="form.isPublic"
-          active-text="是"
-          inactive-text="否"
+          :active-text="t('common.yes')"
+          :inactive-text="t('common.no')"
           inline-prompt
         />
       </el-form-item>
@@ -144,9 +147,9 @@ async function handleSubmit() {
 
     <template #footer>
       <div class="dialog-footer">
-        <button class="btn-ghost" @click="handleClose">取 消</button>
+        <button class="btn-ghost" @click="handleClose">{{ t('common.cancel') }}</button>
         <button class="btn-primary" :disabled="submitLoading" @click="handleSubmit">
-          {{ submitLoading ? '提交中...' : '确 定' }}
+          {{ submitLoading ? t('common.submitting') : t('common.confirm') }}
         </button>
       </div>
     </template>

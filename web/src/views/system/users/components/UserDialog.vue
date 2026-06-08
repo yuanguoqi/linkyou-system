@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, reactive, computed } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { ElMessage } from 'element-plus'
 import type { FormInstance, FormRules } from 'element-plus'
 import { identityUserApi, identityRoleApi } from '@/api/modules/identity'
@@ -9,6 +10,8 @@ import type {
   CreateIdentityUserDto,
   UpdateIdentityUserDto,
 } from '@/api/modules/identity'
+
+const { t } = useI18n()
 
 // ── Emits & Expose ───────────────────────────────────
 const emit = defineEmits<{
@@ -41,26 +44,26 @@ const form = reactive<CreateIdentityUserDto>({
 // ── Validation Rules ─────────────────────────────────
 const rules = computed<FormRules>(() => ({
   userName: [
-    { required: true, message: '请输入用户名', trigger: 'blur' },
-    { min: 3, max: 20, message: '用户名长度 3-20 个字符', trigger: 'blur' },
+    { required: true, message: t('validation.usernameRequired'), trigger: 'blur' },
+    { min: 3, max: 20, message: t('validation.usernameLength'), trigger: 'blur' },
   ],
   email: [
-    { required: true, message: '请输入邮箱', trigger: 'blur' },
-    { type: 'email', message: '请输入有效的邮箱地址', trigger: 'blur' },
+    { required: true, message: t('validation.emailRequired'), trigger: 'blur' },
+    { type: 'email', message: t('validation.emailInvalid'), trigger: 'blur' },
   ],
   name: [
-    { max: 32, message: '名字最多 32 个字符', trigger: 'blur' },
+    { max: 32, message: t('validation.nameMaxLength'), trigger: 'blur' },
   ],
   surname: [
-    { max: 32, message: '姓氏最多 32 个字符', trigger: 'blur' },
+    { max: 32, message: t('validation.surnameMaxLength'), trigger: 'blur' },
   ],
   password: isEdit.value
     ? [
-        { min: 6, message: '密码至少 6 位', trigger: 'blur' },
+        { min: 6, message: t('validation.passwordMinLength'), trigger: 'blur' },
       ]
     : [
-        { required: true, message: '请输入密码', trigger: 'blur' },
-        { min: 6, message: '密码至少 6 位', trigger: 'blur' },
+        { required: true, message: t('validation.passwordRequired'), trigger: 'blur' },
+        { min: 6, message: t('validation.passwordMinLength'), trigger: 'blur' },
       ],
 }))
 
@@ -130,15 +133,15 @@ async function handleSubmit() {
         delete (payload as unknown as Record<string, unknown>).password
       }
       await identityUserApi.update(editId.value!, payload)
-      ElMessage.success('用户更新成功')
+      ElMessage.success(t('user.updateSuccess'))
     } else {
       await identityUserApi.create(form)
-      ElMessage.success('用户创建成功')
+      ElMessage.success(t('user.createSuccess'))
     }
     visible.value = false
     emit('success')
   } catch {
-    ElMessage.error(isEdit.value ? '更新失败' : '创建失败')
+    ElMessage.error(isEdit.value ? t('common.updateFailed') : t('common.createFailed'))
   } finally {
     submitLoading.value = false
   }
@@ -148,7 +151,7 @@ async function handleSubmit() {
 <template>
   <el-dialog
     v-model="visible"
-    :title="isEdit ? '编辑用户' : '新增用户'"
+    :title="isEdit ? t('user.editUser') : t('user.createUser')"
     width="560px"
     :close-on-click-modal="false"
     destroy-on-close
@@ -162,70 +165,70 @@ async function handleSubmit() {
       label-position="left"
       class="user-form"
     >
-      <el-form-item label="用户名" prop="userName">
+      <el-form-item :label="t('user.username')" prop="userName">
         <el-input
           v-model="form.userName"
-          placeholder="请输入用户名"
+          :placeholder="t('user.usernamePlaceholder')"
           :disabled="isEdit"
           clearable
         />
       </el-form-item>
 
-      <el-form-item label="邮箱" prop="email">
+      <el-form-item :label="t('user.email')" prop="email">
         <el-input
           v-model="form.email"
-          placeholder="请输入邮箱地址"
+          :placeholder="t('user.emailPlaceholder')"
           clearable
         />
       </el-form-item>
 
       <div class="form-row">
-        <el-form-item label="名" prop="name" class="form-row-item">
+        <el-form-item :label="t('user.firstName')" prop="name" class="form-row-item">
           <el-input
             v-model="form.name"
-            placeholder="名"
+            :placeholder="t('user.firstNamePlaceholder')"
             clearable
           />
         </el-form-item>
 
-        <el-form-item label="姓" prop="surname" class="form-row-item">
+        <el-form-item :label="t('user.lastName')" prop="surname" class="form-row-item">
           <el-input
             v-model="form.surname"
-            placeholder="姓"
+            :placeholder="t('user.lastNamePlaceholder')"
             clearable
           />
         </el-form-item>
       </div>
 
       <el-form-item
-        label="密码"
+        :label="t('user.password')"
         prop="password"
         :required="!isEdit"
       >
         <el-input
           v-model="form.password"
           type="password"
-          :placeholder="isEdit ? '留空则不修改密码' : '请输入密码'"
+          :placeholder="isEdit ? t('user.passwordLeaveBlank') : t('validation.passwordRequired')"
           show-password
           clearable
         />
       </el-form-item>
 
-      <el-form-item label="手机号" prop="phoneNumber">
+      <el-form-item :label="t('user.phone')" prop="phoneNumber">
         <el-input
           v-model="form.phoneNumber"
-          placeholder="请输入手机号（可选）"
+          :placeholder="t('user.phonePlaceholder')"
           clearable
         />
       </el-form-item>
 
-      <el-form-item label="角色" prop="roleNames">
+      <el-form-item :label="t('user.role')" prop="roleNames">
         <el-select
           v-model="form.roleNames"
           multiple
           collapse-tags
           collapse-tags-tooltip
-          placeholder="请选择角色"
+          :placeholder="t('user.rolePlaceholder')"
           class="w-full"
         >
           <el-option
@@ -237,11 +240,11 @@ async function handleSubmit() {
         </el-select>
       </el-form-item>
 
-      <el-form-item label="状态" prop="isActive">
+      <el-form-item :label="t('common.status')" prop="isActive">
         <el-switch
           v-model="form.isActive"
-          active-text="启用"
-          inactive-text="禁用"
+          :active-text="t('common.enabled')"
+          :inactive-text="t('common.disabled')"
           inline-prompt
         />
       </el-form-item>
@@ -249,10 +252,10 @@ async function handleSubmit() {
 
     <template #footer>
       <div class="dialog-footer">
-        <button class="btn-ghost" @click="handleClose">取 消</button>
+        <button class="btn-ghost" @click="handleClose">{{ t('common.cancel') }}</button>
         <button class="btn-primary" :disabled="submitLoading" @click="handleSubmit">
           <el-icon v-if="submitLoading" :size="14" class="spin"><Loading /></el-icon>
-          {{ submitLoading ? '提交中...' : '确 定' }}
+          {{ submitLoading ? t('common.submitting') : t('common.confirm') }}
         </button>
       </div>
     </template>

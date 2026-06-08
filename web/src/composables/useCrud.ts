@@ -1,5 +1,6 @@
 import { ref, watch, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
+import i18n from '@/locales'
 
 /**
  * 通用 CRUD 分页列表 DTO
@@ -51,10 +52,12 @@ export interface UseCrudOptions<T, CreateDto, UpdateDto> {
 export function useCrud<T extends { id: string }, CreateDto, UpdateDto = CreateDto>(
   options: UseCrudOptions<T, CreateDto, UpdateDto>
 ) {
+  const { t } = i18n.global
+
   const {
     fetchList,
     delete: deleteFn,
-    deleteMessage = '确定要删除「{name}」吗？此操作不可恢复。',
+    deleteMessage = t('crud.deleteConfirm', { name: '{name}' }),
     getRowName = () => '',
     defaultSorting = 'creationTime desc',
     defaultPageSize = 10,
@@ -131,19 +134,19 @@ export function useCrud<T extends { id: string }, CreateDto, UpdateDto = CreateD
   async function handleDelete(row: T) {
     if (!deleteFn) return
 
-    const name = getRowName(row) || '该记录'
+    const name = getRowName(row) || t('crud.thisRecord')
     const msg = typeof deleteMessage === 'function'
       ? deleteMessage(row)
       : deleteMessage.replace('{name}', name)
 
     try {
-      await ElMessageBox.confirm(msg, '确认删除', {
+      await ElMessageBox.confirm(msg, t('crud.confirmDeleteTitle'), {
         type: 'warning',
-        confirmButtonText: '删除',
-        cancelButtonText: '取消',
+        confirmButtonText: t('common.delete'),
+        cancelButtonText: t('common.cancel'),
       })
       await deleteFn(row.id)
-      ElMessage.success('删除成功')
+      ElMessage.success(t('common.deleteSuccess'))
       fetchData()
     } catch {
       // 用户取消或错误

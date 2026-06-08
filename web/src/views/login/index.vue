@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import { ref, reactive, onMounted } from 'vue'
+import { ref, reactive, computed, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import { ElMessage } from 'element-plus'
 import type { FormInstance, FormRules } from 'element-plus'
 import { User, Lock, Message, RefreshRight, Sunny, Moon, Warning, Close, OfficeBuilding } from '@element-plus/icons-vue'
@@ -14,6 +15,14 @@ const router = useRouter()
 const route = useRoute()
 const authStore = useAuthStore()
 const themeStore = useThemeStore()
+const { t, locale } = useI18n()
+
+// 语言切换
+function toggleLocale() {
+  const newLang = locale.value === 'zh-Hans' ? 'en' : 'zh-Hans'
+  locale.value = newLang
+  localStorage.setItem('locale', newLang)
+}
 
 // 租户列表
 const tenantList = ref<TenantLookupDto[]>([])
@@ -53,20 +62,20 @@ const registerForm = reactive({
 })
 
 // 登录规则
-const loginRules: FormRules = {
+const loginRules = computed<FormRules>(() => ({
   userNameOrEmailAddress: [
-    { required: true, message: '请输入用户名或邮箱', trigger: 'blur' },
+    { required: true, message: t('validation.usernameOrEmailRequired'), trigger: 'blur' },
   ],
   password: [
-    { required: true, message: '请输入密码', trigger: 'blur' },
-    { min: 6, message: '密码至少 6 位', trigger: 'blur' },
+    { required: true, message: t('validation.passwordRequired'), trigger: 'blur' },
+    { min: 6, message: t('validation.passwordMinLength'), trigger: 'blur' },
   ],
   captcha: [
-    { required: true, message: '请输入验证码', trigger: 'blur' },
+    { required: true, message: t('validation.captchaRequired'), trigger: 'blur' },
     {
       validator: (_: unknown, value: string, cb: (e?: Error) => void) => {
         if (value.toLowerCase() !== loginCaptchaCode.value.toLowerCase()) {
-          cb(new Error('验证码错误'))
+          cb(new Error(t('validation.captchaError')))
         } else {
           cb()
         }
@@ -74,38 +83,38 @@ const loginRules: FormRules = {
       trigger: 'blur',
     },
   ],
-}
+}))
 
 // 注册规则
-const registerRules: FormRules = {
+const registerRules = computed<FormRules>(() => ({
   userName: [
-    { required: true, message: '请输入用户名', trigger: 'blur' },
-    { min: 3, max: 20, message: '用户名长度 3-20 个字符', trigger: 'blur' },
+    { required: true, message: t('validation.usernameRequired'), trigger: 'blur' },
+    { min: 3, max: 20, message: t('validation.usernameLength'), trigger: 'blur' },
   ],
   email: [
-    { required: true, message: '请输入邮箱', trigger: 'blur' },
-    { type: 'email', message: '请输入有效的邮箱地址', trigger: 'blur' },
+    { required: true, message: t('validation.emailRequired'), trigger: 'blur' },
+    { type: 'email', message: t('validation.emailInvalid'), trigger: 'blur' },
   ],
   password: [
-    { required: true, message: '请输入密码', trigger: 'blur' },
-    { min: 6, message: '密码至少 6 位', trigger: 'blur' },
+    { required: true, message: t('validation.passwordRequired'), trigger: 'blur' },
+    { min: 6, message: t('validation.passwordMinLength'), trigger: 'blur' },
   ],
   confirmPassword: [
-    { required: true, message: '请确认密码', trigger: 'blur' },
+    { required: true, message: t('validation.confirmPasswordRequired'), trigger: 'blur' },
     {
       validator: (_: unknown, value: string, cb: (e?: Error) => void) => {
-        if (value !== registerForm.password) cb(new Error('两次密码不一致'))
+        if (value !== registerForm.password) cb(new Error(t('validation.passwordMismatch')))
         else cb()
       },
       trigger: 'blur',
     },
   ],
   captcha: [
-    { required: true, message: '请输入验证码', trigger: 'blur' },
+    { required: true, message: t('validation.captchaRequired'), trigger: 'blur' },
     {
       validator: (_: unknown, value: string, cb: (e?: Error) => void) => {
         if (value.toLowerCase() !== registerCaptchaCode.value.toLowerCase()) {
-          cb(new Error('验证码错误'))
+          cb(new Error(t('validation.captchaError')))
         } else {
           cb()
         }
@@ -113,7 +122,7 @@ const registerRules: FormRules = {
       trigger: 'blur',
     },
   ],
-}
+}))
 
 // 持久化记住密码
 onMounted(() => {
@@ -224,7 +233,7 @@ async function handleLogin() {
     const axiosErr = err as { response?: { data?: { error?: { message?: string } } } }
     loginError.value =
       axiosErr?.response?.data?.error?.message ||
-      '登录失败，请检查用户名和密码'
+      t('login.loginFailed')
     refreshLoginCaptcha()
   } finally {
     loading.value = false
@@ -235,7 +244,7 @@ async function handleRegister() {
   await registerFormRef.value?.validate()
   loading.value = true
   try {
-    ElMessage.info('注册功能即将开放，请联系管理员')
+    ElMessage.info(t('login.registerComingSoon'))
   } finally {
     loading.value = false
     refreshRegisterCaptcha()
@@ -252,6 +261,11 @@ async function handleRegister() {
     <div class="bg-orb orb-2" />
     <div class="bg-orb orb-3" />
     <div class="noise-overlay" />
+
+    <!-- 语言切换 -->
+    <button class="lang-toggle" @click="toggleLocale">
+      <span class="lang-text">{{ locale === 'zh-Hans' ? 'EN' : '中' }}</span>
+    </button>
 
     <!-- 主题切换 -->
     <button class="theme-toggle" @click="themeStore.toggleDark">
@@ -280,14 +294,14 @@ async function handleRegister() {
               <circle cx="24" cy="24" r="5" fill="url(#brandGrad)"/>
             </svg>
           </div>
-          <h1 class="brand-name font-display">领佑系统</h1>
+          <h1 class="brand-name font-display">{{ t('app.shortTitle') }}</h1>
           <p class="brand-desc">Enterprise Management Platform</p>
         </div>
         <div class="feature-list">
-          <div class="feature-item"><span class="dot" />多租户企业级架构</div>
-          <div class="feature-item"><span class="dot" />细粒度权限管理</div>
-          <div class="feature-item"><span class="dot" />实时审计日志</div>
-          <div class="feature-item"><span class="dot" />高性能 API 接口</div>
+          <div class="feature-item"><span class="dot" />{{ t('login.feature1') }}</div>
+          <div class="feature-item"><span class="dot" />{{ t('login.feature2') }}</div>
+          <div class="feature-item"><span class="dot" />{{ t('login.feature3') }}</div>
+          <div class="feature-item"><span class="dot" />{{ t('login.feature4') }}</div>
         </div>
         <div class="left-footer">Powered by ABP vNext 10.4</div>
       </div>
@@ -300,19 +314,19 @@ async function handleRegister() {
             class="tab-btn"
             :class="{ active: activePanel === 'login' }"
             @click="switchPanel('login')"
-          >登录</button>
+          >{{ t('login.loginTab') }}</button>
           <button
             class="tab-btn"
             :class="{ active: activePanel === 'register' }"
             @click="switchPanel('register')"
-          >注册</button>
+          >{{ t('login.registerTab') }}</button>
           <div class="tab-indicator" :class="{ right: activePanel === 'register' }" />
         </div>
 
         <!-- 登录表单 -->
         <Transition name="slide-fade" mode="out-in">
           <div v-if="activePanel === 'login'" key="login" class="form-panel">
-            <p class="form-welcome">欢迎回来，请登录您的账户</p>
+            <p class="form-welcome">{{ t('login.welcome') }}</p>
             <!-- 登录错误横幅 -->
             <div v-if="loginError" class="login-error-banner">
               <el-icon class="error-icon"><Warning /></el-icon>
@@ -324,7 +338,7 @@ async function handleRegister() {
               <el-form-item class="stagger-item" style="--i:0">
                 <el-select
                   v-model="selectedTenantId"
-                  placeholder="选择租户（默认宿主）"
+                  :placeholder="t('login.selectTenant')"
                   clearable
                   filterable
                   :loading="tenantLoading"
@@ -350,7 +364,7 @@ async function handleRegister() {
               <el-form-item prop="userNameOrEmailAddress" class="stagger-item" style="--i:1">
                 <el-input
                   v-model="loginForm.userNameOrEmailAddress"
-                  placeholder="用户名 / 邮箱"
+                  :placeholder="t('login.usernamePlaceholder')"
                   :prefix-icon="User"
                   clearable
                   autocomplete="username"
@@ -361,7 +375,7 @@ async function handleRegister() {
                 <el-input
                   v-model="loginForm.password"
                   type="password"
-                  placeholder="密码"
+                  :placeholder="t('login.passwordPlaceholder')"
                   :prefix-icon="Lock"
                   show-password
                   autocomplete="current-password"
@@ -373,12 +387,12 @@ async function handleRegister() {
                 <div class="captcha-row">
                   <el-input
                     v-model="loginForm.captcha"
-                    placeholder="验证码"
+                    :placeholder="t('login.captchaPlaceholder')"
                     class="glass-input captcha-input"
                     maxlength="4"
                     @keyup.enter="handleLogin"
                   />
-                  <div class="captcha-img" @click="refreshLoginCaptcha" title="点击刷新">
+                  <div class="captcha-img" @click="refreshLoginCaptcha" :title="t('login.clickToRefresh')">
                     <CaptchaCanvas ref="loginCaptchaRef" @code="handleLoginCaptchaCode" />
                     <el-icon class="refresh-icon"><RefreshRight /></el-icon>
                   </div>
@@ -386,9 +400,9 @@ async function handleRegister() {
               </el-form-item>
               <div class="form-options stagger-item" style="--i:4">
                 <el-checkbox v-model="loginForm.rememberMe" class="remember-check">
-                  记住密码
+                  {{ t('login.rememberMe') }}
                 </el-checkbox>
-                <a href="javascript:;" class="forgot-link">忘记密码？</a>
+                <a href="javascript:;" class="forgot-link">{{ t('login.forgotPassword') }}</a>
               </div>
               <el-form-item class="stagger-item" style="--i:5">
                 <el-button
@@ -397,8 +411,8 @@ async function handleRegister() {
                   :loading="loading"
                   @click="handleLogin"
                 >
-                  <span v-if="!loading">立即登录</span>
-                  <span v-else>登录中...</span>
+                  <span v-if="!loading">{{ t('login.loginBtn') }}</span>
+                  <span v-else>{{ t('login.loggingIn') }}</span>
                 </el-button>
               </el-form-item>
             </el-form>
@@ -406,12 +420,12 @@ async function handleRegister() {
 
           <!-- 注册表单 -->
           <div v-else key="register" class="form-panel">
-            <p class="form-welcome">创建您的账户，开始使用</p>
+            <p class="form-welcome">{{ t('login.registerWelcome') }}</p>
             <el-form ref="registerFormRef" :model="registerForm" :rules="registerRules" size="large">
               <el-form-item prop="userName">
                 <el-input
                   v-model="registerForm.userName"
-                  placeholder="用户名"
+                  :placeholder="t('login.usernamePlaceholder')"
                   :prefix-icon="User"
                   clearable
                   class="glass-input"
@@ -420,7 +434,7 @@ async function handleRegister() {
               <el-form-item prop="email">
                 <el-input
                   v-model="registerForm.email"
-                  placeholder="邮箱地址"
+                  :placeholder="t('login.emailPlaceholder')"
                   :prefix-icon="Message"
                   clearable
                   class="glass-input"
@@ -430,7 +444,7 @@ async function handleRegister() {
                 <el-input
                   v-model="registerForm.password"
                   type="password"
-                  placeholder="设置密码"
+                  :placeholder="t('login.setPassword')"
                   :prefix-icon="Lock"
                   show-password
                   class="glass-input"
@@ -440,7 +454,7 @@ async function handleRegister() {
                 <el-input
                   v-model="registerForm.confirmPassword"
                   type="password"
-                  placeholder="确认密码"
+                  :placeholder="t('login.confirmPassword')"
                   :prefix-icon="Lock"
                   show-password
                   class="glass-input"
@@ -450,11 +464,11 @@ async function handleRegister() {
                 <div class="captcha-row">
                   <el-input
                     v-model="registerForm.captcha"
-                    placeholder="验证码"
+                    :placeholder="t('login.captchaPlaceholder')"
                     class="glass-input captcha-input"
                     maxlength="4"
                   />
-                  <div class="captcha-img" @click="refreshRegisterCaptcha" title="点击刷新">
+                  <div class="captcha-img" @click="refreshRegisterCaptcha" :title="t('login.clickToRefresh')">
                     <CaptchaCanvas ref="registerCaptchaRef" @code="handleRegisterCaptchaCode" />
                     <el-icon class="refresh-icon"><RefreshRight /></el-icon>
                   </div>
@@ -467,8 +481,8 @@ async function handleRegister() {
                   :loading="loading"
                   @click="handleRegister"
                 >
-                  <span v-if="!loading">注册账户</span>
-                  <span v-else>注册中...</span>
+                  <span v-if="!loading">{{ t('login.registerBtn') }}</span>
+                  <span v-else>{{ t('login.registering') }}</span>
                 </el-button>
               </el-form-item>
             </el-form>
@@ -566,6 +580,38 @@ async function handleRegister() {
   50% { transform: translate(-50%, calc(-50% - 15px)) scale(1.05); }
 }
 
+// ── Language Toggle ────────────────────────────────────
+.lang-toggle {
+  position: fixed;
+  top: 20px;
+  right: 68px;
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  border: 1px solid var(--card-border);
+  background: var(--card-bg);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 100;
+
+  .lang-text {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-primary);
+    letter-spacing: -0.3px;
+  }
+
+  &:hover {
+    border-color: rgba(99, 102, 241, 0.4);
+    background: rgba(99, 102, 241, 0.1);
+  }
+}
+
 // ── Theme Toggle ───────────────────────────────────────
 .theme-toggle {
   position: fixed;
@@ -609,8 +655,8 @@ async function handleRegister() {
 .login-card {
   position: relative;
   z-index: 10;
-  width: 860px;
-  min-height: 520px;
+  width: 880px;
+  min-height: 540px;
   display: flex;
   border-radius: 20px;
   border: 1px solid var(--card-border);
@@ -628,14 +674,14 @@ async function handleRegister() {
 
 // ── Left Decorative Panel ──────────────────────────────
 .card-left {
-  width: 280px;
+  width: 300px;
   flex-shrink: 0;
-  padding: 40px 28px;
+  padding: 44px 32px;
   background: var(--left-bg);
   border-right: 1px solid var(--card-border);
   display: flex;
   flex-direction: column;
-  gap: 28px;
+  gap: 32px;
   position: relative;
   overflow: hidden;
 
@@ -647,10 +693,10 @@ async function handleRegister() {
       svg { width: 100%; height: 100%; }
     }
     .brand-name {
-      font-size: 20px;
+      font-size: 22px;
       font-weight: 700;
       color: var(--text-primary);
-      margin: 0 0 4px;
+      margin: 0 0 6px;
       letter-spacing: -0.3px;
     }
     .brand-desc {
@@ -717,7 +763,7 @@ async function handleRegister() {
 // ── Right Form Panel ───────────────────────────────────
 .card-right {
   flex: 1;
-  padding: 40px 40px 36px;
+  padding: 44px 44px 40px;
   display: flex;
   flex-direction: column;
 }
@@ -763,9 +809,9 @@ async function handleRegister() {
 }
 
 .form-welcome {
-  font-size: 12.5px;
+  font-size: 13.5px;
   color: var(--text-secondary);
-  margin: 0 0 18px;
+  margin: 0 0 20px;
 }
 
 // ── Login Error Banner ─────────────────────────────────
@@ -951,8 +997,8 @@ async function handleRegister() {
 // ── Submit Button ──────────────────────────────────────
 .submit-btn {
   width: 100%;
-  height: 42px;
-  font-size: 13.5px;
+  height: 44px;
+  font-size: 14px;
   font-weight: 600;
   border-radius: 10px;
   border: none;

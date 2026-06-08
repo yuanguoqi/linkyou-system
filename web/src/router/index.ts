@@ -4,7 +4,10 @@ import NProgress from 'nprogress'
 import 'nprogress/nprogress.css'
 import { useAuthStore } from '@/stores/auth'
 import { useAppStore } from '@/stores/app'
+import i18n from '@/locales'
 import systemRoutes from './modules/system'
+
+const { t } = i18n.global
 
 // 不需要认证的白名单路由
 const WHITE_LIST = ['/login', '/403', '/404']
@@ -15,19 +18,19 @@ const staticRoutes: RouteRecordRaw[] = [
     path: '/login',
     name: 'Login',
     component: () => import('@/views/login/index.vue'),
-    meta: { title: '登录', hidden: true },
+    meta: { title: 'route.login', hidden: true },
   },
   {
     path: '/403',
     name: '403',
     component: () => import('@/views/error/403.vue'),
-    meta: { title: '无权限', hidden: true },
+    meta: { title: 'route.forbidden', hidden: true },
   },
   {
     path: '/404',
     name: '404',
     component: () => import('@/views/error/404.vue'),
-    meta: { title: '页面不存在', hidden: true },
+    meta: { title: 'route.notFound', hidden: true },
   },
   // 主布局（需认证的页面都嵌套在此）
   {
@@ -39,7 +42,7 @@ const staticRoutes: RouteRecordRaw[] = [
         path: 'dashboard',
         name: 'Dashboard',
         component: () => import('@/views/dashboard/index.vue'),
-        meta: { title: '仪表盘', icon: 'Odometer', affix: true },
+        meta: { title: 'route.dashboard', icon: 'Odometer', affix: true },
       },
       // 动态注册系统管理模块路由（展平以匹配 Vue Router 要求）
       ...systemRoutes.flatMap(group =>
@@ -72,9 +75,11 @@ router.beforeEach(async (to, _from, next) => {
   const authStore = useAuthStore()
   const appStore = useAppStore()
 
-  // 设置页面标题
+  // 设置页面标题（支持 i18n key）
   if (to.meta?.title) {
-    document.title = `${to.meta.title} - ${import.meta.env.VITE_APP_TITLE}`
+    const titleKey = to.meta.title as string
+    const title = titleKey.includes('.') ? t(titleKey) : titleKey
+    document.title = `${title} - ${import.meta.env.VITE_APP_TITLE}`
   }
 
   // 白名单直接放行

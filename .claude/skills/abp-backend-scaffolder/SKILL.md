@@ -43,6 +43,14 @@ src/
 | `Menu` | 菜单管理 | FullAuditedAggregateRoot, IMultiTenant, private set, 领域方法 |
 | `MenuRolePermission` | 菜单角色权限 | CreationAuditedEntity, IMultiTenant, 外键关联 |
 
+## 多租户
+
+项目使用 ABP 单数据库多租户模式。所有业务实体必须实现 `IMultiTenant`。详见 `references/multi-tenancy.md`。
+
+## 种子数据
+
+添加新实体时，需要在 `LinkyouSystemDataSeederContributor` 中添加种子数据。详见 `references/seed-data.md`。
+
 ## 代码生成规范
 
 ### 1. 领域层实体（Domain Layer）

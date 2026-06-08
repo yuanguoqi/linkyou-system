@@ -2,8 +2,11 @@
 import { ref, reactive, watch, computed } from 'vue'
 import type { FormInstance, FormRules } from 'element-plus'
 import { ElMessage } from 'element-plus'
+import { useI18n } from 'vue-i18n'
 import { tenantApi } from '@/api/modules/tenants'
 import type { TenantDto, CreateTenantDto, UpdateTenantDto } from '@/api/modules/tenants'
+
+const { t } = useI18n()
 
 interface Props {
   visible: boolean
@@ -24,29 +27,37 @@ const submitting = ref(false)
 
 const form = reactive({
   name: '',
-  adminEmailAddress: '',
-  adminPassword: '',
+  adminEmailAddress: 'admin@linkyou.com',
+  adminPassword: 'Admin@123456',
 })
 
 const isCreate = computed(() => props.mode === 'create')
 
-const dialogTitle = computed(() => isCreate.value ? '新建租户' : '编辑租户')
+const dialogTitle = computed(() => isCreate.value ? t('tenant.createTenant') : t('tenant.editTenant'))
 
 // ── Validation Rules ───────────────────────────────────
-const rules: FormRules = {
+const rules = computed<FormRules>(() => ({
   name: [
-    { required: true, message: '请输入租户名称', trigger: 'blur' },
-    { max: 256, message: '租户名称不超过 256 个字符', trigger: 'blur' },
+    { required: true, message: t('validation.tenantNameRequired'), trigger: 'blur' },
+    { max: 256, message: t('validation.tenantNameMaxLength'), trigger: 'blur' },
   ],
-  adminEmailAddress: [
-    { required: true, message: '请输入管理员邮箱', trigger: 'blur' },
-    { type: 'email', message: '请输入有效的邮箱地址', trigger: 'blur' },
-  ],
-  adminPassword: [
-    { required: true, message: '请输入管理员密码', trigger: 'blur' },
-    { min: 6, message: '密码不少于 6 个字符', trigger: 'blur' },
-  ],
-}
+  adminEmailAddress: isCreate.value
+    ? [
+        { required: true, message: t('validation.adminEmailRequired'), trigger: 'blur' },
+        { type: 'email', message: t('validation.emailInvalid'), trigger: 'blur' },
+      ]
+    : [
+        { type: 'email', message: t('validation.emailInvalid'), trigger: 'blur' },
+      ],
+  adminPassword: isCreate.value
+    ? [
+        { required: true, message: t('validation.adminPasswordRequired'), trigger: 'blur' },
+        { min: 6, message: t('validation.passwordMinLength'), trigger: 'blur' },
+      ]
+    : [
+        { min: 6, message: t('validation.passwordMinLength'), trigger: 'blur' },
+      ],
+}))
 
 // ── Watchers ───────────────────────────────────────────
 watch(() => props.visible, (val) => {
@@ -86,14 +97,14 @@ async function handleSubmit() {
         adminPassword: form.adminPassword,
       }
       await tenantApi.create(payload)
-      ElMessage.success('租户创建成功')
+      ElMessage.success(t('tenant.createSuccess'))
     } else {
       const payload: UpdateTenantDto = {
         name: form.name,
         concurrencyStamp: props.data!.concurrencyStamp,
       }
       await tenantApi.update(props.data!.id, payload)
-      ElMessage.success('租户更新成功')
+      ElMessage.success(t('tenant.updateSuccess'))
     }
     emit('success')
   } catch {
@@ -119,40 +130,38 @@ async function handleSubmit() {
       label-position="top"
       class="tenant-form"
     >
-      <el-form-item label="租户名称" prop="name">
+      <el-form-item :label="t('tenant.tenantName')" prop="name">
         <el-input
           v-model="form.name"
-          placeholder="请输入租户名称"
+          :placeholder="t('tenant.tenantNamePlaceholder')"
           maxlength="256"
           show-word-limit
         />
       </el-form-item>
 
-      <template v-if="isCreate">
-        <el-form-item label="管理员邮箱" prop="adminEmailAddress">
-          <el-input
-            v-model="form.adminEmailAddress"
-            placeholder="请输入管理员邮箱"
-          />
-        </el-form-item>
+      <el-form-item :label="t('tenant.adminEmail')" prop="adminEmailAddress">
+        <el-input
+          v-model="form.adminEmailAddress"
+          :placeholder="isCreate ? t('tenant.adminEmailPlaceholder') : t('tenant.leaveBlank')"
+        />
+      </el-form-item>
 
-        <el-form-item label="管理员密码" prop="adminPassword">
-          <el-input
-            v-model="form.adminPassword"
-            type="password"
-            placeholder="请输入管理员密码"
-            show-password
-          />
-        </el-form-item>
-      </template>
+      <el-form-item :label="t('tenant.adminPassword')" prop="adminPassword">
+        <el-input
+          v-model="form.adminPassword"
+          type="password"
+          :placeholder="isCreate ? t('tenant.adminPasswordPlaceholder') : t('tenant.leaveBlank')"
+          show-password
+        />
+      </el-form-item>
     </el-form>
 
     <template #footer>
       <div class="dialog-footer">
-        <button class="btn btn-ghost" @click="handleClose">取消</button>
+        <button class="btn btn-ghost" @click="handleClose">{{ t('common.cancel') }}</button>
         <button class="btn btn-primary" :disabled="submitting" @click="handleSubmit">
           <el-icon v-if="submitting" :size="14" class="spin"><Loading /></el-icon>
-          {{ isCreate ? '创建' : '保存' }}
+          {{ isCreate ? t('common.create') : t('common.save') }}
         </button>
       </div>
     </template>

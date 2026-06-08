@@ -4,6 +4,9 @@ import { ElMessage, ElMessageBox } from 'element-plus'
 import { useAuthStore } from '@/stores/auth'
 import router from '@/router'
 import type { AbpErrorResponse } from '@/types/common'
+import i18n from '@/locales'
+
+const { t } = i18n.global
 
 // 创建 axios 实例
 const http: AxiosInstance = axios.create({
@@ -52,7 +55,7 @@ http.interceptors.response.use(
 
     if (!response) {
       // 网络错误或超时
-      ElMessage.error('网络连接异常，请检查网络设置')
+      ElMessage.error(t('api.networkError'))
       return Promise.reject(error)
     }
 
@@ -61,7 +64,18 @@ http.interceptors.response.use(
 
     switch (status) {
       case 400:
-        ElMessage.error(abpError?.message || '请求参数错误')
+        // 检查是否是租户不存在错误
+        if (abpError?.code?.includes('MultiTenancy')) {
+          // 清除无效的租户信息并跳转登录
+          const authStore = useAuthStore()
+          authStore.setTenant(null)
+          localStorage.removeItem('tenant_id')
+          document.cookie = '__tenant=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;'
+          router.push('/login')
+          ElMessage.error(t('api.tenantNotFound'))
+        } else {
+          ElMessage.error(abpError?.message || t('api.badRequest'))
+        }
         break
 
       case 401:
@@ -70,20 +84,30 @@ http.interceptors.response.use(
         break
 
       case 403:
-        ElMessage.error('您没有权限执行此操作')
+        ElMessage.error(t('api.forbidden'))
         router.push('/403')
         break
 
       case 404:
-        ElMessage.error(abpError?.message || '请求的资源不存在')
+        ElMessage.error(abpError?.message || t('api.notFound'))
         break
 
       case 500:
-        ElMessage.error(abpError?.message || '服务器内部错误，请联系管理员')
+        // 检查是否是租户不存在错误（ABP 可能返回 500）
+        if (abpError?.code?.includes('MultiTenancy')) {
+          const authStore2 = useAuthStore()
+          authStore2.setTenant(null)
+          localStorage.removeItem('tenant_id')
+          document.cookie = '__tenant=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;'
+          router.push('/login')
+          ElMessage.error(t('api.tenantNotFound'))
+        } else {
+          ElMessage.error(abpError?.message || t('api.serverError'))
+        }
         break
 
       default:
-        ElMessage.error(abpError?.message || `请求失败（${status}）`)
+        ElMessage.error(abpError?.message || t('api.requestFailed', { status }))
     }
 
     return Promise.reject(error)
@@ -112,8 +136,8 @@ async function handleUnauthorized() {
   } catch {
     // 刷新失败，清除状态并跳转登录
     authStore.logout()
-    ElMessageBox.alert('登录已过期，请重新登录', '提示', {
-      confirmButtonText: '重新登录',
+    ElMessageBox.alert(t('api.sessionExpired'), t('common.hint'), {
+      confirmButtonText: t('api.relogin'),
       callback: () => router.push('/login'),
     })
   } finally {

@@ -1,10 +1,12 @@
 <script setup lang="ts">
+import { useI18n } from 'vue-i18n'
 import { useAuthStore } from '@/stores/auth'
 import { useAppStore } from '@/stores/app'
 import { useThemeStore } from '@/stores/theme'
 import { useRouter } from 'vue-router'
 import { ElMessageBox } from 'element-plus'
 
+const { t } = useI18n()
 const authStore = useAuthStore()
 const appStore = useAppStore()
 const themeStore = useThemeStore()
@@ -12,9 +14,9 @@ const router = useRouter()
 
 async function handleCommand(cmd: string) {
   if (cmd === 'logout') {
-    await ElMessageBox.confirm('确定要退出登录吗？', '退出确认', {
-      confirmButtonText: '确定退出',
-      cancelButtonText: '取消',
+    await ElMessageBox.confirm(t('header.logoutConfirm'), t('header.logoutTitle'), {
+      confirmButtonText: t('header.confirmLogout'),
+      cancelButtonText: t('common.cancel'),
       type: 'warning',
     })
     await authStore.logout()
@@ -52,14 +54,14 @@ async function handleCommand(cmd: string) {
     <!-- 右侧操作区 -->
     <div class="header-right">
       <!-- 语言切换 -->
-      <el-tooltip content="切换语言" placement="bottom">
+      <el-tooltip :content="t('header.switchLanguage')" placement="bottom">
         <el-dropdown @command="appStore.setLocale">
           <button class="action-btn">
             <el-icon :size="15"><Grid /></el-icon>
           </button>
           <template #dropdown>
             <el-dropdown-menu>
-              <el-dropdown-item command="zh-Hans">简体中文</el-dropdown-item>
+              <el-dropdown-item command="zh-Hans">{{ t('header.chinese') }}</el-dropdown-item>
               <el-dropdown-item command="en">English</el-dropdown-item>
             </el-dropdown-menu>
           </template>
@@ -67,7 +69,7 @@ async function handleCommand(cmd: string) {
       </el-tooltip>
 
       <!-- 主题切换 -->
-      <el-tooltip :content="themeStore.isDark ? '切换为浅色' : '切换为深色'" placement="bottom">
+      <el-tooltip :content="themeStore.isDark ? t('header.switchToLight') : t('header.switchToDark')" placement="bottom">
         <button class="action-btn theme-btn" @click="themeStore.toggleDark()">
           <transition name="theme-icon" mode="out-in">
             <el-icon v-if="themeStore.isDark" :size="15" key="sun"><Sunny /></el-icon>
@@ -86,7 +88,7 @@ async function handleCommand(cmd: string) {
           </div>
           <div class="user-meta">
             <span class="user-name">{{ authStore.userDisplayName }}</span>
-            <span class="user-role">管理员</span>
+            <span class="user-role">{{ t('header.admin') }}</span>
           </div>
           <el-icon class="arrow-icon" :size="10"><ArrowDown /></el-icon>
         </div>
@@ -94,15 +96,15 @@ async function handleCommand(cmd: string) {
           <el-dropdown-menu>
             <el-dropdown-item command="profile">
               <el-icon><User /></el-icon>
-              <span>个人信息</span>
+              <span>{{ t('header.profile') }}</span>
             </el-dropdown-item>
             <el-dropdown-item command="password">
               <el-icon><Lock /></el-icon>
-              <span>修改密码</span>
+              <span>{{ t('header.changePassword') }}</span>
             </el-dropdown-item>
             <el-dropdown-item divided command="logout">
               <el-icon><SwitchButton /></el-icon>
-              <span>退出登录</span>
+              <span>{{ t('header.logout') }}</span>
             </el-dropdown-item>
           </el-dropdown-menu>
         </template>
@@ -206,8 +208,8 @@ async function handleCommand(cmd: string) {
   }
 
   .user-avatar {
-    width: 30px;
-    height: 30px;
+    width: 32px;
+    height: 32px;
     border-radius: 8px;
     background: var(--avatar-gradient);
     display: flex;

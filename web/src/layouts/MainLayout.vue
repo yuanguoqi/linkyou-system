@@ -1,11 +1,13 @@
 <script setup lang="ts">
 import { computed } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { useAppStore } from '@/stores/app'
 import { useThemeStore } from '@/stores/theme'
 import SidebarMenu from './components/SidebarMenu.vue'
 import HeaderBar from './components/HeaderBar.vue'
 import TabsNav from './components/TabsNav.vue'
 
+const { t } = useI18n()
 const appStore = useAppStore()
 const themeStore = useThemeStore()
 const collapsed = computed(() => appStore.sidebarCollapsed)
@@ -14,7 +16,7 @@ const collapsed = computed(() => appStore.sidebarCollapsed)
 <template>
   <el-container class="layout-wrapper" :class="{ light: !themeStore.isDark }">
     <!-- 左侧导航 -->
-    <el-aside :width="collapsed ? '56px' : '212px'" class="layout-aside">
+    <el-aside :width="collapsed ? '60px' : '220px'" class="layout-aside">
       <div class="logo-area" :class="{ collapsed }">
         <div class="logo-mark">
           <svg viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -30,7 +32,7 @@ const collapsed = computed(() => appStore.sidebarCollapsed)
           </svg>
         </div>
         <transition name="logo-slide">
-          <span v-show="!collapsed" class="logo-text">领佑管理系统</span>
+          <span v-show="!collapsed" class="logo-text">{{ t('app.title') }}</span>
         </transition>
       </div>
       <SidebarMenu :collapsed="collapsed" />

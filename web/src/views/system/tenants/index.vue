@@ -3,7 +3,10 @@ import { tenantApi } from '@/api/modules/tenants'
 import type { TenantDto } from '@/api/modules/tenants'
 import { useCrud } from '@/composables/useCrud'
 import { formatDateTime } from '@/utils/date'
+import { useI18n } from 'vue-i18n'
 import TenantDialog from './components/TenantDialog.vue'
+
+const { t } = useI18n()
 
 const {
   loading, tableData, totalCount, searchFilter,
@@ -21,15 +24,15 @@ const {
 
 <template>
   <div class="page-container">
-    <!-- 搜索区 -->
+    <!-- Search Panel -->
     <div class="panel">
       <div class="panel-header">
-        <span class="panel-title font-display">租户管理</span>
+        <span class="panel-title font-display">{{ t('tenant.title') }}</span>
       </div>
       <div class="search-bar">
         <el-input
           v-model="searchFilter"
-          placeholder="搜索租户名称..."
+          :placeholder="t('tenant.searchPlaceholder')"
           clearable
           class="search-input"
           @keyup.enter="handleSearch"
@@ -39,37 +42,37 @@ const {
         </el-input>
         <div class="search-actions">
           <button class="btn btn-primary" @click="handleSearch">
-            <el-icon :size="14"><Search /></el-icon>搜索
+            <el-icon :size="14"><Search /></el-icon>{{ t('common.search') }}
           </button>
           <button class="btn btn-ghost" @click="handleReset">
-            <el-icon :size="14"><RefreshRight /></el-icon>重置
+            <el-icon :size="14"><RefreshRight /></el-icon>{{ t('common.reset') }}
           </button>
         </div>
       </div>
     </div>
 
-    <!-- 数据区 -->
+    <!-- Data Panel -->
     <div class="panel">
       <div class="panel-header">
-        <span class="panel-title">租户列表</span>
+        <span class="panel-title">{{ t('tenant.list') }}</span>
         <button class="btn btn-primary" @click="handleCreate">
-          <el-icon :size="14"><Plus /></el-icon>新建租户
+          <el-icon :size="14"><Plus /></el-icon>{{ t('tenant.createTenant') }}
         </button>
       </div>
 
       <el-table :data="tableData" v-loading="loading" class="dark-table" row-key="id">
-        <el-table-column prop="name" label="租户名称" min-width="200" show-overflow-tooltip />
-        <el-table-column prop="creationTime" label="创建时间" width="200">
+        <el-table-column prop="name" :label="t('tenant.tenantName')" min-width="200" show-overflow-tooltip />
+        <el-table-column prop="creationTime" :label="t('common.createTime')" width="200">
           <template #default="{ row }">{{ formatDateTime(row.creationTime) }}</template>
         </el-table-column>
-        <el-table-column label="操作" width="160" fixed="right">
+        <el-table-column :label="t('common.operation')" width="160" fixed="right">
           <template #default="{ row }">
             <div class="action-buttons">
               <button class="btn-action btn-action-edit" @click="handleEdit(row as TenantDto)">
-                <el-icon :size="13"><Edit /></el-icon>编辑
+                <el-icon :size="13"><Edit /></el-icon>{{ t('common.edit') }}
               </button>
               <button class="btn-action btn-action-delete" @click="handleDelete(row as TenantDto)">
-                <el-icon :size="13"><Delete /></el-icon>删除
+                <el-icon :size="13"><Delete /></el-icon>{{ t('common.delete') }}
               </button>
             </div>
           </template>
@@ -101,17 +104,17 @@ const {
 
 <style scoped lang="scss">
 .page-container {
-  padding: 16px;
+  padding: 20px;
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 16px;
   min-height: 100%;
 }
 
 .panel {
   background: var(--bg-card);
   border: 1px solid var(--border-default);
-  border-radius: 12px;
+  border-radius: 14px;
   overflow: hidden;
   transition: background 0.3s, border-color 0.3s;
 }
@@ -120,7 +123,7 @@ const {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 14px 16px;
+  padding: 16px 20px;
   border-bottom: 1px solid var(--border-default);
 }
 
@@ -136,7 +139,7 @@ const {
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 14px 16px;
+  padding: 16px 20px;
   flex-wrap: wrap;
 }
 
@@ -201,7 +204,7 @@ const {
 .pagination-wrap {
   display: flex;
   justify-content: flex-end;
-  padding: 14px 16px;
+  padding: 16px 20px;
   border-top: 1px solid var(--border-default);
 }
 
