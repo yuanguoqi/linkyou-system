@@ -34,12 +34,9 @@ public class MenuAppService : ApplicationService, IMenuAppService
 
     public async Task<PagedResultDto<MenuDto>> GetListAsync(GetMenuListInput input)
     {
-        var count = await _repository.GetCountAsync(input.Filter);
-        var list = await _repository.GetListAsync(
-            input.Filter, input.SkipCount, input.MaxResultCount,
-            input.Sorting ?? nameof(Menu.Sort));
+        var (items, count) = await _repository.GetPagedListAsync(input);
         return new PagedResultDto<MenuDto>(
-            count, ObjectMapper.Map<List<Menu>, List<MenuDto>>(list));
+            count, ObjectMapper.Map<List<Menu>, List<MenuDto>>(items));
     }
 
     [Authorize(MenusPermissions.MenuItems.Create)]
@@ -83,26 +80,17 @@ public class MenuAppService : ApplicationService, IMenuAppService
 
         List<Menu> allMenus;
 
+        var visibleMenus = await _repository.GetAllVisibleAsync();
+
         if (isSuperAdmin)
         {
-            // 超级管理员：获取所有可见菜单
-            allMenus = await _repository.GetListAsync(
-                maxResultCount: 1000,
-                sorting: nameof(Menu.Sort));
-            allMenus = allMenus.Where(m => m.IsVisible).ToList();
+            allMenus = visibleMenus;
         }
         else
         {
-            // 普通用户：根据角色权限过滤
             var permissions = await _permissionRepository.GetByRolesAsync(userRoles);
             var allowedMenuIds = permissions.Select(p => p.MenuId).ToHashSet();
-
-            allMenus = await _repository.GetListAsync(
-                maxResultCount: 1000,
-                sorting: nameof(Menu.Sort));
-            allMenus = allMenus
-                .Where(m => m.IsVisible && allowedMenuIds.Contains(m.Id))
-                .ToList();
+            allMenus = visibleMenus.Where(m => allowedMenuIds.Contains(m.Id)).ToList();
         }
 
         // 构建树形结构

@@ -50,7 +50,12 @@
       "Bash(taskkill //F //PID 48580)",
       "Bash(taskkill //F //PID 26776)",
       "Bash(dotnet add *)",
-      "Bash(taskkill //F //PID 46276)"
+      "Bash(taskkill //F //PID 46276)",
+      "Bash(taskkill *)",
+      "Bash(cd /tmp)",
+      "Bash(mkdir -p abp-audit)",
+      "Bash(unzip -o \"/c/Users/Guoqi Yuan/.nuget/packages/volo.abp.auditlogging.domain/10.4.1/volo.abp.auditlogging.domain.10.4.1.nupkg\" -d abp-audit)",
+      "Bash(find /tmp/abp-audit -name \"AuditLog.cs\")"
     ]
   }
 }

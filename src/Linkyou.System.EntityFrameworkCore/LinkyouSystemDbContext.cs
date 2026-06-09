@@ -1,4 +1,3 @@
-using Linkyou.System.AuditLogs;
 using Linkyou.System.Menus;
 using Microsoft.EntityFrameworkCore;
 using Volo.Abp.Data;
@@ -69,7 +68,6 @@ public class LinkyouSystemDbContext :
     // ==================== 业务实体表（在此追加） ====================
     public DbSet<Menu> Menus { get; set; }
     public DbSet<MenuRolePermission> MenuRolePermissions { get; set; }
-    public DbSet<AuditLog> AuditLogs { get; set; }
 
     public LinkyouSystemDbContext(DbContextOptions<LinkyouSystemDbContext> options)
         : base(options)

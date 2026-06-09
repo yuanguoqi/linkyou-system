@@ -1,18 +1,20 @@
 import { http } from '../index'
 import type { PagedResultDto } from '@/types/common'
 
-// ── Audit Log DTOs ─────────────────────────────────────
 export interface AuditLogDto {
   id: string
-  httpMethod: string
-  url: string
-  httpStatusCode: number
-  executionDuration: number
-  clientIpAddress: string | null
+  userId: string | null
   userName: string | null
+  tenantId: string | null
+  applicationName: string | null
+  clientIpAddress: string | null
+  httpMethod: string | null
+  url: string | null
+  httpStatusCode: number | null
+  executionDuration: number
+  executionTime: string
   exceptions: string | null
-  creationTime: string
-  creatorId: string | null
+  browserInfo: string | null
 }
 
 export interface GetAuditLogListInput {
@@ -25,7 +27,6 @@ export interface GetAuditLogListInput {
   sorting?: string
 }
 
-// ── API ────────────────────────────────────────────────
 const BASE_URL = '/audit-logging/audit-logs'
 
 export const auditLogApi = {
