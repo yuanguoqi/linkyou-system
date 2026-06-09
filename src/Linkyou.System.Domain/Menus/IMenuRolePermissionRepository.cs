@@ -18,8 +18,8 @@ public interface IMenuRolePermissionRepository : IRepository<MenuRolePermission,
         Guid menuId,
         CancellationToken cancellationToken = default);
 
-    /// <summary>获取指定角色列表的所有菜单权限（去重）</summary>
-    Task<List<MenuRolePermission>> GetByRolesAsync(
+    /// <summary>获取指定角色列表有权限的菜单 ID 集合（去重）</summary>
+    Task<List<Guid>> GetMenuIdsByRolesAsync(
         string[] roleNames,
         CancellationToken cancellationToken = default);
 

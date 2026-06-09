@@ -237,7 +237,8 @@ export default {
   },
   auditLog: {
     title: '审计日志',
-    searchPlaceholder: '关键词搜索...',
+    urlPlaceholder: '搜索 URL...',
+    userNamePlaceholder: '搜索用户名...',
     httpMethod: 'HTTP 方法',
     rangeSeparator: '至',
     startTime: '开始时间',

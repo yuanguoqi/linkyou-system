@@ -15,7 +15,8 @@ const tableData = ref<AuditLogDto[]>([])
 const totalCount = ref(0)
 
 const searchForm = reactive({
-  keyword: '',
+  url: '',
+  userName: '',
   httpMethod: '',
   dateRange: [] as string[],
 })
@@ -69,7 +70,8 @@ async function fetchData() {
   loading.value = true
   try {
     const params: GetAuditLogListInput = {
-      filter: searchForm.keyword || undefined,
+      url: searchForm.url || undefined,
+      userName: searchForm.userName || undefined,
       httpMethod: searchForm.httpMethod || undefined,
       skipCount: getSkipCount(),
       maxResultCount: pageSize.value,
@@ -96,7 +98,8 @@ function handleSearch() {
 }
 
 function handleReset() {
-  searchForm.keyword = ''
+  searchForm.url = ''
+  searchForm.userName = ''
   searchForm.httpMethod = ''
   searchForm.dateRange = []
   resetPage()
@@ -116,17 +119,24 @@ onMounted(fetchData)
       </div>
       <div class="search-bar">
         <el-input
-          v-model="searchForm.keyword"
-          :placeholder="t('auditLog.searchPlaceholder')"
+          v-model="searchForm.url"
+          :placeholder="t('auditLog.urlPlaceholder')"
           clearable
           class="search-input"
           @keyup.enter="handleSearch"
           @clear="handleSearch"
         >
-          <template #prefix>
-            <el-icon><Search /></el-icon>
-          </template>
+          <template #prefix><el-icon><Search /></el-icon></template>
         </el-input>
+
+        <el-input
+          v-model="searchForm.userName"
+          :placeholder="t('auditLog.userNamePlaceholder')"
+          clearable
+          class="search-input"
+          @keyup.enter="handleSearch"
+          @clear="handleSearch"
+        />
 
         <el-select
           v-model="searchForm.httpMethod"

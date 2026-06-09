@@ -18,7 +18,8 @@ export interface AuditLogDto {
 }
 
 export interface GetAuditLogListInput {
-  filter?: string
+  url?: string
+  userName?: string
   httpMethod?: string
   startTime?: string
   endTime?: string

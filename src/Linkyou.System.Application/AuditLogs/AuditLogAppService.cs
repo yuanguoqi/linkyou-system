@@ -24,8 +24,8 @@ public class AuditLogAppService(IAuditLogRepository auditLogRepository)
             startTime: input.StartTime,
             endTime: input.EndTime,
             httpMethod: input.HttpMethod,
-            url: input.Filter,
-            userName: input.Filter);
+            url: input.Url,
+            userName: input.UserName);
 
         var items = await auditLogRepository.GetListAsync(
             sorting: input.Sorting ?? "executionTime desc",
@@ -34,8 +34,8 @@ public class AuditLogAppService(IAuditLogRepository auditLogRepository)
             startTime: input.StartTime,
             endTime: input.EndTime,
             httpMethod: input.HttpMethod,
-            url: input.Filter,
-            userName: input.Filter);
+            url: input.Url,
+            userName: input.UserName);
 
         return new PagedResultDto<AuditLogDto>(count, items.ConvertAll(Map));
     }

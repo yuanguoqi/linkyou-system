@@ -88,8 +88,7 @@ public class MenuAppService : ApplicationService, IMenuAppService
         }
         else
         {
-            var permissions = await _permissionRepository.GetByRolesAsync(userRoles);
-            var allowedMenuIds = permissions.Select(p => p.MenuId).ToHashSet();
+            var allowedMenuIds = (await _permissionRepository.GetMenuIdsByRolesAsync(userRoles)).ToHashSet();
             allMenus = visibleMenus.Where(m => allowedMenuIds.Contains(m.Id)).ToList();
         }
 

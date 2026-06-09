@@ -55,7 +55,9 @@
       "Bash(cd /tmp)",
       "Bash(mkdir -p abp-audit)",
       "Bash(unzip -o \"/c/Users/Guoqi Yuan/.nuget/packages/volo.abp.auditlogging.domain/10.4.1/volo.abp.auditlogging.domain.10.4.1.nupkg\" -d abp-audit)",
-      "Bash(find /tmp/abp-audit -name \"AuditLog.cs\")"
+      "Bash(find /tmp/abp-audit -name \"AuditLog.cs\")",
+      "Bash(sed -n '238,260p' /e/DevelopCode/SelfCode/linkyou-system/web/src/locales/en.ts)",
+      "Bash(sed -n '238,260p' /e/DevelopCode/SelfCode/linkyou-system/web/src/locales/zh-Hans.ts)"
     ]
   }
 }

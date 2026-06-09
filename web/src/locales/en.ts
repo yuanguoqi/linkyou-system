@@ -237,7 +237,8 @@ export default {
   },
   auditLog: {
     title: 'Audit Logs',
-    searchPlaceholder: 'Search keywords...',
+    urlPlaceholder: 'Search URL...',
+    userNamePlaceholder: 'Search username...',
     httpMethod: 'HTTP Method',
     rangeSeparator: 'to',
     startTime: 'Start Time',

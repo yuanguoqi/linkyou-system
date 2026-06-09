@@ -79,9 +79,7 @@ http.interceptors.response.use(
         break
 
       case 401:
-        // 未认证，尝试刷新令牌（登录页不会触发此分支，因为登录接口用 skipErrorHandler）
-        await handleUnauthorized()
-        break
+        return handleUnauthorized(config)
 
       case 403:
         // 区分真实权限错误和业务验证错误
@@ -125,13 +123,15 @@ http.interceptors.response.use(
 let isRefreshing = false
 let pendingRequests: Array<(token: string) => void> = []
 
-async function handleUnauthorized() {
+async function handleUnauthorized(originalConfig: InternalAxiosRequestConfig) {
   const authStore = useAuthStore()
 
   if (isRefreshing) {
-    // 等待刷新完成后重试
-    return new Promise<void>((resolve) => {
-      pendingRequests.push(() => resolve())
+    return new Promise<AxiosResponse>((resolve) => {
+      pendingRequests.push((token) => {
+        originalConfig.headers.Authorization = `Bearer ${token}`
+        resolve(http(originalConfig))
+      })
     })
   }
 
@@ -139,14 +139,17 @@ async function handleUnauthorized() {
 
   try {
     await authStore.refreshToken()
-    pendingRequests.forEach((cb) => cb(authStore.accessToken!))
+    const token = authStore.accessToken!
+    pendingRequests.forEach((cb) => cb(token))
+    originalConfig.headers.Authorization = `Bearer ${token}`
+    return http(originalConfig)
   } catch {
-    // 刷新失败，清除状态并跳转登录
     authStore.logout()
     ElMessageBox.alert(t('api.sessionExpired'), t('common.hint'), {
       confirmButtonText: t('api.relogin'),
       callback: () => router.push('/login'),
     })
+    return Promise.reject(new Error('Session expired'))
   } finally {
     isRefreshing = false
     pendingRequests = []
