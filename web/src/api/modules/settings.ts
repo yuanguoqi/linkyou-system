@@ -20,11 +20,11 @@ export interface GetSettingsInput {
 }
 
 // ── API ────────────────────────────────────────────────
-const BASE_URL = '/setting-management/settings'
+const BASE_URL = '/setting-management/global-settings'
 
 export const settingApi = {
   get: (params: GetSettingsInput) =>
-    http.get<SettingDto[]>(`${BASE_URL}/by-global`, { params }),
+    http.get<SettingDto[]>(BASE_URL, { params }),
 
   update: (data: UpdateSettingDto[]) =>
     http.put(BASE_URL, data),

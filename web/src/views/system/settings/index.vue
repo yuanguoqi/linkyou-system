@@ -6,7 +6,7 @@ import { useI18n } from 'vue-i18n'
 import { settingApi } from '@/api/modules/settings'
 import type { SettingDto, UpdateSettingDto } from '@/api/modules/settings'
 
-const { t } = useI18n()
+const { t, locale } = useI18n()
 
 // ── State ──────────────────────────────────────────────
 const loading = ref(false)
@@ -14,10 +14,48 @@ const saving = ref(false)
 const settingsList = ref<SettingDto[]>([])
 const settingValues = reactive<Record<string, string>>({})
 
-// ── Lifecycle ──────────────────────────────────────────
-onMounted(() => {
-  fetchSettings()
-})
+// ── Default values for specific settings ───────────────
+const DEFAULT_VALUES: Record<string, string> = {
+  'Abp.Localization.DefaultLanguage': 'zh-Hans',
+  'Abp.Timing.Timezone': 'Asia/Shanghai',
+  'Abp.Identity.SignIn.RequireConfirmedEmail': 'False',
+  'Abp.Identity.SignIn.RequireConfirmedPhoneNumber': 'False',
+}
+
+// ── Dropdown options (computed for i18n reactivity) ─────
+const languageOptions = computed(() => [
+  { label: t('settings.languageZhHans'), value: 'zh-Hans' },
+  { label: t('settings.languageEn'), value: 'en' },
+])
+
+const verificationOptions = computed(() => [
+  { label: t('settings.disabled'), value: 'False' },
+  { label: t('settings.enabled'), value: 'True' },
+])
+
+const timezoneOptions = [
+  { label: '(UTC+08:00) 北京/上海/香港', value: 'Asia/Shanghai' },
+  { label: '(UTC+09:00) 东京/首尔', value: 'Asia/Tokyo' },
+  { label: '(UTC+07:00) 曼谷/河内', value: 'Asia/Bangkok' },
+  { label: '(UTC+05:30) 新德里/孟买', value: 'Asia/Kolkata' },
+  { label: '(UTC+00:00) 伦敦', value: 'Europe/London' },
+  { label: '(UTC+01:00) 巴黎/柏林', value: 'Europe/Berlin' },
+  { label: '(UTC-05:00) 纽约', value: 'America/New_York' },
+  { label: '(UTC-08:00) 洛杉矶', value: 'America/Los_Angeles' },
+  { label: '(UTC+03:00) 莫斯科', value: 'Europe/Moscow' },
+  { label: '(UTC+10:00) 悉尼', value: 'Australia/Sydney' },
+]
+
+// ── Hidden categories (entire module excluded) ──────────
+const HIDDEN_CATEGORIES = new Set([
+  'Abp.Mailing',
+])
+
+// ── Hidden individual settings ──────────────────────────
+const HIDDEN_SETTINGS = new Set([
+  'Abp.Timing.TimeZone',
+  'Abp.Identity.Password.RequiredUniqueChars',
+])
 
 // ── Computed: Group settings by category ───────────────
 interface SettingGroup {
@@ -29,9 +67,10 @@ const settingGroups = computed<SettingGroup[]>(() => {
   const groups = new Map<string, SettingDto[]>()
 
   settingsList.value.forEach(setting => {
-    // Extract category from setting name (e.g., "Abp.Mailing.SmtpHost" -> "Abp.Mailing")
+    if (HIDDEN_SETTINGS.has(setting.name)) return
     const parts = setting.name.split('.')
     const category = parts.length > 1 ? parts.slice(0, -1).join('.') : 'General'
+    if (HIDDEN_CATEGORIES.has(category)) return
 
     if (!groups.has(category)) {
       groups.set(category, [])
@@ -39,23 +78,53 @@ const settingGroups = computed<SettingGroup[]>(() => {
     groups.get(category)!.push(setting)
   })
 
-  return Array.from(groups.entries()).map(([category, items]) => ({
-    category,
-    items,
-  }))
+  // Sort groups: Localization first, then Timing, then others
+  const CATEGORY_ORDER: Record<string, number> = {
+    'Abp.Localization': 0,
+    'Abp.Timing': 1,
+  }
+
+  return Array.from(groups.entries())
+    .map(([category, items]) => ({ category, items }))
+    .sort((a, b) => {
+      const orderA = CATEGORY_ORDER[a.category] ?? 99
+      const orderB = CATEGORY_ORDER[b.category] ?? 99
+      return orderA - orderB || a.category.localeCompare(b.category)
+    })
 })
 
-// ── Methods ────────────────────────────────────────────
+// ── Data Fetching ──────────────────────────────────────
 async function fetchSettings() {
   loading.value = true
   try {
     const res = await settingApi.get({})
-    settingsList.value = res.data
+    const data = Array.isArray(res.data) ? res.data : (res.data as any)?.items ?? []
+    settingsList.value = data
 
-    // Populate reactive values
-    res.data.forEach((setting: SettingDto) => {
-      settingValues[setting.name] = setting.value ?? ''
+    // 先用后端返回值填充
+    data.forEach((setting: SettingDto) => {
+      const v = setting.value ?? DEFAULT_VALUES[setting.name] ?? ''
+      settingValues[setting.name] = v
     })
+
+    // 后端未返回的设置项：补默认值 + 补入 settingsList 以显示在页面上
+    const existingNames = new Set(data.map((s: SettingDto) => s.name))
+    for (const [key, defaultVal] of Object.entries(DEFAULT_VALUES)) {
+      if (!settingValues[key]) {
+        settingValues[key] = defaultVal
+      }
+      if (!existingNames.has(key)) {
+        const parts = key.split('.')
+        const displayName = parts[parts.length - 1]!
+        settingsList.value.push({
+          name: key,
+          value: defaultVal,
+          displayName,
+          description: key,
+          isEncrypted: false,
+        })
+      }
+    }
   } catch (err: unknown) {
     const axiosErr = err as { response?: { data?: { error?: { message?: string } } } }
     ElMessage.error(axiosErr?.response?.data?.error?.message || t('settings.fetchFailed'))
@@ -64,15 +133,32 @@ async function fetchSettings() {
   }
 }
 
+// ── Save ───────────────────────────────────────────────
 async function handleSave() {
   saving.value = true
   try {
-    const payload: UpdateSettingDto[] = Object.entries(settingValues).map(([name, value]) => ({
-      name,
-      value,
-    }))
+    const payload: UpdateSettingDto[] = Object.entries(settingValues)
+      .filter(([name]) => {
+        if (HIDDEN_SETTINGS.has(name)) return false
+        const parts = name.split('.')
+        const cat = parts.length > 1 ? parts.slice(0, -1).join('.') : 'General'
+        return !HIDDEN_CATEGORIES.has(cat)
+      })
+      .map(([name, value]) => ({
+        name,
+        value,
+      }))
 
     await settingApi.update(payload)
+
+    // If language changed, update UI immediately
+    const langKey = 'Abp.Localization.DefaultLanguage'
+    const newLang = settingValues[langKey]
+    if (newLang && newLang !== locale.value) {
+      locale.value = newLang as 'zh-Hans' | 'en'
+      localStorage.setItem('locale', newLang)
+    }
+
     ElMessage.success(t('settings.saveSuccess'))
   } catch (err: unknown) {
     const axiosErr = err as { response?: { data?: { error?: { message?: string } } } }
@@ -88,17 +174,14 @@ function handleRefresh() {
 
 // ── Helpers ────────────────────────────────────────────
 function formatCategoryName(category: string): string {
-  // "Abp.Mailing" -> "Mailing", "Abp" -> "Abp"
   const parts = category.split('.')
   return parts[parts.length - 1]
 }
 
 function getCategoryDescription(category: string): string {
   const descriptions: Record<string, string> = {
-    'Abp.Mailing': t('settings.descMailing'),
-    'Abp.Security': t('settings.descSecurity'),
-    'Abp.Account': t('settings.descAccount'),
     'Abp.Identity': t('settings.descIdentity'),
+    'Abp.Account': t('settings.descAccount'),
     'Abp.SettingManagement': t('settings.descSettingManagement'),
     'Abp.TenantManagement': t('settings.descTenantManagement'),
   }
@@ -112,21 +195,43 @@ function isPasswordSetting(name: string): boolean {
 
 function isNumberSetting(name: string): boolean {
   const lower = name.toLowerCase()
-  return lower.includes('port') || lower.includes('timeout') || lower.includes('count') || lower.includes('size')
+  return lower.includes('port') || lower.includes('timeout') || lower.includes('count') || lower.includes('size') || lower.includes('length')
 }
 
 function isBooleanSetting(name: string): boolean {
   const lower = name.toLowerCase()
-  return lower.includes('enable') || lower.includes('is') || lower.includes('use') || lower === 'true' || lower === 'false'
+  return lower.includes('enable') || lower.includes('is') || lower.includes('use')
 }
 
-function getBooleanValue(name: string): boolean {
+function getBoolValue(name: string): boolean {
   return settingValues[name]?.toLowerCase() === 'true'
 }
 
-function setBooleanValue(name: string, val: boolean) {
+function setBoolValue(name: string, val: boolean) {
   settingValues[name] = val ? 'True' : 'False'
 }
+
+function isTimezoneSetting(name: string): boolean {
+  return name === 'Abp.Timing.Timezone'
+}
+
+function isLanguageSetting(name: string): boolean {
+  return name === 'Abp.Localization.DefaultLanguage'
+}
+
+function isBoolDropdownSetting(name: string): boolean {
+  return name === 'Abp.Identity.SignIn.RequireConfirmedEmail'
+    || name === 'Abp.Identity.SignIn.RequireConfirmedPhoneNumber'
+    || name === 'Abp.Identity.Password.RequireNonAlphanumeric'
+    || name === 'Abp.Identity.Password.RequireLowercase'
+    || name === 'Abp.Identity.Password.RequireUppercase'
+    || name === 'Abp.Identity.Password.RequireDigit'
+}
+
+// ── Lifecycle ──────────────────────────────────────────
+onMounted(() => {
+  fetchSettings()
+})
 </script>
 
 <template>
@@ -139,12 +244,13 @@ function setBooleanValue(name: string, val: boolean) {
           <span class="panel-subtitle">{{ t('settings.subtitle') }}</span>
         </div>
         <div class="header-actions">
-          <el-button class="btn-ghost" :icon="Refresh" :loading="loading" @click="handleRefresh">
+          <button class="btn-ghost" :disabled="loading" @click="handleRefresh">
+            <el-icon :size="14"><Refresh /></el-icon>
             {{ t('common.refresh') }}
-          </el-button>
-          <el-button class="btn-primary" :loading="saving" @click="handleSave">
-            {{ t('settings.save') }}
-          </el-button>
+          </button>
+          <button class="btn-primary" :disabled="saving" @click="handleSave">
+            {{ saving ? t('settings.saving') : t('settings.save') }}
+          </button>
         </div>
       </div>
     </div>
@@ -152,7 +258,7 @@ function setBooleanValue(name: string, val: boolean) {
     <!-- Loading State -->
     <div v-if="loading && settingsList.length === 0" class="panel loading-panel">
       <div class="loading-content">
-        <el-icon class="loading-icon" :size="32"><Refresh /></el-icon>
+        <el-icon class="loading-icon" :size="28"><Refresh /></el-icon>
         <span>{{ t('settings.loading') }}</span>
       </div>
     </div>
@@ -193,11 +299,58 @@ function setBooleanValue(name: string, val: boolean) {
             </div>
 
             <div class="setting-control">
+              <!-- Language dropdown -->
+              <el-select
+                v-if="isLanguageSetting(setting.name)"
+                :model-value="settingValues[setting.name]"
+                @update:model-value="(val: string | number | boolean) => { settingValues[setting.name] = String(val) }"
+                class="setting-select"
+              >
+                <el-option
+                  v-for="opt in languageOptions"
+                  :key="opt.value"
+                  :label="opt.label"
+                  :value="opt.value"
+                />
+              </el-select>
+
+              <!-- Bool dropdown (verification + password requires) -->
+              <el-select
+                v-else-if="isBoolDropdownSetting(setting.name)"
+                :model-value="settingValues[setting.name]"
+                @update:model-value="(val: string | number | boolean) => { settingValues[setting.name] = String(val) }"
+                class="setting-select"
+              >
+                <el-option
+                  v-for="opt in verificationOptions"
+                  :key="opt.value"
+                  :label="opt.label"
+                  :value="opt.value"
+                />
+              </el-select>
+
+              <!-- Timezone dropdown -->
+              <el-select
+                v-else-if="isTimezoneSetting(setting.name)"
+                :model-value="settingValues[setting.name]"
+                @update:model-value="(val: string | number | boolean) => { settingValues[setting.name] = String(val) }"
+                filterable
+                class="setting-select"
+                :placeholder="t('settings.timezonePlaceholder')"
+              >
+                <el-option
+                  v-for="opt in timezoneOptions"
+                  :key="opt.value"
+                  :label="opt.label"
+                  :value="opt.value"
+                />
+              </el-select>
+
               <!-- Boolean switch -->
               <el-switch
-                v-if="isBooleanSetting(setting.name) && (settingValues[setting.name] === 'True' || settingValues[setting.name] === 'False' || settingValues[setting.name] === 'true' || settingValues[setting.name] === 'false')"
-                :model-value="getBooleanValue(setting.name)"
-                @update:model-value="(val: string | number | boolean) => setBooleanValue(setting.name, !!val)"
+                v-else-if="isBooleanSetting(setting.name) && (settingValues[setting.name] === 'True' || settingValues[setting.name] === 'False' || settingValues[setting.name] === 'true' || settingValues[setting.name] === 'false')"
+                :model-value="getBoolValue(setting.name)"
+                @update:model-value="(val: string | number | boolean) => setBoolValue(setting.name, !!val)"
                 :active-text="t('common.enabled')"
                 :inactive-text="t('common.disabled')"
               />
@@ -245,7 +398,7 @@ function setBooleanValue(name: string, val: boolean) {
   min-height: 100%;
 }
 
-// ─── Panel ─────────────────────────────────────────────
+// ── Panel ─────────────────────────────────────────────
 .panel {
   background: var(--bg-card);
   border: 1px solid var(--border-default);
@@ -272,7 +425,7 @@ function setBooleanValue(name: string, val: boolean) {
   transition: color 0.3s;
 }
 
-// ─── Header Panel ──────────────────────────────────────
+// ── Header ────────────────────────────────────────────
 .header-panel {
   .header-left {
     display: flex;
@@ -291,47 +444,61 @@ function setBooleanValue(name: string, val: boolean) {
   }
 }
 
-// ─── Buttons ───────────────────────────────────────────
-.btn-ghost {
-  background: transparent !important;
-  border: 1px solid var(--border-default) !important;
-  color: var(--text-secondary) !important;
-  border-radius: 8px !important;
-  font-size: 13px;
-  height: 36px;
-  padding: 0 14px;
-  transition: all 0.2s;
-
-  &:hover {
-    border-color: var(--border-medium) !important;
-    color: var(--text-primary) !important;
-    background: var(--bg-hover) !important;
-  }
-}
-
+// ── Buttons ───────────────────────────────────────────
 .btn-primary {
-  background: linear-gradient(135deg, #4f46e5, #6366f1) !important;
-  border: none !important;
-  color: #fff !important;
-  border-radius: 8px !important;
-  font-size: 13px;
-  font-weight: 500;
-  height: 36px;
-  padding: 0 14px;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 7px 16px;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: #fff;
+  background: linear-gradient(135deg, #4f46e5, #6366f1);
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s, opacity 0.2s;
   box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
-  transition: all 0.2s;
+  letter-spacing: 0.3px;
 
-  &:hover {
+  &:hover:not(:disabled) {
     transform: translateY(-1px);
     box-shadow: 0 6px 16px rgba(79, 70, 229, 0.4);
   }
 
-  &:active {
-    transform: translateY(0);
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
   }
 }
 
-// ─── Loading / Empty States ────────────────────────────
+.btn-ghost {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 7px 14px;
+  font-size: 12.5px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  background: transparent;
+  border: 1px solid var(--border-subtle);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+
+  &:hover:not(:disabled) {
+    color: var(--text-primary);
+    border-color: var(--border-medium);
+    background: var(--bg-hover);
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+// ── Loading / Empty States ────────────────────────────
 .loading-panel,
 .empty-panel {
   padding: 60px 16px;
@@ -362,10 +529,8 @@ function setBooleanValue(name: string, val: boolean) {
   color: var(--border-subtle);
 }
 
-// ─── Settings Group ────────────────────────────────────
+// ── Settings Group ────────────────────────────────────
 .settings-group {
-  transition: background 0.3s, border-color 0.3s;
-
   &:hover {
     border-color: var(--border-subtle);
   }
@@ -413,7 +578,7 @@ function setBooleanValue(name: string, val: boolean) {
   padding: 4px 0;
 }
 
-// ─── Setting Item ──────────────────────────────────────
+// ── Setting Item ──────────────────────────────────────
 .setting-item {
   display: flex;
   align-items: center;
@@ -462,10 +627,10 @@ function setBooleanValue(name: string, val: boolean) {
 
 .setting-control {
   flex-shrink: 0;
-  width: 280px;
+  width: 300px;
 }
 
-// ─── Input Overrides ───────────────────────────────────
+// ── Input ─────────────────────────────────────────────
 .setting-input {
   :deep(.el-input__wrapper) {
     background: var(--input-bg) !important;
@@ -494,7 +659,34 @@ function setBooleanValue(name: string, val: boolean) {
   }
 }
 
-// ─── Switch Override ───────────────────────────────────
+// ── Select ────────────────────────────────────────────
+.setting-select {
+  width: 100%;
+
+  :deep(.el-select__wrapper) {
+    background: var(--input-bg) !important;
+    border: 1px solid var(--input-border) !important;
+    border-radius: 8px !important;
+    box-shadow: none !important;
+
+    &:hover {
+      border-color: rgba(99, 102, 241, 0.3) !important;
+    }
+
+    &.is-focus {
+      border-color: rgba(99, 102, 241, 0.6) !important;
+      box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1) !important;
+    }
+
+    .el-select__placeholder,
+    .el-select__selected-item {
+      color: var(--text-primary) !important;
+      font-size: 13px;
+    }
+  }
+}
+
+// ── Switch ────────────────────────────────────────────
 :deep(.el-switch) {
   --el-switch-on-color: #6366f1;
   --el-switch-off-color: var(--border-medium);
@@ -505,7 +697,7 @@ function setBooleanValue(name: string, val: boolean) {
   }
 }
 
-// ─── Responsive ────────────────────────────────────────
+// ── Responsive ────────────────────────────────────────
 @media (max-width: 768px) {
   .header-panel .panel-header {
     flex-direction: column;

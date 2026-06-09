@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, reactive, computed, watch } from 'vue'
+import { ref, reactive, computed, watch, nextTick } from 'vue'
 import { ElMessage } from 'element-plus'
 import type { FormInstance, FormRules } from 'element-plus'
 import { useI18n } from 'vue-i18n'
@@ -111,22 +111,33 @@ async function loadMenuData() {
     const { data } = await menuApi.getList({ maxResultCount: 1000, sorting: 'sort' })
     allMenus.value = data.items
 
+    let targetIds: string[] = []
+
     if (isEdit.value) {
       // 编辑模式：从 API 获取当前角色的菜单权限
       try {
-        const { data: ids } = await menuApi.getRoleMenuIds(form.name)
-        checkedMenuIds.value = ids
+        const { data: raw } = await menuApi.getRoleMenuIds(form.name)
+        // ABP 可能返回 string[] 或 { items: string[] }
+        const ids = Array.isArray(raw) ? raw : ((raw as any)?.items ?? [])
+        targetIds = ids
       } catch {
-        // 获取失败则根据角色名判断
-        checkedMenuIds.value = isAdminRole.value
+        targetIds = isAdminRole.value
           ? allMenus.value.map(m => m.id)
           : []
       }
     } else {
       // 新增模式：admin/superadmin 默认全选
-      checkedMenuIds.value = isAdminRole.value
+      targetIds = isAdminRole.value
         ? allMenus.value.map(m => m.id)
         : []
+    }
+
+    checkedMenuIds.value = targetIds
+
+    // 确保 tree 组件同步 checked 状态（异步加载场景下需要手动调用）
+    await nextTick()
+    if (menuTreeRef.value && targetIds.length > 0) {
+      menuTreeRef.value.setCheckedKeys(targetIds)
     }
   } catch {
     allMenus.value = []
