@@ -6,67 +6,37 @@ using Volo.Abp;
 
 namespace Linkyou.System.Controllers.Account;
 
-/// <summary>
-/// 账户 API 控制器
-/// 提供登录、刷新令牌、用户信息、修改密码、退出登录接口
-/// </summary>
 [RemoteService]
 [Area("app")]
 [Route("api/account")]
-public class AccountController : LinkyouSystemController
+public class AccountController : LinkyouSystemController, IAccountAppService
 {
-    private readonly IAccountAppService _accountAppService;
+    private readonly IAccountAppService _appService;
 
-    public AccountController(IAccountAppService accountAppService)
-    {
-        _accountAppService = accountAppService;
-    }
+    public AccountController(IAccountAppService appService)
+        => _appService = appService;
 
-    /// <summary>
-    /// 登录，返回 AccessToken + RefreshToken
-    /// POST /api/account/login
-    /// </summary>
     [HttpPost("login")]
     public Task<LoginOutput> LoginAsync([FromBody] LoginInput input)
-        => _accountAppService.LoginAsync(input);
+        => _appService.LoginAsync(input);
 
-    /// <summary>
-    /// 刷新访问令牌
-    /// POST /api/account/refresh-token
-    /// </summary>
     [HttpPost("refresh-token")]
     public Task<LoginOutput> RefreshTokenAsync([FromBody] RefreshTokenInput input)
-        => _accountAppService.RefreshTokenAsync(input);
+        => _appService.RefreshTokenAsync(input);
 
-    /// <summary>
-    /// 获取当前登录用户信息（需 Bearer Token）
-    /// GET /api/account/my-profile
-    /// </summary>
     [HttpGet("my-profile")]
     public Task<CurrentUserDto> GetCurrentUserAsync()
-        => _accountAppService.GetCurrentUserAsync();
+        => _appService.GetCurrentUserAsync();
 
-    /// <summary>
-    /// 修改密码
-    /// POST /api/account/change-password
-    /// </summary>
     [HttpPost("change-password")]
     public Task ChangePasswordAsync([FromBody] ChangePasswordInput input)
-        => _accountAppService.ChangePasswordAsync(input);
+        => _appService.ChangePasswordAsync(input);
 
-    /// <summary>
-    /// 退出登录（吊销 RefreshToken）
-    /// POST /api/account/logout
-    /// </summary>
     [HttpPost("logout")]
     public Task LogoutAsync()
-        => _accountAppService.LogoutAsync();
+        => _appService.LogoutAsync();
 
-    /// <summary>
-    /// 获取租户列表（公开接口，供登录页使用）
-    /// GET /api/account/tenants
-    /// </summary>
     [HttpGet("tenants")]
     public Task<List<TenantLookupDto>> GetTenantListAsync()
-        => _accountAppService.GetTenantListAsync();
+        => _appService.GetTenantListAsync();
 }

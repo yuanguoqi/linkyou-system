@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Linkyou.System.Controllers;
 using Microsoft.AspNetCore.Mvc;
 using Volo.Abp;
 
@@ -9,7 +8,7 @@ namespace Linkyou.System.Settings;
 [RemoteService]
 [Area("app")]
 [Route("api/setting-management/global-settings")]
-public class SettingController : LinkyouSystemController
+public class SettingController : Linkyou.System.Controllers.LinkyouSystemController, ISettingAppService
 {
     private readonly ISettingAppService _appService;
 
@@ -17,10 +16,8 @@ public class SettingController : LinkyouSystemController
         => _appService = appService;
 
     [HttpGet]
-    public Task<List<SettingDto>> GetGlobalSettingsAsync()
-        => _appService.GetGlobalSettingsAsync();
+    public Task<List<SettingDto>> GetAsync() => _appService.GetAsync();
 
     [HttpPut]
-    public Task UpdateGlobalSettingsAsync([FromBody] List<UpdateSettingDto> input)
-        => _appService.UpdateGlobalSettingsAsync(input);
+    public Task UpdateAsync([FromBody] List<UpdateSettingDto> input) => _appService.UpdateAsync(input);
 }

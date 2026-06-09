@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Linkyou.System.Controllers;
 using Microsoft.AspNetCore.Mvc;
 using Volo.Abp;
 using Volo.Abp.Application.Dtos;
@@ -11,7 +10,7 @@ namespace Linkyou.System.Menus;
 [RemoteService]
 [Area("app")]
 [Route("api/app/menus")]
-public class MenuController : LinkyouSystemController, IMenuAppService
+public class MenuController : Linkyou.System.Controllers.LinkyouSystemController, IMenuAppService
 {
     private readonly IMenuAppService _appService;
 

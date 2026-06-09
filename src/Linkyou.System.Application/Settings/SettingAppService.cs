@@ -24,7 +24,7 @@ public class SettingAppService : ApplicationService, ISettingAppService
         _settingDefinitionManager = settingDefinitionManager;
     }
 
-    public async Task<List<SettingDto>> GetGlobalSettingsAsync()
+    public async Task<List<SettingDto>> GetAsync()
     {
         var definitions = await _settingDefinitionManager.GetAllAsync();
         var result = new List<SettingDto>();
@@ -45,7 +45,7 @@ public class SettingAppService : ApplicationService, ISettingAppService
         return result;
     }
 
-    public async Task UpdateGlobalSettingsAsync(List<UpdateSettingDto> input)
+    public async Task UpdateAsync(List<UpdateSettingDto> input)
     {
         foreach (var item in input)
         {

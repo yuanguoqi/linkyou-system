@@ -1,6 +1,5 @@
 using System;
 using System.Threading.Tasks;
-using Linkyou.System.Controllers;
 using Microsoft.AspNetCore.Mvc;
 using Volo.Abp;
 using Volo.Abp.Application.Dtos;
@@ -10,7 +9,7 @@ namespace Linkyou.System.AuditLogs;
 [RemoteService]
 [Area("app")]
 [Route("api/audit-logging/audit-logs")]
-public class AuditLogController : LinkyouSystemController, IAuditLogAppService
+public class AuditLogController : Linkyou.System.Controllers.LinkyouSystemController, IAuditLogAppService
 {
     private readonly IAuditLogAppService _appService;
 

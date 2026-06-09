@@ -1,11 +1,15 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Mvc;
 using Volo.Abp.Application.Services;
 
 namespace Linkyou.System.Settings;
 
 public interface ISettingAppService : IApplicationService
 {
-    Task<List<SettingDto>> GetGlobalSettingsAsync();
-    Task UpdateGlobalSettingsAsync(List<UpdateSettingDto> input);
+    [HttpGet]
+    Task<List<SettingDto>> GetAsync();
+
+    [HttpPut]
+    Task UpdateAsync(List<UpdateSettingDto> input);
 }
