@@ -1,3 +1,4 @@
+using Linkyou.System.AuditLogs;
 using Linkyou.System.Menus;
 using Microsoft.EntityFrameworkCore;
 using Volo.Abp;
@@ -59,6 +60,9 @@ public static class LinkyouSystemDbContextModelCreatingExtensions
             b.ToTable("MenuRolePermissions", LinkyouSystemConsts.DbSchema);
             b.Property(x => x.RoleName).IsRequired().HasMaxLength(256);
 
+            // 索引：角色查询
+            b.HasIndex(x => x.RoleName);
+
             // 索引：租户+角色查询
             b.HasIndex(x => new { x.TenantId, x.RoleName });
             // 索引：租户+菜单+角色（唯一约束）
@@ -72,6 +76,23 @@ public static class LinkyouSystemDbContextModelCreatingExtensions
                 .HasForeignKey(x => x.MenuId)
                 .OnDelete(DeleteBehavior.Cascade)
                 .HasConstraintName("FK_MenuRolePermissions_MenuId");
+        });
+
+        builder.Entity<AuditLog>(b =>
+        {
+            b.ToTable("AuditLogs", LinkyouSystemConsts.DbSchema);
+            b.Property(x => x.HttpMethod).IsRequired().HasMaxLength(10);
+            b.Property(x => x.Url).IsRequired().HasMaxLength(2048);
+            b.Property(x => x.ClientIpAddress).HasMaxLength(64);
+            b.Property(x => x.UserName).HasMaxLength(256);
+            b.Property(x => x.Exceptions).HasMaxLength(4000);
+
+            // 索引：按时间查询
+            b.HasIndex(x => x.CreationTime);
+            // 索引：按用户查询
+            b.HasIndex(x => x.UserName);
+            // 索引：按租户+时间查询
+            b.HasIndex(x => new { x.TenantId, x.CreationTime });
         });
     }
 }

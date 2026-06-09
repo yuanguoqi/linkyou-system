@@ -5,7 +5,7 @@ const emit = defineEmits<{ code: [value: string] }>()
 
 const canvasRef = ref<HTMLCanvasElement>()
 
-const CHARS = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789'
+const CHARS = '0123456789'
 
 function randomChar() {
   return CHARS[Math.floor(Math.random() * CHARS.length)]

@@ -84,8 +84,15 @@ http.interceptors.response.use(
         break
 
       case 403:
-        ElMessage.error(t('api.forbidden'))
-        router.push('/403')
+        // 区分真实权限错误和业务验证错误
+        if (abpError?.code?.includes('Authorization')) {
+          // 真实权限不足，跳转 403 页面
+          ElMessage.error(t('api.forbidden'))
+          router.push('/403')
+        } else {
+          // 业务验证错误（如邮箱重复），弹窗提示
+          ElMessage.error(abpError?.message || t('api.forbidden'))
+        }
         break
 
       case 404:

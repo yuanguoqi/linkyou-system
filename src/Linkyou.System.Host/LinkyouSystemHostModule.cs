@@ -5,6 +5,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
+using Volo.Abp.Auditing;
 using Volo.Abp.Authorization;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi;
@@ -51,6 +52,7 @@ public class LinkyouSystemHostModule : AbpModule
         ConfigureCors(context, configuration);
         ConfigureSwagger(context, configuration);
         ConfigureAntiForgery();
+        ConfigureAuditing();
 
         // 开发环境：替换方法调用授权服务，允许所有已认证用户访问
         // 注意：必须在所有模块初始化之后执行，确保覆盖 ABP 默认实现
@@ -177,6 +179,19 @@ public class LinkyouSystemHostModule : AbpModule
         Configure<AbpAntiForgeryOptions>(options =>
         {
             options.AutoValidate = false;
+        });
+    }
+
+    /// <summary>
+    /// 配置审计日志：记录所有 API 调用和实体变更
+    /// </summary>
+    private void ConfigureAuditing()
+    {
+        Configure<AbpAuditingOptions>(options =>
+        {
+            options.IsEnabled = true;
+            options.IsEnabledForAnonymousUsers = false;
+            options.IsEnabledForGetRequests = true;
         });
     }
 

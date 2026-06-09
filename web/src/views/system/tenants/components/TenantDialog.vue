@@ -5,6 +5,8 @@ import { ElMessage } from 'element-plus'
 import { useI18n } from 'vue-i18n'
 import { tenantApi } from '@/api/modules/tenants'
 import type { TenantDto, CreateTenantDto, UpdateTenantDto } from '@/api/modules/tenants'
+import { identityUserApi } from '@/api/modules/identity'
+import { formatDateTime } from '@/utils/date'
 
 const { t } = useI18n()
 
@@ -30,6 +32,9 @@ const form = reactive({
   adminEmailAddress: 'admin@linkyou.com',
   adminPassword: 'Admin@123456',
 })
+
+// 编辑时保存的 DTO 完整数据（用于回显和提交）
+const editData = ref<TenantDto | null>(null)
 
 const isCreate = computed(() => props.mode === 'create')
 
@@ -60,11 +65,39 @@ const rules = computed<FormRules>(() => ({
 }))
 
 // ── Watchers ───────────────────────────────────────────
-watch(() => props.visible, (val) => {
+watch(() => props.visible, async (val) => {
   if (val) {
     resetForm()
     if (props.mode === 'edit' && props.data) {
-      form.name = props.data.name
+      // 编辑模式：从 API 获取完整 DTO 数据
+      try {
+        const { data } = await tenantApi.get(props.data.id)
+        editData.value = data
+        form.name = data.name
+
+        // 尝试获取该租户的管理员信息
+        try {
+          const { data: usersData } = await identityUserApi.getList({
+            filter: 'admin',
+            maxResultCount: 1,
+          })
+          if (usersData.items.length > 0) {
+            form.adminEmailAddress = usersData.items[0].email || ''
+          }
+        } catch {
+          // 获取管理员信息失败，留空
+        }
+        form.adminPassword = '' // 密码不可读，留空
+      } catch {
+        // 如果获取失败，使用列表页传入的数据
+        editData.value = props.data
+        form.name = props.data.name
+      }
+    } else {
+      // 新增模式：设置默认值
+      editData.value = null
+      form.adminEmailAddress = 'admin@linkyou.com'
+      form.adminPassword = 'Admin@123456'
     }
   }
 })
@@ -74,11 +107,17 @@ function resetForm() {
   form.name = ''
   form.adminEmailAddress = ''
   form.adminPassword = ''
+  editData.value = null
   formRef.value?.clearValidate()
 }
 
 function handleClose() {
   emit('update:visible', false)
+}
+
+/** 重置管理员密码为默认密码 */
+function handleResetPassword() {
+  form.adminPassword = 'Admin@123456'
 }
 
 async function handleSubmit() {
@@ -101,9 +140,9 @@ async function handleSubmit() {
     } else {
       const payload: UpdateTenantDto = {
         name: form.name,
-        concurrencyStamp: props.data!.concurrencyStamp,
+        concurrencyStamp: editData.value!.concurrencyStamp,
       }
-      await tenantApi.update(props.data!.id, payload)
+      await tenantApi.update(editData.value!.id, payload)
       ElMessage.success(t('tenant.updateSuccess'))
     }
     emit('success')
@@ -147,13 +186,31 @@ async function handleSubmit() {
       </el-form-item>
 
       <el-form-item :label="t('tenant.adminPassword')" prop="adminPassword">
-        <el-input
-          v-model="form.adminPassword"
-          type="password"
-          :placeholder="isCreate ? t('tenant.adminPasswordPlaceholder') : t('tenant.leaveBlank')"
-          show-password
-        />
+        <div class="password-row">
+          <el-input
+            v-model="form.adminPassword"
+            type="password"
+            :placeholder="isCreate ? t('tenant.adminPasswordPlaceholder') : t('tenant.leaveBlank')"
+            show-password
+            class="password-input"
+          />
+          <button
+            v-if="!isCreate"
+            type="button"
+            class="btn btn-ghost btn-reset"
+            @click="handleResetPassword"
+          >
+            {{ t('tenant.resetPassword') }}
+          </button>
+        </div>
       </el-form-item>
+
+      <!-- 编辑模式：显示只读信息 -->
+      <template v-if="!isCreate && editData">
+        <el-form-item :label="t('common.createTime')">
+          <el-input :model-value="formatDateTime(editData.creationTime)" disabled />
+        </el-form-item>
+      </template>
     </el-form>
 
     <template #footer>
@@ -177,6 +234,23 @@ async function handleSubmit() {
   display: flex;
   justify-content: flex-end;
   gap: 8px;
+}
+
+.password-row {
+  display: flex;
+  gap: 8px;
+  width: 100%;
+
+  .password-input {
+    flex: 1;
+  }
+
+  .btn-reset {
+    flex-shrink: 0;
+    white-space: nowrap;
+    font-size: 12px;
+    padding: 0 12px;
+  }
 }
 
 // ── Buttons ────────────────────────────────────────────

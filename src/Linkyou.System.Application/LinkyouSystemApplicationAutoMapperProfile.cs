@@ -1,4 +1,5 @@
 using AutoMapper;
+using Linkyou.System.AuditLogs;
 using Linkyou.System.Menus;
 
 namespace Linkyou.System;
@@ -12,5 +13,6 @@ public class LinkyouSystemApplicationAutoMapperProfile : Profile
     public LinkyouSystemApplicationAutoMapperProfile()
     {
         CreateMap<Menu, MenuDto>();
+        CreateMap<AuditLog, AuditLogDto>();
     }
 }

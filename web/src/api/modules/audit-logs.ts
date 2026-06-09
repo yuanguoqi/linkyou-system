@@ -4,29 +4,22 @@ import type { PagedResultDto } from '@/types/common'
 // ── Audit Log DTOs ─────────────────────────────────────
 export interface AuditLogDto {
   id: string
-  applicationName: string
-  userId: string | null
-  userName: string | null
-  tenantId: string | null
-  tenantName: string | null
-  executionTime: string
+  httpMethod: string
+  url: string
+  httpStatusCode: number
   executionDuration: number
-  clientIpAddress: string
-  clientName: string | null
-  browserInfo: string | null
-  httpMethod: string | null
-  url: string | null
+  clientIpAddress: string | null
+  userName: string | null
   exceptions: string | null
-  comments: string | null
-  httpStatusCode: number | null
+  creationTime: string
+  creatorId: string | null
 }
 
 export interface GetAuditLogListInput {
   filter?: string
+  httpMethod?: string
   startTime?: string
   endTime?: string
-  httpMethod?: string
-  url?: string
   skipCount?: number
   maxResultCount?: number
   sorting?: string

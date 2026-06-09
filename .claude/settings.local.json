@@ -48,7 +48,9 @@
       "Bash(taskkill //F //PID 44896)",
       "Bash(PGPASSWORD=Ygq123456789. psql *)",
       "Bash(taskkill //F //PID 48580)",
-      "Bash(taskkill //F //PID 26776)"
+      "Bash(taskkill //F //PID 26776)",
+      "Bash(dotnet add *)",
+      "Bash(taskkill //F //PID 46276)"
     ]
   }
 }

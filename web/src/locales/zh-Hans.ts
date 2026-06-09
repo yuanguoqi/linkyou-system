@@ -204,6 +204,7 @@ export default {
     adminEmailPlaceholder: '请输入管理员邮箱',
     adminPasswordPlaceholder: '请输入管理员密码',
     leaveBlank: '留空则不修改',
+    resetPassword: '重置密码',
     fetchListFailed: '获取租户列表失败',
     deleteConfirm: '确定要删除租户「{name}」吗？此操作不可恢复。',
     createSuccess: '租户创建成功',

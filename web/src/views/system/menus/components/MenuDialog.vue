@@ -34,6 +34,28 @@ const emit = defineEmits<{
 const formRef = ref<FormInstance>()
 const loading = ref(false)
 
+// 常用图标列表
+const iconOptions = [
+  'Odometer', 'Setting', 'User', 'UserFilled', 'OfficeBuilding',
+  'Document', 'Menu', 'Tools', 'Home', 'DataLine',
+  'Bell', 'Calendar', 'ChatDotRound', 'Collection', 'Connection',
+  'Coordinate', 'CopyDocument', 'CreditCard', 'DataBoard', 'DataAnalysis',
+  'Delete', 'Discount', 'Edit', 'Files', 'Film',
+  'Flag', 'Folder', 'FolderOpened', 'Goods', 'Grid',
+  'Headset', 'Help', 'Histogram', 'HotWater', 'IceCream',
+  'InfoFilled', 'Key', 'Link', 'List', 'Location',
+  'Lock', 'Magnet', 'Management', 'Medal', 'Memo',
+  'MessageBox', 'Mic', 'Monitor', 'More', 'Mouse',
+  'Mug', 'Notification', 'Paperclip', 'Pen', 'Phone',
+  'Picture', 'Platform', 'Position', 'Postcard', 'Present',
+  'Printer', 'Promotion', 'Reading', 'Refresh', 'RefreshRight',
+  'Right', 'ScaleToOriginal', 'School', 'Search', 'Select',
+  'Sell', 'Service', 'Ship', 'ShoppingBag', 'ShoppingCart',
+  'Stamp', 'Star', 'Sunny', 'Ticket', 'Timer',
+  'Trophy', 'Umbrella', 'Upload', 'VideoCamera', 'Wallet',
+  'Warning', 'Watch', 'ZoomIn', 'ZoomOut',
+]
+
 const defaultForm = (): CreateMenuDto => ({
   name: '',
   path: '',
@@ -172,11 +194,25 @@ const parentOptions = computed(() => {
       </el-form-item>
 
       <el-form-item :label="t('menu.icon')" prop="icon">
-        <el-input
+        <el-select
           v-model="form.icon"
           :placeholder="t('menu.iconPlaceholder')"
           clearable
-        />
+          filterable
+          style="width: 100%"
+        >
+          <el-option
+            v-for="icon in iconOptions"
+            :key="icon"
+            :label="icon"
+            :value="icon"
+          >
+            <div class="icon-option">
+              <el-icon :size="16"><component :is="icon" /></el-icon>
+              <span>{{ icon }}</span>
+            </div>
+          </el-option>
+        </el-select>
       </el-form-item>
 
       <el-form-item :label="t('menu.parentMenu')" prop="parentId">
@@ -231,13 +267,21 @@ const parentOptions = computed(() => {
 </template>
 
 <style scoped lang="scss">
+.icon-option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+}
+
 .menu-form {
   :deep(.el-form-item__label) {
     font-size: 13px;
     color: var(--text-secondary);
   }
 
-  :deep(.el-input__wrapper) {
+  :deep(.el-input__wrapper),
+  :deep(.el-select__wrapper) {
     background: var(--input-bg) !important;
     border: 1px solid var(--input-border) !important;
     border-radius: 8px !important;

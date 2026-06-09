@@ -204,6 +204,7 @@ export default {
     adminEmailPlaceholder: 'Enter admin email',
     adminPasswordPlaceholder: 'Enter admin password',
     leaveBlank: 'Leave blank to keep unchanged',
+    resetPassword: 'Reset Password',
     fetchListFailed: 'Failed to fetch tenant list',
     deleteConfirm: 'Are you sure you want to delete tenant "{name}"? This action cannot be undone.',
     createSuccess: 'Tenant created successfully',
