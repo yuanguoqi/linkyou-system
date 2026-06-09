@@ -22,4 +22,10 @@ public interface IMenuAppService : IApplicationService
 
     /// <summary>设置菜单的角色权限（覆盖写入）</summary>
     Task SetMenuRolePermissionsAsync(Guid menuId, string[] roleNames);
+
+    /// <summary>获取指定角色有权限的菜单 ID 列表</summary>
+    Task<List<Guid>> GetRoleMenuIdsAsync(string roleName);
+
+    /// <summary>设置角色的菜单权限（覆盖写入）</summary>
+    Task SetRoleMenuIdsAsync(string roleName, Guid[] menuIds);
 }

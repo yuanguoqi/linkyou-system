@@ -93,7 +93,7 @@ async function fetchRoles() {
 
 async function open(user?: IdentityUserDto) {
   resetForm()
-  fetchRoles()
+  await fetchRoles()
 
   if (user) {
     editId.value = user.id
@@ -104,7 +104,14 @@ async function open(user?: IdentityUserDto) {
     form.surname = user.surname ?? ''
     form.phoneNumber = user.phoneNumber ?? ''
     form.isActive = user.isActive
-    form.roleNames = user.roles?.map(r => r.roleName) ?? []
+
+    // 通过 GetRoles API 获取用户已有角色（IdentityUserDto 不包含 roles）
+    try {
+      const { data: roleResult } = await identityUserApi.getRoles(user.id)
+      form.roleNames = roleResult.items?.map(r => r.name) ?? []
+    } catch {
+      form.roleNames = []
+    }
   }
 
   visible.value = true

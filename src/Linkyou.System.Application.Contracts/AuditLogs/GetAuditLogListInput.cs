@@ -12,4 +12,5 @@ public class GetAuditLogListInput : PagedAndSortedResultRequestDto
     public string? HttpMethod { get; set; }
     public DateTime? StartTime { get; set; }
     public DateTime? EndTime { get; set; }
+    public int? HttpStatusCode { get; set; }
 }

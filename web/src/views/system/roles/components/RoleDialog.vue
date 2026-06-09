@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, reactive, computed } from 'vue'
+import { ref, reactive, computed, watch } from 'vue'
 import { ElMessage } from 'element-plus'
 import type { FormInstance, FormRules } from 'element-plus'
 import { useI18n } from 'vue-i18n'
@@ -9,6 +9,7 @@ import {
   type CreateIdentityRoleDto,
   type UpdateIdentityRoleDto,
 } from '@/api/modules/identity'
+import { menuApi, type MenuDto } from '@/api/modules/menus'
 
 const { t } = useI18n()
 
@@ -34,6 +35,38 @@ const form = reactive<CreateIdentityRoleDto>({
   isPublic: false,
 })
 
+// ── Menu Permission Tree ───────────────────────────────
+const allMenus = ref<MenuDto[]>([])
+const menuTreeLoading = ref(false)
+const checkedMenuIds = ref<string[]>([])
+const menuTreeRef = ref()
+
+interface MenuTreeNode {
+  id: string
+  label: string
+  children?: MenuTreeNode[]
+}
+
+const menuTreeData = computed<MenuTreeNode[]>(() => {
+  return buildTree(allMenus.value, null)
+})
+
+function buildTree(menus: MenuDto[], parentId: string | null): MenuTreeNode[] {
+  return menus
+    .filter(m => m.parentId === parentId)
+    .sort((a, b) => a.sort - b.sort)
+    .map(m => ({
+      id: m.id,
+      label: m.name,
+      children: buildTree(menus, m.id),
+    }))
+}
+
+const isAdminRole = computed(() => {
+  const name = form.name.toLowerCase()
+  return name === 'admin' || name === 'superadmin'
+})
+
 // ── Validation Rules ───────────────────────────────────
 const rules = computed<FormRules>(() => ({
   name: [
@@ -49,10 +82,12 @@ function resetForm() {
   form.isPublic = false
   editId.value = null
   concurrencyStamp.value = ''
+  allMenus.value = []
+  checkedMenuIds.value = []
   formRef.value?.clearValidate()
 }
 
-function open(role?: IdentityRoleDto) {
+async function open(role?: IdentityRoleDto) {
   resetForm()
 
   if (role) {
@@ -64,6 +99,64 @@ function open(role?: IdentityRoleDto) {
   }
 
   visible.value = true
+
+  // 加载菜单数据
+  await loadMenuData()
+}
+
+async function loadMenuData() {
+  menuTreeLoading.value = true
+  try {
+    // 获取所有菜单（flat list）
+    const { data } = await menuApi.getList({ maxResultCount: 1000, sorting: 'sort' })
+    allMenus.value = data.items
+
+    if (isEdit.value) {
+      // 编辑模式：从 API 获取当前角色的菜单权限
+      try {
+        const { data: ids } = await menuApi.getRoleMenuIds(form.name)
+        checkedMenuIds.value = ids
+      } catch {
+        // 获取失败则根据角色名判断
+        checkedMenuIds.value = isAdminRole.value
+          ? allMenus.value.map(m => m.id)
+          : []
+      }
+    } else {
+      // 新增模式：admin/superadmin 默认全选
+      checkedMenuIds.value = isAdminRole.value
+        ? allMenus.value.map(m => m.id)
+        : []
+    }
+  } catch {
+    allMenus.value = []
+    checkedMenuIds.value = []
+  } finally {
+    menuTreeLoading.value = false
+  }
+}
+
+// 监听角色名变化，admin/superadmin 自动全选
+watch(() => form.name, (newName) => {
+  if (!isEdit.value && allMenus.value.length > 0) {
+    const name = newName.toLowerCase()
+    if (name === 'admin' || name === 'superadmin') {
+      checkedMenuIds.value = allMenus.value.map(m => m.id)
+    }
+  }
+})
+
+function handleGrantAll() {
+  checkedMenuIds.value = allMenus.value.map(m => m.id)
+}
+
+function handleClearAll() {
+  checkedMenuIds.value = []
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function handleTreeCheck(_node: any, data: any) {
+  checkedMenuIds.value = (data.checkedKeys as (string | number)[]).map(String)
 }
 
 function handleClose() {
@@ -85,11 +178,14 @@ async function handleSubmit() {
         concurrencyStamp: concurrencyStamp.value,
       }
       await identityRoleApi.update(editId.value!, payload)
-      ElMessage.success(t('role.updateSuccess'))
     } else {
       await identityRoleApi.create(form)
-      ElMessage.success(t('role.createSuccess'))
     }
+
+    // 保存菜单权限
+    await menuApi.setRoleMenuIds(form.name, checkedMenuIds.value)
+
+    ElMessage.success(isEdit.value ? t('role.updateSuccess') : t('role.createSuccess'))
     visible.value = false
     emit('success')
   } catch {
@@ -104,7 +200,7 @@ async function handleSubmit() {
   <el-dialog
     v-model="visible"
     :title="isEdit ? t('role.editRole') : t('role.createRole')"
-    width="480px"
+    width="560px"
     :close-on-click-modal="false"
     destroy-on-close
     @close="resetForm"
@@ -121,6 +217,7 @@ async function handleSubmit() {
         <el-input
           v-model="form.name"
           :placeholder="t('role.roleNamePlaceholder')"
+          :disabled="isEdit"
           clearable
           maxlength="64"
         />
@@ -142,6 +239,40 @@ async function handleSubmit() {
           :inactive-text="t('common.no')"
           inline-prompt
         />
+      </el-form-item>
+
+      <!-- 菜单权限 -->
+      <el-form-item :label="t('role.menuPermissions')" prop="menuPermissions">
+        <div class="menu-permissions-section">
+          <div class="menu-permissions-header">
+            <span class="menu-permissions-hint">{{ t('role.menuPermissionsHint') }}</span>
+            <div class="menu-permissions-actions">
+              <button type="button" class="btn-link" @click="handleGrantAll">
+                {{ t('role.grantAllMenus') }}
+              </button>
+              <button type="button" class="btn-link btn-link--muted" @click="handleClearAll">
+                {{ t('role.clearAllMenus') }}
+              </button>
+            </div>
+          </div>
+          <div class="menu-tree-wrap" v-loading="menuTreeLoading">
+            <el-tree
+              ref="menuTreeRef"
+              :data="menuTreeData"
+              show-checkbox
+              node-key="id"
+              :check-strictly="false"
+              :props="{ children: 'children', label: 'label' }"
+              :default-expand-all="true"
+              :checked-keys="checkedMenuIds"
+              @check="handleTreeCheck"
+            >
+              <template #default="{ data }">
+                <span class="tree-node-label">{{ data.label }}</span>
+              </template>
+            </el-tree>
+          </div>
+        </div>
       </el-form-item>
     </el-form>
 
@@ -178,6 +309,90 @@ async function handleSubmit() {
   }
 }
 
+// ── Menu Permissions Section ────────────────────────────
+.menu-permissions-section {
+  width: 100%;
+}
+
+.menu-permissions-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.menu-permissions-hint {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.menu-permissions-actions {
+  display: flex;
+  gap: 12px;
+}
+
+.btn-link {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--primary-light);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  transition: color 0.2s;
+
+  &:hover {
+    color: var(--primary);
+  }
+
+  &--muted {
+    color: var(--text-muted);
+
+    &:hover {
+      color: var(--text-secondary);
+    }
+  }
+}
+
+.menu-tree-wrap {
+  border: 1px solid var(--border-subtle);
+  border-radius: 8px;
+  padding: 8px;
+  max-height: 320px;
+  overflow-y: auto;
+  background: var(--bg-input);
+
+  :deep(.el-tree) {
+    --el-tree-node-hover-bg-color: var(--bg-hover);
+    background: transparent;
+    font-size: 13px;
+
+    .el-tree-node__content {
+      height: 32px;
+      border-radius: 4px;
+
+      &:hover {
+        background: var(--bg-hover);
+      }
+    }
+
+    .el-checkbox {
+      --el-checkbox-checked-bg-color: #6366f1;
+      --el-checkbox-checked-input-border-color: #6366f1;
+      --el-checkbox-input-border: var(--border-medium);
+    }
+
+    .el-tree-node__label {
+      color: var(--text-primary);
+    }
+  }
+}
+
+.tree-node-label {
+  font-size: 13px;
+  color: var(--text-primary);
+}
+
 // ── Input Override ──────────────────────────────────────
 :deep(.el-input) {
   .el-input__wrapper {
@@ -210,6 +425,11 @@ async function handleSubmit() {
     .el-input__suffix .el-icon {
       color: var(--text-muted);
     }
+  }
+
+  &.is-disabled .el-input__wrapper {
+    opacity: 0.5;
+    background: var(--bg-elevated) !important;
   }
 }
 

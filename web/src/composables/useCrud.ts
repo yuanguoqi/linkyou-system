@@ -1,4 +1,4 @@
-import { ref, watch, onMounted } from 'vue'
+import { ref, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import i18n from '@/locales'
 
@@ -170,9 +170,6 @@ export function useCrud<T extends { id: string }, CreateDto, UpdateDto = CreateD
     currentPage.value = 1
     fetchData()
   }
-
-  // ── 监听分页变化 ──────────────────────────────────────
-  watch([currentPage, pageSize], fetchData)
 
   // ── 自动加载 ──────────────────────────────────────────
   if (immediate) {

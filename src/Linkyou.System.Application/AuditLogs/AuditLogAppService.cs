@@ -20,12 +20,17 @@ public class AuditLogAppService(IAuditLogRepository auditLogRepository)
 
     public async Task<PagedResultDto<AuditLogDto>> GetListAsync(GetAuditLogListInput input)
     {
+        var httpStatusCode = input.HttpStatusCode.HasValue
+            ? (global::System.Net.HttpStatusCode)input.HttpStatusCode.Value
+            : (global::System.Net.HttpStatusCode?)null;
+
         var count = await auditLogRepository.GetCountAsync(
             startTime: input.StartTime,
             endTime: input.EndTime,
             httpMethod: input.HttpMethod,
             url: input.Url,
-            userName: input.UserName);
+            userName: input.UserName,
+            httpStatusCode: httpStatusCode);
 
         var items = await auditLogRepository.GetListAsync(
             sorting: input.Sorting ?? "executionTime desc",
@@ -35,7 +40,8 @@ public class AuditLogAppService(IAuditLogRepository auditLogRepository)
             endTime: input.EndTime,
             httpMethod: input.HttpMethod,
             url: input.Url,
-            userName: input.UserName);
+            userName: input.UserName,
+            httpStatusCode: httpStatusCode);
 
         return new PagedResultDto<AuditLogDto>(count, items.ConvertAll(Map));
     }

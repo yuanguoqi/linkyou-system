@@ -70,6 +70,14 @@ export const menuApi = {
   setMenuRolePermissions: (menuId: string, roleNames: string[]) =>
     http.put(`${BASE_URL}/${menuId}/role-permissions`, roleNames),
 
+  /** 获取指定角色有权限的菜单 ID 列表 */
+  getRoleMenuIds: (roleName: string) =>
+    http.get<string[]>(`${BASE_URL}/role/${encodeURIComponent(roleName)}/menu-ids`),
+
+  /** 设置角色的菜单权限（覆盖写入） */
+  setRoleMenuIds: (roleName: string, menuIds: string[]) =>
+    http.put(`${BASE_URL}/role/${encodeURIComponent(roleName)}/menu-ids`, menuIds),
+
   create: (data: CreateMenuDto) =>
     http.post<MenuDto>(BASE_URL, data),
 

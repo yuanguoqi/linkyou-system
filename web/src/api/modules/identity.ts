@@ -90,6 +90,14 @@ export const identityUserApi = {
 
   delete: (id: string) =>
     http.delete(`${USER_BASE}/${id}`),
+
+  /** 获取用户的角色列表 */
+  getRoles: (id: string) =>
+    http.get<PagedResultDto<IdentityRoleDto>>(`${USER_BASE}/${id}/roles`),
+
+  /** 更新用户的角色 */
+  updateRoles: (id: string, roleNames: string[]) =>
+    http.put(`${USER_BASE}/${id}/roles`, { roleNames }),
 }
 
 export const identityRoleApi = {

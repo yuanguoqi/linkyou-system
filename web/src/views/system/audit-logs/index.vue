@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, reactive, onMounted, watch } from 'vue'
+import { ref, reactive, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { auditLogApi } from '@/api/modules/audit-logs'
 import type { AuditLogDto, GetAuditLogListInput } from '@/api/modules/audit-logs'
@@ -18,6 +18,7 @@ const searchForm = reactive({
   url: '',
   userName: '',
   httpMethod: '',
+  httpStatusCode: null as number | null,
   dateRange: [] as string[],
 })
 
@@ -29,13 +30,25 @@ const httpMethodOptions = [
   { label: 'PATCH', value: 'PATCH' },
 ]
 
+const httpStatusCodeOptions = [
+  { label: '200 OK', value: 200 },
+  { label: '201 Created', value: 201 },
+  { label: '204 No Content', value: 204 },
+  { label: '301 Moved', value: 301 },
+  { label: '302 Found', value: 302 },
+  { label: '400 Bad Request', value: 400 },
+  { label: '401 Unauthorized', value: 401 },
+  { label: '403 Forbidden', value: 403 },
+  { label: '404 Not Found', value: 404 },
+  { label: '500 Server Error', value: 500 },
+  { label: '502 Bad Gateway', value: 502 },
+  { label: '503 Unavailable', value: 503 },
+]
+
 const {
   pagination,
   currentPage,
   pageSize,
-  handlePageChange,
-  handleSizeChange,
-  resetPage,
   getSkipCount,
 } = usePagination()
 
@@ -73,6 +86,7 @@ async function fetchData() {
       url: searchForm.url || undefined,
       userName: searchForm.userName || undefined,
       httpMethod: searchForm.httpMethod || undefined,
+      httpStatusCode: searchForm.httpStatusCode ?? undefined,
       skipCount: getSkipCount(),
       maxResultCount: pageSize.value,
     }
@@ -94,19 +108,33 @@ async function fetchData() {
 
 // ── Search ─────────────────────────────────────────────
 function handleSearch() {
-  resetPage()
+  currentPage.value = 1
+  fetchData()
 }
 
 function handleReset() {
   searchForm.url = ''
   searchForm.userName = ''
   searchForm.httpMethod = ''
+  searchForm.httpStatusCode = null
   searchForm.dateRange = []
-  resetPage()
+  currentPage.value = 1
+  fetchData()
+}
+
+// ── Pagination ─────────────────────────────────────────
+function onPageChange(page: number) {
+  currentPage.value = page
+  fetchData()
+}
+
+function onSizeChange(size: number) {
+  pageSize.value = size
+  currentPage.value = 1
+  fetchData()
 }
 
 // ── Lifecycle ──────────────────────────────────────────
-watch([currentPage, pageSize], fetchData)
 onMounted(fetchData)
 </script>
 
@@ -146,6 +174,20 @@ onMounted(fetchData)
         >
           <el-option
             v-for="opt in httpMethodOptions"
+            :key="opt.value"
+            :label="opt.label"
+            :value="opt.value"
+          />
+        </el-select>
+
+        <el-select
+          v-model="searchForm.httpStatusCode"
+          :placeholder="t('auditLog.httpStatusCodePlaceholder')"
+          clearable
+          class="search-select"
+        >
+          <el-option
+            v-for="opt in httpStatusCodeOptions"
             :key="opt.value"
             :label="opt.label"
             :value="opt.value"
@@ -261,6 +303,28 @@ onMounted(fetchData)
         </el-table-column>
 
         <el-table-column
+          prop="exceptions"
+          :label="t('auditLog.returnInfo')"
+          min-width="200"
+          show-overflow-tooltip
+        >
+          <template #default="{ row }">
+            <span class="mono-text text-muted">{{ row.exceptions || '-' }}</span>
+          </template>
+        </el-table-column>
+
+        <el-table-column
+          prop="browserInfo"
+          :label="t('auditLog.browserInfo')"
+          min-width="160"
+          show-overflow-tooltip
+        >
+          <template #default="{ row }">
+            <span class="text-muted">{{ row.browserInfo || '-' }}</span>
+          </template>
+        </el-table-column>
+
+        <el-table-column
           prop="executionTime"
           :label="t('auditLog.executionTime')"
           width="180"
@@ -275,8 +339,8 @@ onMounted(fetchData)
         <el-pagination
           v-bind="pagination"
           :total="totalCount"
-          @current-change="handlePageChange"
-          @size-change="handleSizeChange"
+          @current-change="onPageChange"
+          @size-change="onSizeChange"
         />
       </div>
     </div>
@@ -410,6 +474,11 @@ onMounted(fetchData)
 
 .duration-text {
   font-variant-numeric: tabular-nums;
+}
+
+.text-muted {
+  color: var(--text-muted);
+  font-size: 12px;
 }
 
 // ── Pagination ─────────────────────────────────────────

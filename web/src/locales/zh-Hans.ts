@@ -190,6 +190,10 @@ export default {
     deleteConfirm: '确定要删除角色「{name}」吗？此操作不可撤销。',
     updateSuccess: '角色更新成功',
     createSuccess: '角色创建成功',
+    menuPermissions: '菜单权限',
+    menuPermissionsHint: '勾选该角色可访问的菜单项',
+    grantAllMenus: '授予全部菜单',
+    clearAllMenus: '清除全部',
   },
   tenant: {
     title: '租户管理',
@@ -240,6 +244,8 @@ export default {
     urlPlaceholder: '搜索 URL...',
     userNamePlaceholder: '搜索用户名...',
     httpMethod: 'HTTP 方法',
+    httpStatusCode: '状态码',
+    httpStatusCodePlaceholder: '状态码',
     rangeSeparator: '至',
     startTime: '开始时间',
     endTime: '结束时间',
@@ -251,6 +257,8 @@ export default {
     duration: '耗时',
     statusCode: '状态码',
     executionTime: '执行时间',
+    returnInfo: '返回信息',
+    browserInfo: '浏览器信息',
   },
   settings: {
     title: '系统设置',

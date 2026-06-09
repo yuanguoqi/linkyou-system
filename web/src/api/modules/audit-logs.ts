@@ -21,6 +21,7 @@ export interface GetAuditLogListInput {
   url?: string
   userName?: string
   httpMethod?: string
+  httpStatusCode?: number
   startTime?: string
   endTime?: string
   skipCount?: number

@@ -46,4 +46,12 @@ public class MenuController : LinkyouSystemController, IMenuAppService
     [HttpPut("{menuId}/role-permissions")]
     public Task SetMenuRolePermissionsAsync(Guid menuId, [FromBody] string[] roleNames)
         => _appService.SetMenuRolePermissionsAsync(menuId, roleNames);
+
+    [HttpGet("role/{roleName}/menu-ids")]
+    public Task<List<Guid>> GetRoleMenuIdsAsync(string roleName)
+        => _appService.GetRoleMenuIdsAsync(roleName);
+
+    [HttpPut("role/{roleName}/menu-ids")]
+    public Task SetRoleMenuIdsAsync(string roleName, [FromBody] Guid[] menuIds)
+        => _appService.SetRoleMenuIdsAsync(roleName, menuIds);
 }

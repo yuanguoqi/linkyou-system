@@ -190,6 +190,10 @@ export default {
     deleteConfirm: 'Are you sure you want to delete role "{name}"? This action cannot be undone.',
     updateSuccess: 'Role updated successfully',
     createSuccess: 'Role created successfully',
+    menuPermissions: 'Menu Permissions',
+    menuPermissionsHint: 'Select menu items accessible by this role',
+    grantAllMenus: 'Grant All',
+    clearAllMenus: 'Clear All',
   },
   tenant: {
     title: 'Tenant Management',
@@ -240,6 +244,8 @@ export default {
     urlPlaceholder: 'Search URL...',
     userNamePlaceholder: 'Search username...',
     httpMethod: 'HTTP Method',
+    httpStatusCode: 'Status Code',
+    httpStatusCodePlaceholder: 'Status Code',
     rangeSeparator: 'to',
     startTime: 'Start Time',
     endTime: 'End Time',
@@ -251,6 +257,8 @@ export default {
     duration: 'Duration',
     statusCode: 'Status Code',
     executionTime: 'Execution Time',
+    returnInfo: 'Response Info',
+    browserInfo: 'Browser Info',
   },
   settings: {
     title: 'System Settings',

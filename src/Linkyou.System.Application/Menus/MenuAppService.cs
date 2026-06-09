@@ -147,4 +147,29 @@ public class MenuAppService : ApplicationService, IMenuAppService
             })
             .ToList();
     }
+
+    /// <summary>
+    /// 获取指定角色有权限的菜单 ID 列表
+    /// </summary>
+    public async Task<List<Guid>> GetRoleMenuIdsAsync(string roleName)
+    {
+        return await _permissionRepository.GetMenuIdsByRoleAsync(roleName);
+    }
+
+    /// <summary>
+    /// 设置角色的菜单权限（覆盖写入）
+    /// </summary>
+    [Authorize(MenusPermissions.MenuItems.Update)]
+    public async Task SetRoleMenuIdsAsync(string roleName, Guid[] menuIds)
+    {
+        // 删除旧权限
+        await _permissionRepository.DeleteByRoleAsync(roleName);
+
+        // 写入新权限
+        foreach (var menuId in menuIds)
+        {
+            await _permissionRepository.InsertAsync(
+                new MenuRolePermission(GuidGenerator.Create(), menuId, roleName));
+        }
+    }
 }

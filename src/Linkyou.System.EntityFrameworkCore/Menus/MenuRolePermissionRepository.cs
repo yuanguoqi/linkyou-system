@@ -36,4 +36,17 @@ public class MenuRolePermissionRepository(IDbContextProvider<LinkyouSystemDbCont
         await (await GetDbSetAsync())
             .Where(x => x.MenuId == menuId)
             .ExecuteDeleteAsync(ct);
+
+    public async Task<List<Guid>> GetMenuIdsByRoleAsync(
+        string roleName, CancellationToken ct = default) =>
+        await (await GetDbSetAsync())
+            .Where(x => x.RoleName == roleName)
+            .Select(x => x.MenuId)
+            .ToListAsync(ct);
+
+    public async Task DeleteByRoleAsync(
+        string roleName, CancellationToken ct = default) =>
+        await (await GetDbSetAsync())
+            .Where(x => x.RoleName == roleName)
+            .ExecuteDeleteAsync(ct);
 }
