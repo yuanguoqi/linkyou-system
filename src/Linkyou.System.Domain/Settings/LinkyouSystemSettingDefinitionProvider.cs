@@ -17,10 +17,10 @@ public class LinkyouSystemSettingDefinitionProvider : SettingDefinitionProvider
                 description: new FixedLocalizableString("Default Language")
             ));
 
-        // 时区
+        // 时区（注意：前端使用 "Timezone" 小写 z，与 ABP 常量 "TimeZone" 大小写不同，必须用前端侧的精确名称）
         context.Add(
             new SettingDefinition(
-                TimingSettingNames.TimeZone,
+                "Abp.Timing.Timezone",
                 defaultValue: "Asia/Shanghai",
                 displayName: new FixedLocalizableString("时区"),
                 description: new FixedLocalizableString("Timezone")

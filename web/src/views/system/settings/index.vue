@@ -6,7 +6,7 @@ import { useI18n } from 'vue-i18n'
 import { settingApi } from '@/api/modules/settings'
 import type { SettingDto, UpdateSettingDto } from '@/api/modules/settings'
 
-const { t, locale } = useI18n()
+const { t, te, locale } = useI18n()
 
 // ── State ──────────────────────────────────────────────
 const loading = ref(false)
@@ -172,8 +172,62 @@ function handleRefresh() {
   fetchSettings()
 }
 
+// ── I18n: setting name → translation key ────────────────
+const SETTING_LABEL_MAP: Record<string, string> = {
+  // Localization
+  'Abp.Localization.DefaultLanguage': 'settings.defaultLanguage',
+  // Timing
+  'Abp.Timing.Timezone': 'settings.timezone',
+  // SignIn
+  'Abp.Identity.SignIn.RequireConfirmedEmail': 'settings.requireConfirmedEmail',
+  'Abp.Identity.SignIn.RequireConfirmedPhoneNumber': 'settings.requireConfirmedPhone',
+  // Password
+  'Abp.Identity.Password.RequiredLength': 'settings.passwordRequiredLength',
+  'Abp.Identity.Password.RequireNonAlphanumeric': 'settings.passwordRequireNonAlphanumeric',
+  'Abp.Identity.Password.RequireLowercase': 'settings.passwordRequireLowercase',
+  'Abp.Identity.Password.RequireUppercase': 'settings.passwordRequireUppercase',
+  'Abp.Identity.Password.RequireDigit': 'settings.passwordRequireDigit',
+  // Account
+  'Abp.Account.IsSelfRegistrationEnabled': 'settings.selfRegistration',
+  // Lockout
+  'Abp.Identity.Lockout.IsEnabled': 'settings.userLockoutEnabled',
+  'Abp.Identity.Lockout.MaxFailedAccessAttempts': 'settings.maxFailedLoginAttempts',
+  'Abp.Identity.Lockout.DefaultLockoutTimeSpanSeconds': 'settings.lockoutDurationSeconds',
+  'Abp.Identity.UserLockOut.IsEnabled': 'settings.userLockoutEnabled',
+  'Abp.Identity.UserLockOut.MaxFailedAccessAttempts': 'settings.maxFailedLoginAttempts',
+  'Abp.Identity.UserLockOut.DefaultLockoutTimeSpanSeconds': 'settings.lockoutDurationSeconds',
+  // OrganizationUnit
+  'Abp.Identity.OrganizationUnit.MaxUserCount': 'settings.maxUserCountPerOrgUnit',
+}
+
+function getSettingLabel(name: string, fallback: string): string {
+  if (SETTING_LABEL_MAP[name]) return t(SETTING_LABEL_MAP[name])
+  // 尝试用设置名最后一段 + "settings." 前缀查 i18n
+  const shortKey = 'settings.' + name.split('.').pop()!
+  if (te(shortKey)) return t(shortKey)
+  return fallback
+}
+
+// ── Category i18n ────────────────────────────────────────
+const CATEGORY_LABEL_MAP: Record<string, string> = {
+  'Abp.Localization': 'settings.catLocalization',
+  'Abp.Timing': 'settings.catTiming',
+  'Abp.Identity': 'settings.catIdentity',
+  'Abp.Account': 'settings.catAccount',
+  'Abp.SettingManagement': 'settings.catSettingManagement',
+  'Abp.TenantManagement': 'settings.catTenantManagement',
+  'Abp.FeatureManagement': 'settings.catFeatureManagement',
+  'Abp.PermissionManagement': 'settings.catPermissionManagement',
+  'Abp.Identity.Password': 'settings.catPassword',
+  'Abp.Identity.SignIn': 'settings.catSignIn',
+  'Abp.Identity.Lockout': 'settings.catLockout',
+  'Abp.Identity.UserLockOut': 'settings.catLockout',
+  'Abp.Identity.OrganizationUnit': 'settings.catOrganizationUnit',
+}
+
 // ── Helpers ────────────────────────────────────────────
 function formatCategoryName(category: string): string {
+  if (CATEGORY_LABEL_MAP[category]) return t(CATEGORY_LABEL_MAP[category])
   const parts = category.split('.')
   return parts[parts.length - 1]
 }
@@ -195,12 +249,12 @@ function isPasswordSetting(name: string): boolean {
 
 function isNumberSetting(name: string): boolean {
   const lower = name.toLowerCase()
-  return lower.includes('port') || lower.includes('timeout') || lower.includes('count') || lower.includes('size') || lower.includes('length')
+  return lower.includes('port') || lower.includes('timeout') || lower.includes('count') || lower.includes('size') || lower.includes('length') || lower.includes('period')
 }
 
 function isBooleanSetting(name: string): boolean {
   const lower = name.toLowerCase()
-  return lower.includes('enable') || lower.includes('is') || lower.includes('use')
+  return lower.includes('enable') || lower.includes('is') || lower.includes('use') || lower.includes('require')
 }
 
 function getBoolValue(name: string): boolean {
@@ -219,13 +273,9 @@ function isLanguageSetting(name: string): boolean {
   return name === 'Abp.Localization.DefaultLanguage'
 }
 
-function isBoolDropdownSetting(name: string): boolean {
-  return name === 'Abp.Identity.SignIn.RequireConfirmedEmail'
-    || name === 'Abp.Identity.SignIn.RequireConfirmedPhoneNumber'
-    || name === 'Abp.Identity.Password.RequireNonAlphanumeric'
-    || name === 'Abp.Identity.Password.RequireLowercase'
-    || name === 'Abp.Identity.Password.RequireUppercase'
-    || name === 'Abp.Identity.Password.RequireDigit'
+// 保留为空，所有 bool 设置现在统一走 isBooleanSetting → el-switch
+function isBoolDropdownSetting(_name: string): boolean {
+  return false
 }
 
 // ── Lifecycle ──────────────────────────────────────────
@@ -293,7 +343,7 @@ onMounted(() => {
             class="setting-item"
           >
             <div class="setting-info">
-              <div class="setting-label">{{ setting.displayName || setting.name }}</div>
+              <div class="setting-label">{{ getSettingLabel(setting.name, setting.displayName || setting.name) }}</div>
               <div v-if="setting.description" class="setting-desc">{{ setting.description }}</div>
               <div class="setting-key">{{ setting.name }}</div>
             </div>
