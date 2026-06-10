@@ -46,6 +46,15 @@ public class MenuAppService : ApplicationService, IMenuAppService
             input.Name, input.Path, input.Icon, input.ParentId,
             input.Sort, input.IsVisible, input.Permission);
         await _repository.InsertAsync(entity);
+
+        // admin、superadmin 默认获得新菜单的访问权限
+        var adminRoles = new[] { "admin", "superadmin" };
+        foreach (var roleName in adminRoles)
+        {
+            await _permissionRepository.InsertAsync(
+                new MenuRolePermission(GuidGenerator.Create(), entity.Id, roleName));
+        }
+
         return ObjectMapper.Map<Menu, MenuDto>(entity);
     }
 
