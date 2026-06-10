@@ -17,6 +17,7 @@ using Volo.Abp.Caching;
 using Volo.Abp.Identity;
 using Volo.Abp.TenantManagement;
 using Volo.Abp.Security.Claims;
+using Volo.Abp.Settings;
 
 namespace Linkyou.System.Account;
 
@@ -31,6 +32,7 @@ public class AccountAppService : ApplicationService, IAccountAppService
     private readonly IDistributedCache<string> _refreshTokenCache;
     private readonly IPermissionManager _permissionManager;
     private readonly IRepository<Tenant, Guid> _tenantRepository;
+    private readonly ISettingProvider _settingProvider;
 
     // RefreshToken 缓存键前缀
     private const string RefreshTokenCachePrefix = "RefreshToken:";
@@ -40,13 +42,15 @@ public class AccountAppService : ApplicationService, IAccountAppService
         IJwtTokenService jwtTokenService,
         IDistributedCache<string> refreshTokenCache,
         IPermissionManager permissionManager,
-        IRepository<Tenant, Guid> tenantRepository)
+        IRepository<Tenant, Guid> tenantRepository,
+        ISettingProvider settingProvider)
     {
         _userManager = userManager;
         _jwtTokenService = jwtTokenService;
         _refreshTokenCache = refreshTokenCache;
         _permissionManager = permissionManager;
         _tenantRepository = tenantRepository;
+        _settingProvider = settingProvider;
     }
 
     /// <summary>
@@ -192,6 +196,7 @@ public class AccountAppService : ApplicationService, IAccountAppService
 
     /// <summary>
     /// 修改密码（需要认证）
+    /// 使用自定义校验规则（从系统设置读取），绕过 ABP Identity 内置的 PasswordOptions 校验
     /// </summary>
     [Authorize]
     public async Task ChangePasswordAsync(ChangePasswordInput input)
@@ -200,14 +205,59 @@ public class AccountAppService : ApplicationService, IAccountAppService
             ?? throw new AbpAuthorizationException(L["NotLoggedIn"]);
 
         var user = await _userManager.GetByIdAsync(userId);
-        var result = await _userManager.ChangePasswordAsync(
-            user, input.CurrentPassword, input.NewPassword);
 
-        if (!result.Succeeded)
+        // 1. 校验当前密码
+        if (!await _userManager.CheckPasswordAsync(user, input.CurrentPassword))
         {
-            var errors = string.Join("; ", result.Errors.Select(e => e.Description));
-            throw new UserFriendlyException(L["ChangePasswordFailed", errors]);
+            throw new UserFriendlyException(L["PasswordValidation:CurrentPasswordWrong"]);
         }
+
+        // 2. 根据系统设置校验新密码
+        var errors = await ValidatePasswordAsync(input.NewPassword);
+        if (errors.Count > 0)
+        {
+            throw new UserFriendlyException(string.Join("; ", errors));
+        }
+
+        // 3. 反射设置 PasswordHash（ABP 设为 protected），绕过动态校验
+        var hash = _userManager.PasswordHasher.HashPassword(user, input.NewPassword);
+        var prop = typeof(IdentityUser).GetProperty("PasswordHash",
+            global::System.Reflection.BindingFlags.Instance | global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic);
+        prop!.SetValue(user, hash);
+        var result = await _userManager.UpdateAsync(user);
+        if (!result.Succeeded)
+            throw new UserFriendlyException(string.Join("; ", result.Errors.Select(e => e.Description)));
+    }
+
+    /// <summary>
+    /// 从系统设置读取密码策略并校验
+    /// </summary>
+    private async Task<List<string>> ValidatePasswordAsync(string password)
+    {
+        var errors = new List<string>();
+
+        var len = await _settingProvider.GetAsync<int>("Abp.Identity.Password.RequiredLength");
+        var upper = await _settingProvider.GetAsync<bool>("Abp.Identity.Password.RequireUppercase");
+        var lower = await _settingProvider.GetAsync<bool>("Abp.Identity.Password.RequireLowercase");
+        var digit = await _settingProvider.GetAsync<bool>("Abp.Identity.Password.RequireDigit");
+        var nonAlpha = await _settingProvider.GetAsync<bool>("Abp.Identity.Password.RequireNonAlphanumeric");
+
+        if (password.Length < len)
+            errors.Add(L["PasswordValidation:RequiredLength", len]);
+
+        if (upper && !password.Any(char.IsUpper))
+            errors.Add(L["PasswordValidation:RequireUppercase"]);
+
+        if (lower && !password.Any(char.IsLower))
+            errors.Add(L["PasswordValidation:RequireLowercase"]);
+
+        if (digit && !password.Any(char.IsDigit))
+            errors.Add(L["PasswordValidation:RequireDigit"]);
+
+        if (nonAlpha && password.All(char.IsLetterOrDigit))
+            errors.Add(L["PasswordValidation:RequireNonAlphanumeric"]);
+
+        return errors;
     }
 
     /// <summary>

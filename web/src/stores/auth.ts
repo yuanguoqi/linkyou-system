@@ -19,8 +19,13 @@ export const useAuthStore = defineStore('auth', () => {
 
   const userDisplayName = computed(() => {
     if (!currentUser.value) return ''
-    const { name, surName, userName } = currentUser.value
-    return name || surName ? `${name ?? ''} ${surName ?? ''}`.trim() : userName
+    const { name, userName } = currentUser.value
+    return name || userName
+  })
+
+  const userRoleDisplay = computed(() => {
+    if (!currentUser.value) return ''
+    return currentUser.value.roles?.join(', ') || ''
   })
 
   /** 检查是否拥有某个权限 */
@@ -113,6 +118,7 @@ export const useAuthStore = defineStore('auth', () => {
     currentTenantId,
     isAuthenticated,
     userDisplayName,
+    userRoleDisplay,
     hasPermission,
     hasRole,
     login,

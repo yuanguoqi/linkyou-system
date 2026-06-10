@@ -32,10 +32,11 @@ public class SettingAppService : ApplicationService, ISettingAppService
         foreach (var def in definitions)
         {
             var value = await _settingProvider.GetOrNullAsync(def.Name);
+            // 数据库无值时用 SettingDefinition 的默认值，确保前端获取到正确默认值
             result.Add(new SettingDto
             {
                 Name = def.Name,
-                Value = value,
+                Value = value ?? def.DefaultValue,
                 DisplayName = def.DisplayName.Localize(StringLocalizerFactory),
                 Description = def.Description?.Localize(StringLocalizerFactory),
                 IsEncrypted = def.IsEncrypted,

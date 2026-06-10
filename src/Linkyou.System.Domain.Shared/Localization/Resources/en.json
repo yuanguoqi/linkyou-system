@@ -46,6 +46,12 @@
     "InvalidRefreshToken": "Invalid or expired refresh token, please login again",
     "NotLoggedIn": "Not logged in",
     "ChangePasswordFailed": "Failed to change password: {0}",
+    "PasswordValidation:CurrentPasswordWrong": "Current password is incorrect",
+    "PasswordValidation:RequiredLength": "Password must be at least {0} characters",
+    "PasswordValidation:RequireUppercase": "Password must contain at least one uppercase letter",
+    "PasswordValidation:RequireLowercase": "Password must contain at least one lowercase letter",
+    "PasswordValidation:RequireDigit": "Password must contain at least one digit",
+    "PasswordValidation:RequireNonAlphanumeric": "Password must contain at least one special character",
 
     "UserNotFound": "User not found.",
     "RoleNotFound": "Role not found.",

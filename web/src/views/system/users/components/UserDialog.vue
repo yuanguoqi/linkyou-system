@@ -1,9 +1,10 @@
 <script setup lang="ts">
-import { ref, reactive, computed } from 'vue'
+import { ref, reactive, computed, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { ElMessage } from 'element-plus'
 import type { FormInstance, FormRules } from 'element-plus'
 import { identityUserApi, identityRoleApi } from '@/api/modules/identity'
+import { settingApi } from '@/api/modules/settings'
 import type {
   IdentityUserDto,
   IdentityRoleDto,
@@ -12,6 +13,42 @@ import type {
 } from '@/api/modules/identity'
 
 const { t } = useI18n()
+
+// ── 动态密码策略（从系统设置获取）───────────────────────
+const passwordPolicy = reactive({
+  requiredLength: 6,
+  requireUppercase: false,
+  requireLowercase: false,
+  requireDigit: false,
+  requireNonAlphanumeric: false,
+})
+
+async function fetchPasswordPolicy() {
+  try {
+    const res = await settingApi.get({})
+    const data = Array.isArray(res.data) ? res.data : (res.data as any)?.items ?? []
+    const map: Record<string, string> = {}
+    data.forEach((s: any) => { map[s.name] = s.value ?? '' })
+    const getBool = (k: string) => (map[k] || 'False').toLowerCase() === 'true'
+    const getNum = (k: string) => parseInt(map[k]) || 6
+    passwordPolicy.requiredLength = getNum('Abp.Identity.Password.RequiredLength')
+    passwordPolicy.requireUppercase = getBool('Abp.Identity.Password.RequireUppercase')
+    passwordPolicy.requireLowercase = getBool('Abp.Identity.Password.RequireLowercase')
+    passwordPolicy.requireDigit = getBool('Abp.Identity.Password.RequireDigit')
+    passwordPolicy.requireNonAlphanumeric = getBool('Abp.Identity.Password.RequireNonAlphanumeric')
+  } catch { /* keep defaults */ }
+}
+
+function buildPasswordRules(required: boolean) {
+  const rules: any[] = []
+  if (required) rules.push({ required: true, message: t('validation.passwordRequired'), trigger: 'blur' })
+  rules.push({ min: passwordPolicy.requiredLength, message: `密码至少 ${passwordPolicy.requiredLength} 位`, trigger: 'blur' })
+  if (passwordPolicy.requireUppercase) rules.push({ pattern: /[A-Z]/, message: '需包含大写字母', trigger: 'blur' })
+  if (passwordPolicy.requireLowercase) rules.push({ pattern: /[a-z]/, message: '需包含小写字母', trigger: 'blur' })
+  if (passwordPolicy.requireDigit) rules.push({ pattern: /[0-9]/, message: '需包含数字', trigger: 'blur' })
+  if (passwordPolicy.requireNonAlphanumeric) rules.push({ pattern: /[^a-zA-Z0-9]/, message: '需包含特殊字符', trigger: 'blur' })
+  return rules
+}
 
 // ── Emits & Expose ───────────────────────────────────
 const emit = defineEmits<{
@@ -41,6 +78,13 @@ const form = reactive<CreateIdentityUserDto>({
   roleNames: [],
 })
 
+// ── Auto-fill email in create mode ────────────────────
+watch(() => form.userName, (val) => {
+  if (!isEdit.value && val) {
+    form.email = val + '@linkyou.com'
+  }
+})
+
 // ── Validation Rules ─────────────────────────────────
 const rules = computed<FormRules>(() => ({
   userName: [
@@ -54,20 +98,12 @@ const rules = computed<FormRules>(() => ({
   name: [
     { max: 32, message: t('validation.nameMaxLength'), trigger: 'blur' },
   ],
-  surname: [
-    { max: 32, message: t('validation.surnameMaxLength'), trigger: 'blur' },
-  ],
-  password: isEdit.value
-    ? [
-        { min: 6, message: t('validation.passwordMinLength'), trigger: 'blur' },
-      ]
-    : [
-        { required: true, message: t('validation.passwordRequired'), trigger: 'blur' },
-        { min: 6, message: t('validation.passwordMinLength'), trigger: 'blur' },
-      ],
+  password: isEdit.value ? [] : buildPasswordRules(true),
 }))
 
 // ── Methods ──────────────────────────────────────────
+const DEFAULT_PASSWORD = 'Admin@123456'
+
 function resetForm() {
   form.userName = ''
   form.email = ''
@@ -82,6 +118,10 @@ function resetForm() {
   formRef.value?.clearValidate()
 }
 
+function handleResetPassword() {
+  form.password = DEFAULT_PASSWORD
+}
+
 async function fetchRoles() {
   try {
     const { data } = await identityRoleApi.getAllList()
@@ -93,17 +133,18 @@ async function fetchRoles() {
 
 async function open(user?: IdentityUserDto) {
   resetForm()
-  await fetchRoles()
+  await Promise.all([fetchRoles(), fetchPasswordPolicy()])
 
   if (user) {
     editId.value = user.id
     concurrencyStamp.value = user.concurrencyStamp
     form.userName = user.userName
     form.email = user.email
-    form.name = user.name ?? ''
-    form.surname = user.surname ?? ''
+    form.name = user.name ?? ''  // 昵称
+    form.surname = ''
     form.phoneNumber = user.phoneNumber ?? ''
     form.isActive = user.isActive
+    form.password = ''  // 编辑模式密码不能查看只能重置
 
     // 通过 GetRoles API 获取用户已有角色（IdentityUserDto 不包含 roles）
     try {
@@ -112,6 +153,9 @@ async function open(user?: IdentityUserDto) {
     } catch {
       form.roleNames = []
     }
+  } else {
+    // 新增模式：默认密码，邮箱由 watch 自动填充
+    form.password = DEFAULT_PASSWORD
   }
 
   visible.value = true
@@ -133,6 +177,7 @@ async function handleSubmit() {
     if (isEdit.value) {
       const payload: UpdateIdentityUserDto = {
         ...form,
+        surname: '',
         concurrencyStamp: concurrencyStamp.value,
       }
       // Password is optional on edit; omit if empty
@@ -142,7 +187,7 @@ async function handleSubmit() {
       await identityUserApi.update(editId.value!, payload)
       ElMessage.success(t('user.updateSuccess'))
     } else {
-      await identityUserApi.create(form)
+      await identityUserApi.create({ ...form, surname: '' })
       ElMessage.success(t('user.createSuccess'))
     }
     visible.value = false
@@ -189,36 +234,37 @@ async function handleSubmit() {
         />
       </el-form-item>
 
-      <div class="form-row">
-        <el-form-item :label="t('user.firstName')" prop="name" class="form-row-item">
-          <el-input
-            v-model="form.name"
-            :placeholder="t('user.firstNamePlaceholder')"
-            clearable
-          />
-        </el-form-item>
-
-        <el-form-item :label="t('user.lastName')" prop="surname" class="form-row-item">
-          <el-input
-            v-model="form.surname"
-            :placeholder="t('user.lastNamePlaceholder')"
-            clearable
-          />
-        </el-form-item>
-      </div>
+      <el-form-item :label="t('user.nickname')" prop="name">
+        <el-input
+          v-model="form.name"
+          :placeholder="t('user.nicknamePlaceholder')"
+          clearable
+        />
+      </el-form-item>
 
       <el-form-item
         :label="t('user.password')"
         prop="password"
         :required="!isEdit"
       >
-        <el-input
-          v-model="form.password"
-          type="password"
-          :placeholder="isEdit ? t('user.passwordLeaveBlank') : t('validation.passwordRequired')"
-          show-password
-          clearable
-        />
+        <div class="password-row">
+          <el-input
+            v-model="form.password"
+            type="password"
+            :placeholder="isEdit ? t('user.passwordLeaveBlank') : t('validation.passwordRequired')"
+            show-password
+            :disabled="isEdit"
+            class="password-input"
+          />
+          <button
+            v-if="isEdit"
+            type="button"
+            class="btn-ghost btn-reset"
+            @click="handleResetPassword"
+          >
+            {{ t('user.resetPassword') }}
+          </button>
+        </div>
       </el-form-item>
 
       <el-form-item :label="t('user.phone')" prop="phoneNumber">
@@ -293,6 +339,23 @@ async function handleSubmit() {
 
   .form-row-item {
     flex: 1;
+  }
+}
+
+.password-row {
+  display: flex;
+  gap: 8px;
+  width: 100%;
+
+  .password-input {
+    flex: 1;
+  }
+
+  .btn-reset {
+    flex-shrink: 0;
+    white-space: nowrap;
+    font-size: 12px;
+    padding: 0 12px;
   }
 }
 

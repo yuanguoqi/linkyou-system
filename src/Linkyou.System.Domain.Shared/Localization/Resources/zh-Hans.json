@@ -46,6 +46,12 @@
     "InvalidRefreshToken": "刷新令牌无效或已过期，请重新登录",
     "NotLoggedIn": "未登录",
     "ChangePasswordFailed": "修改密码失败：{0}",
+    "PasswordValidation:CurrentPasswordWrong": "当前密码不正确",
+    "PasswordValidation:RequiredLength": "密码至少 {0} 位",
+    "PasswordValidation:RequireUppercase": "密码至少包含一位大写字母",
+    "PasswordValidation:RequireLowercase": "密码至少包含一位小写字母",
+    "PasswordValidation:RequireDigit": "密码至少包含一位数字",
+    "PasswordValidation:RequireNonAlphanumeric": "密码至少包含一位特殊字符",
 
     "UserNotFound": "未找到用户。",
     "RoleNotFound": "未找到角色。",

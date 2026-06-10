@@ -103,8 +103,7 @@ function handleDialogSuccess() {
 }
 
 function getDisplayName(row: IdentityUserDto): string {
-  const parts = [row.name, row.surname].filter(Boolean)
-  return parts.length > 0 ? parts.join(' ') : '-'
+  return row.name || row.userName || '-'
 }
 
 // ── Lifecycle ────────────────────────────────────────
@@ -161,7 +160,7 @@ onMounted(() => {
             show-overflow-tooltip
           />
           <el-table-column
-            :label="t('user.fullName')"
+            :label="t('user.nickname')"
             min-width="140"
             show-overflow-tooltip
           >
