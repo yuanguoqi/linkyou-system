@@ -59,7 +59,8 @@
       "Bash(sed -n '238,260p' /e/DevelopCode/SelfCode/linkyou-system/web/src/locales/en.ts)",
       "Bash(sed -n '238,260p' /e/DevelopCode/SelfCode/linkyou-system/web/src/locales/zh-Hans.ts)",
       "Bash(dotnet Volo.Abp.AuditLogging.Domain.dll)",
-      "WebFetch(domain:abp.io)"
+      "WebFetch(domain:abp.io)",
+      "Bash(dotnet restore *)"
     ]
   }
 }

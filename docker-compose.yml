@@ -23,6 +23,23 @@ services:
       timeout: 5s
       retries: 5
 
+  # ===================== Redis 缓存 =====================
+  redis:
+    image: redis:7-alpine
+    container_name: linkyou-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - linkyou-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
   # ===================== 后端 API 服务 =====================
   api:
     build:
@@ -35,6 +52,7 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Production
       - ConnectionStrings__Default=Host=db;Port=5432;Database=LinkyouSystem;Username=postgres;Password=postgres
+      - Redis__Configuration=redis:6379
       - AuthServer__Authority=http://api:80
       - AuthServer__RequireHttpsMetadata=false
       # 生产环境 CORS 指向前端容器（nginx 80 端口）
@@ -47,6 +65,8 @@ services:
       - ./logs/api:/app/Logs
     depends_on:
       db:
+        condition: service_healthy
+      redis:
         condition: service_healthy
     networks:
       - linkyou-network
@@ -85,6 +105,8 @@ services:
 # ===================== 数据卷 =====================
 volumes:
   postgres_data:
+    driver: local
+  redis_data:
     driver: local
 
 # ===================== 网络 =====================

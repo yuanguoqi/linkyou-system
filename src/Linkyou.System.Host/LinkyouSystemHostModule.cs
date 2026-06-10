@@ -16,7 +16,8 @@ using Volo.Abp.AspNetCore.Mvc;
 using Volo.Abp.AspNetCore.Mvc.AntiForgery;
 using Volo.Abp.AspNetCore.Serilog;
 using Volo.Abp.Autofac;
-using Volo.Abp.Authorization;
+using Volo.Abp.Caching;
+using Volo.Abp.Caching.StackExchangeRedis;
 using Volo.Abp.Localization;
 using Volo.Abp.Modularity;
 using Volo.Abp.Swashbuckle;
@@ -35,6 +36,7 @@ namespace Linkyou.System;
     typeof(LinkyouSystemEntityFrameworkCoreModule),
     // ABP 基础设施
     typeof(AbpAutofacModule),                          // Autofac IOC 容器
+    typeof(AbpCachingStackExchangeRedisModule),         // Redis 分布式缓存
     typeof(AbpAspNetCoreMultiTenancyModule),            // 多租户（从请求头识别）
     typeof(AbpAspNetCoreAuthenticationJwtBearerModule), // JWT Bearer 认证
     typeof(AbpAspNetCoreSerilogModule),                 // Serilog 结构化日志
@@ -53,6 +55,7 @@ public class LinkyouSystemHostModule : AbpModule
         ConfigureSwagger(context, configuration);
         ConfigureAntiForgery();
         ConfigureAuditing();
+        ConfigureCache(context);
 
         // 开发环境：替换方法调用授权服务，允许所有已认证用户访问
         // 注意：必须在所有模块初始化之后执行，确保覆盖 ABP 默认实现
@@ -193,6 +196,22 @@ public class LinkyouSystemHostModule : AbpModule
             options.IsEnabledForAnonymousUsers = false;
             options.IsEnabledForGetRequests = true;
         });
+    }
+
+    /// <summary>
+    /// 配置 Redis 分布式缓存
+    /// </summary>
+    private void ConfigureCache(ServiceConfigurationContext context)
+    {
+        var configuration = context.Services.GetConfiguration();
+        var redis = configuration["Redis:Configuration"];
+        if (!string.IsNullOrEmpty(redis))
+        {
+            Configure<AbpDistributedCacheOptions>(options =>
+            {
+                options.KeyPrefix = "LinkyouSystem:";
+            });
+        }
     }
 
     public override void OnApplicationInitialization(ApplicationInitializationContext context)

@@ -93,6 +93,16 @@ const settingGroups = computed<SettingGroup[]>(() => {
     })
 })
 
+// ── Apply default language from setting ─────────────────
+function applyDefaultLanguage() {
+  const langKey = 'Abp.Localization.DefaultLanguage'
+  const lang = settingValues[langKey]
+  if (lang && (lang === 'zh-Hans' || lang === 'en') && lang !== locale.value) {
+    locale.value = lang as 'zh-Hans' | 'en'
+    localStorage.setItem('locale', lang)
+  }
+}
+
 // ── Data Fetching ──────────────────────────────────────
 async function fetchSettings() {
   loading.value = true
@@ -125,6 +135,9 @@ async function fetchSettings() {
         })
       }
     }
+
+    // 根据「默认语言」设置项的值切换界面语言
+    applyDefaultLanguage()
   } catch (err: unknown) {
     const axiosErr = err as { response?: { data?: { error?: { message?: string } } } }
     ElMessage.error(axiosErr?.response?.data?.error?.message || t('settings.fetchFailed'))
@@ -151,13 +164,7 @@ async function handleSave() {
 
     await settingApi.update(payload)
 
-    // If language changed, update UI immediately
-    const langKey = 'Abp.Localization.DefaultLanguage'
-    const newLang = settingValues[langKey]
-    if (newLang && newLang !== locale.value) {
-      locale.value = newLang as 'zh-Hans' | 'en'
-      localStorage.setItem('locale', newLang)
-    }
+    applyDefaultLanguage()
 
     ElMessage.success(t('settings.saveSuccess'))
   } catch (err: unknown) {
